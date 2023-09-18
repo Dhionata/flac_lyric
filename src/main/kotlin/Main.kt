@@ -22,8 +22,8 @@ fun main() {
 
         val mp3FilesMap = musicDirectory.walk().filter { it.extension == "mp3" }.associateBy { it.nameWithoutExtension }
 
-        processFiles(flacFilesMap, lyricsDirectory)
-        processFiles(mp3FilesMap, lyricsDirectory)
+        processFiles(flacFilesMap, musicDirectory, lyricsDirectory)
+        processFiles(mp3FilesMap, musicDirectory, lyricsDirectory)
 
         JOptionPane.showMessageDialog(
             frame, "Todos os arquivos .flac e .lrc estão juntos.", "Informação", JOptionPane.INFORMATION_MESSAGE
@@ -40,7 +40,7 @@ fun main() {
     exitProcess(0)
 }
 
-fun processFiles(audioFilesMap: Map<String, File>, lyricsDirectory: File) {
+fun processFiles(audioFilesMap: Map<String, File>, musicDirectory: File, lyricsDirectory: File) {
     val lyricFiles = lyricsDirectory.walk().filter { it.extension == "lrc" }.toList()
     val unmatchedFiles = mutableListOf<File>()
 
@@ -53,7 +53,7 @@ fun processFiles(audioFilesMap: Map<String, File>, lyricsDirectory: File) {
         }
     }
 
-    if (unmatchedFiles.isNotEmpty()) {
+    if (unmatchedFiles.isNotEmpty() && audioFilesMap.values.isNotEmpty()) {
         val optionPane = JOptionPane.showConfirmDialog(
             null,
             "Não foi possível encontrar um par para alguns arquivos .lrc\nDeseja criar uma nova pasta para movê-los?",
@@ -61,8 +61,8 @@ fun processFiles(audioFilesMap: Map<String, File>, lyricsDirectory: File) {
             JOptionPane.YES_NO_OPTION
         )
 
-        if (optionPane == JOptionPane.YES_OPTION && audioFilesMap.values.isNotEmpty()) {
-            val newDir = File(audioFilesMap.values.first().parentFile.parentFile, "unmatched_lrc")
+        if (optionPane == JOptionPane.YES_OPTION) {
+            val newDir = File(musicDirectory.parentFile, "unmatched_lrc")
             if (!newDir.exists()) {
                 newDir.mkdir()
             }
@@ -72,17 +72,24 @@ fun processFiles(audioFilesMap: Map<String, File>, lyricsDirectory: File) {
             if (lyricsDirectory.listFiles().isNullOrEmpty()) {
                 lyricsDirectory.delete()
             }
-        } else {
-            JOptionPane.showMessageDialog(
-                null, "Não há arquivos .flac no diretório especificado.", "Informação", JOptionPane.INFORMATION_MESSAGE
-            )
         }
     }
 }
 
 fun moveLyricFile(lyricFile: File, targetDir: File): Boolean {
-    val targetFile = File(targetDir, lyricFile.name)
-    return if (!targetFile.exists() && targetDir.parentFile.freeSpace >= lyricFile.length()) {
+    if (!lyricFile.exists()) {
+        println("O arquivo ${lyricFile.name} não existe.")
+        return false
+    }
+
+    val actualTargetDir = if (targetDir.isDirectory) targetDir else targetDir.parentFile
+
+    if (!actualTargetDir.exists()) {
+        actualTargetDir.mkdirs()
+    }
+
+    val targetFile = File(actualTargetDir, lyricFile.name)
+    return if (!targetFile.exists() && actualTargetDir.parentFile.freeSpace >= lyricFile.length()) {
         try {
             Files.move(lyricFile.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
             println("Arquivo ${lyricFile.name} movido de ${lyricFile.absolutePath} para ${targetFile.absolutePath}")
