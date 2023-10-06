@@ -11,7 +11,8 @@ repositories {
 }
 
 dependencies {
-    testImplementation("org.jetbrains.kotlin:kotlin-test:1.8.10")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:1.8.20-RC")
+    implementation("org.apache.commons:commons-text:1.9")
 }
 
 tasks.test {
