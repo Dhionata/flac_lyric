@@ -3,7 +3,6 @@ import java.awt.Dimension
 import java.io.File
 import java.nio.file.Files
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.stream.Collectors
 import javax.swing.*
 import kotlin.system.exitProcess
 
@@ -20,16 +19,15 @@ private fun main() {
 
     do {
         musicDirectory = getDirectory("Selecione o diretório das músicas")
-        lyricsDirectory = getDirectory("Selecione o diretório dos arquivos .lrc")
 
         printFilePermissions(musicDirectory)
-        printFilePermissions(lyricsDirectory)
 
-        if (musicDirectory.canWrite() && lyricsDirectory.canWrite()) {
+        if (musicDirectory.canWrite()) {
             processFiles()
         } else {
+            errorList.add(Exception("\nDiretório $musicDirectory somente leitura!\n"))
             JOptionPane.showMessageDialog(
-                frame, "Um ou ambos os diretórios selecionados são somente leituras.", "Erro", JOptionPane.ERROR_MESSAGE
+                frame, "Diretório $musicDirectory somente leitura!", "Erro", JOptionPane.ERROR_MESSAGE
             )
         }
     } while (!musicDirectory.canWrite() && !lyricsDirectory.canWrite())
@@ -67,20 +65,24 @@ private fun main() {
 
 private fun processFiles() {
     val audioFilesMap = getAudioFilesMap(musicDirectory)
-    val lyricFiles = lyricsDirectory.walk().filter { it.extension == "lrc" }.toList()
 
-    lyricFiles.parallelStream().forEach { lyricFile ->
+    lyricsDirectory = getDirectory("Selecione o diretório dos arquivos .lrc")
+    printFilePermissions(lyricsDirectory)
+
+    val lyricFiles = lyricsDirectory.walk().filter { it.extension == "lrc" }
+
+    lyricFiles.forEach { lyricFile ->
         val matched = handleLyricFile(lyricFile, audioFilesMap)
         if (!matched) {
             unmatchedLyrics.add(lyricFile)
         }
     }
-
     handleUnmatchedFiles(audioFilesMap)
 }
 
 private fun getAudioFilesMap(musicDirectory: File): MutableMap<String, File> {
     val audioFilesMap = mutableMapOf<String, File>()
+
     supportedExtensions.parallelStream().forEach { extension ->
         audioFilesMap.putAll(musicDirectory.walk().filter { it.extension == extension }
             .associateBy { it.nameWithoutExtension })
@@ -90,6 +92,7 @@ private fun getAudioFilesMap(musicDirectory: File): MutableMap<String, File> {
 
 private fun handleLyricFile(lyricFile: File, audioFilesMap: Map<String, File>): Boolean {
     val correspondingFile = audioFilesMap[lyricFile.nameWithoutExtension]
+
     return if (correspondingFile != null) {
         if (lyricFile.parentFile == correspondingFile.parentFile) {
             true
@@ -103,6 +106,7 @@ private fun handleLyricFile(lyricFile: File, audioFilesMap: Map<String, File>): 
 
 private fun findAndMovePossiblePairs(lyricFile: File, audioFilesMap: Map<String, File>): Boolean {
     val possiblePairs = findPossiblePairs(audioFilesMap, lyricFile)
+
     val result = AtomicBoolean(false)
 
     if (possiblePairs.isNotEmpty()) {
@@ -112,7 +116,7 @@ private fun findAndMovePossiblePairs(lyricFile: File, audioFilesMap: Map<String,
                 }) {
                 val optionPane = JOptionPane.showConfirmDialog(
                     frame,
-                    "O arquivo '${lyricFile.name}' pode ser pareado com '${possiblePair.name}'.\nDeseja mover o arquivo de '${lyricFile.absolutePath}' para '${possiblePair.absolutePath}'?",
+                    "O arquivo '${lyricFile.name}' pode ser pareado com '${possiblePair.name}'.\nDeseja mover o arquivo de\n'${lyricFile.absolutePath}'\npara\n'${possiblePair.absolutePath}'?",
                     "Confirmação",
                     JOptionPane.YES_NO_OPTION
                 )
@@ -123,6 +127,7 @@ private fun findAndMovePossiblePairs(lyricFile: File, audioFilesMap: Map<String,
                 }
             }
         }
+
     }
     return result.get()
 }
@@ -133,7 +138,10 @@ private fun handleUnmatchedFiles(audioFilesMap: Map<String, File>) {
     }
 
     val duplicateLyrics = lyricsDirectory.walk().filter { it.extension == "lrc" && it.name in audioFilesMap.keys }
-    duplicateLyrics.forEach { unmatchedLyrics.add(it) }
+
+    duplicateLyrics.forEach {
+        unmatchedLyrics.add(it)
+    }
 
     if (unmatchedLyrics.isNotEmpty()) {
         val optionPane = JOptionPane.showConfirmDialog(
@@ -155,6 +163,7 @@ private fun handleUnmatchedFiles(audioFilesMap: Map<String, File>) {
 
 private fun moveUnmatchedFilesToNewDir(parentDir: File, lyricsDirectory: File) {
     val newDir = File(parentDir.absolutePath, "unmatched_lrc")
+
     if (!newDir.exists()) {
         newDir.mkdir()
     }
@@ -187,14 +196,14 @@ private fun moveLyricFile(lyricFile: File, targetDir: File): Boolean {
 
     val targetFile = File(actualTargetDir, lyricFile.name)
 
-    if (targetFile.exists()) {
+    return if (targetFile.exists()) {
         println("Já existe um arquivo ${targetFile.name} no diretório de destino.")
-        return false
+        false
     } else if (actualTargetDir.parentFile.freeSpace < lyricFile.length()) {
         errorList.add(
             Exception("— Não há espaço suficiente no diretório de destino para o arquivo ${lyricFile.name}.\n")
         )
-        return false
+        false
     } else {
         return try {
             Files.move(lyricFile.toPath(), targetFile.toPath())
@@ -226,7 +235,9 @@ private fun rename(lyricFile: File, targetFile: File) {
         if (option == JOptionPane.YES_OPTION) {
             if (!lyricFile.renameTo(File(lyricFile.parent, targetFile.nameWithoutExtension + ".lrc"))) {
                 errorList.add(
-                    Exception("Falha ao renomear o arquivo ${lyricFile.name} para ${targetFile.nameWithoutExtension}.lrc")
+                    Exception(
+                        "Falha ao renomear o arquivo ${lyricFile.name} para${targetFile.nameWithoutExtension}.lrc"
+                    )
                 )
             }
         } else {
@@ -255,9 +266,9 @@ private fun printFilePermissions(file: File) {
 }
 
 private fun findPossiblePairs(audioFilesMap: Map<String, File>, lyricFile: File): List<File> {
-    return audioFilesMap.values.parallelStream().filter { audioFile ->
+    return audioFilesMap.values.filter { audioFile ->
         LevenshteinDistance().apply(
             audioFile.nameWithoutExtension, lyricFile.nameWithoutExtension
         ) <= (lyricFile.nameWithoutExtension.length / 2)
-    }.collect(Collectors.toList())
+    }
 }
