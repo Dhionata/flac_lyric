@@ -94,7 +94,7 @@ private fun handleLyricFile(lyricFile: File, audioFiles: Set<File>): Boolean {
     val correspondingFile = audioFiles.find { it.nameWithoutExtension == lyricFile.nameWithoutExtension }
 
     return if (correspondingFile != null) {
-        if (lyricFile.parentFile == correspondingFile.parentFile) {
+        if (lyricFile.parent == correspondingFile.parent) {
             true
         } else {
             moveLyricFile(lyricFile, correspondingFile)
@@ -111,12 +111,12 @@ private fun findAndMovePossiblePairs(lyricFile: File, audioFiles: Set<File>): Bo
 
     if (possiblePairs.isNotEmpty()) {
         possiblePairs.parallelStream().forEach { possiblePair ->
-            if (lyricFile.parentFile != possiblePair.parentFile && possiblePair.walk().any {
+            if (lyricFile.parent != possiblePair.parent && possiblePair.walk().any {
                     it == lyricFile
                 }) {
                 val optionPane = JOptionPane.showConfirmDialog(
                     null,
-                    "O arquivo '${lyricFile.name}' pode ser pareado com '${possiblePair.name}'.\nDeseja mover o arquivo de\n'${lyricFile.absolutePath}'\npara\n'${possiblePair.absolutePath}'?",
+                    "O arquivo '${lyricFile.name}' pode ser pareado com '${possiblePair.name}'.\nDeseja mover o arquivo de\n'${lyricFile.parent}'\npara\n'${possiblePair.parent}'?",
                     "Confirmação",
                     JOptionPane.YES_NO_OPTION
                 )
@@ -158,18 +158,19 @@ private fun handleUnmatchedFiles(audioFiles: Set<File>) {
 
     if (lyricsDirectory.listFiles()?.isEmpty() == true) {
         System.err.println(lyricsDirectory.name)
+        errorList.add(Exception("${lyricsDirectory.name} está vazio!"))
     }
 }
 
-private fun moveUnmatchedFilesToNewDir(parentDir: File, lyricsDirectory: File) {
-    val newDir = File(parentDir.absolutePath, "unmatched_lrc")
+private fun moveUnmatchedFilesToNewDir(parentDirectory: File, lyricsDirectory: File) {
+    val newDirectory = File(parentDirectory.absolutePath, "unmatched_lrc")
 
-    if (!newDir.exists()) {
-        newDir.mkdir()
+    if (!newDirectory.exists()) {
+        newDirectory.mkdir()
     }
 
     unmatchedLyrics.parallelStream().forEach { lyricFile ->
-        moveLyricFile(lyricFile, newDir)
+        moveLyricFile(lyricFile, newDirectory)
     }
 
     if (lyricsDirectory.walk().filter { it.isFile }.none()) {
@@ -197,7 +198,7 @@ private fun moveLyricFile(lyricFile: File, targetDir: File): Boolean {
     val targetFile = File(actualTargetDir, lyricFile.name)
 
     return if (targetFile.exists()) {
-        println("Já existe um arquivo ${targetFile.name} no diretório de destino ${targetFile.absolutePath}.")
+        println("Já existe um arquivo ${targetFile.name} no diretório de destino ${targetFile.parent}.")
         false
     } else if (actualTargetDir.parentFile.freeSpace < lyricFile.length()) {
         errorList.add(Exception("— Não há espaço suficiente no diretório de destino para o arquivo ${lyricFile.name}.\n"))
@@ -205,13 +206,13 @@ private fun moveLyricFile(lyricFile: File, targetDir: File): Boolean {
     } else {
         try {
             Files.move(lyricFile.toPath(), targetFile.toPath())
-            movedList.add("Arquivo \n${lyricFile.name}\nmovido de\n${lyricFile.absolutePath}\npara\n${targetFile.absolutePath}\n")
+            movedList.add("Arquivo \n${lyricFile.name}\nmovido de\n${lyricFile.parent}\npara\n${targetFile.parent}\n")
             true
         } catch (e: Exception) {
             errorList.add(
                 Exception(
-                    "Falha ao mover o arquivo\n${lyricFile.name}\nde\n${lyricFile.absolutePath}\npara\n${
-                        targetFile.absolutePath
+                    "Falha ao mover o arquivo\n${lyricFile.name}\nde\n${lyricFile.parent}\npara\n${
+                        targetFile.parent
                     }\n${e.javaClass}\n"
                 )
             )
