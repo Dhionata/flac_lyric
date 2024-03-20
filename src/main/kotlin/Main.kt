@@ -3,20 +3,20 @@ import java.awt.Dimension
 import java.io.File
 import java.nio.file.Files
 import java.util.concurrent.atomic.AtomicBoolean
-import javax.swing.*
+import javax.swing.JFileChooser
+import javax.swing.JOptionPane
+import javax.swing.JScrollPane
+import javax.swing.JTextArea
 import kotlin.system.exitProcess
 
 private val errorList = mutableSetOf<Exception>()
 private val movedList = mutableSetOf<String>()
 private val unmatchedLyrics = mutableSetOf<File>()
-private val frame = JFrame()
 private val supportedExtensions = listOf("flac", "mp3", "ogg", "wav", "m4a")
 private lateinit var musicDirectory: File
 private lateinit var lyricsDirectory: File
 
 private fun main() {
-    frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
-
     do {
         musicDirectory = getDirectory("Selecione o diretório das músicas")
 
@@ -27,11 +27,33 @@ private fun main() {
         } else {
             errorList.add(Exception("\nDiretório $musicDirectory somente leitura!\n"))
             JOptionPane.showMessageDialog(
-                frame, "Diretório $musicDirectory somente leitura!", "Erro", JOptionPane.ERROR_MESSAGE
+                null, "Diretório $musicDirectory somente leitura!", "Erro", JOptionPane.ERROR_MESSAGE
             )
         }
     } while (!musicDirectory.canWrite() && !lyricsDirectory.canWrite())
 
+    val (textArea, scrollPane) = ui()
+
+    if (errorList.isNotEmpty()) {
+        val errorMessage = errorList.joinToString("\n") { it.message ?: it.toString() }
+
+        textArea.text = errorMessage
+
+        JOptionPane.showMessageDialog(null, scrollPane, "Erros", JOptionPane.ERROR_MESSAGE)
+    }
+    if (movedList.isNotEmpty()) {
+        val movedMessage = movedList.joinToString("\n") { it }
+        textArea.text = movedMessage
+        JOptionPane.showMessageDialog(null, scrollPane, "Informação", JOptionPane.INFORMATION_MESSAGE)
+    }
+    if (errorList.isEmpty() && movedList.isEmpty()) {
+        JOptionPane.showMessageDialog(null, "Está tudo no lugar!", "Informação", JOptionPane.INFORMATION_MESSAGE)
+    }
+
+    exitProcess(0)
+}
+
+private fun ui(): Pair<JTextArea, JScrollPane> {
     val textArea = JTextArea()
     textArea.isEditable = false
     textArea.wrapStyleWord = true
@@ -39,32 +61,11 @@ private fun main() {
 
     val scrollPane = JScrollPane(textArea)
     scrollPane.preferredSize = Dimension(800, 600)
-
-    if (errorList.isNotEmpty()) {
-        val errorMessage = errorList.joinToString("\n") { it.message ?: it.toString() }
-
-        textArea.text = errorMessage
-
-        JOptionPane.showMessageDialog(
-            frame, scrollPane, "Erros", JOptionPane.ERROR_MESSAGE
-        )
-    }
-    if (movedList.isNotEmpty()) {
-        val movedMessage = movedList.joinToString("\n") { it }
-        textArea.text = movedMessage
-        JOptionPane.showMessageDialog(
-            frame, scrollPane, "Informação", JOptionPane.INFORMATION_MESSAGE
-        )
-    }
-    if (errorList.isEmpty() && movedList.isEmpty()) {
-        JOptionPane.showMessageDialog(frame, "Está tudo no lugar!", "Informação", JOptionPane.INFORMATION_MESSAGE)
-    }
-
-    exitProcess(0)
+    return Pair(textArea, scrollPane)
 }
 
 private fun processFiles() {
-    val audioFilesMap = getAudioFilesMap(musicDirectory)
+    val audioFilesMap = getAudioFiles()
 
     lyricsDirectory = getDirectory("Selecione o diretório dos arquivos .lrc")
     printFilePermissions(lyricsDirectory)
@@ -80,18 +81,17 @@ private fun processFiles() {
     handleUnmatchedFiles(audioFilesMap)
 }
 
-private fun getAudioFilesMap(musicDirectory: File): MutableMap<String, File> {
-    val audioFilesMap = mutableMapOf<String, File>()
+private fun getAudioFiles(): MutableSet<File> {
+    val audioFiles = mutableSetOf<File>()
 
     supportedExtensions.parallelStream().forEach { extension ->
-        audioFilesMap.putAll(musicDirectory.walk().filter { it.extension == extension }
-            .associateBy { it.nameWithoutExtension })
+        audioFiles.addAll(musicDirectory.walk().filter { it.extension == extension })
     }
-    return audioFilesMap
+    return audioFiles
 }
 
-private fun handleLyricFile(lyricFile: File, audioFilesMap: Map<String, File>): Boolean {
-    val correspondingFile = audioFilesMap[lyricFile.nameWithoutExtension]
+private fun handleLyricFile(lyricFile: File, audioFiles: Set<File>): Boolean {
+    val correspondingFile = audioFiles.find { it.nameWithoutExtension == lyricFile.nameWithoutExtension }
 
     return if (correspondingFile != null) {
         if (lyricFile.parentFile == correspondingFile.parentFile) {
@@ -100,12 +100,12 @@ private fun handleLyricFile(lyricFile: File, audioFilesMap: Map<String, File>): 
             moveLyricFile(lyricFile, correspondingFile)
         }
     } else {
-        findAndMovePossiblePairs(lyricFile, audioFilesMap)
+        findAndMovePossiblePairs(lyricFile, audioFiles)
     }
 }
 
-private fun findAndMovePossiblePairs(lyricFile: File, audioFilesMap: Map<String, File>): Boolean {
-    val possiblePairs = findPossiblePairs(audioFilesMap, lyricFile)
+private fun findAndMovePossiblePairs(lyricFile: File, audioFiles: Set<File>): Boolean {
+    val possiblePairs = findPossiblePairs(audioFiles, lyricFile)
 
     val result = AtomicBoolean(false)
 
@@ -115,7 +115,7 @@ private fun findAndMovePossiblePairs(lyricFile: File, audioFilesMap: Map<String,
                     it == lyricFile
                 }) {
                 val optionPane = JOptionPane.showConfirmDialog(
-                    frame,
+                    null,
                     "O arquivo '${lyricFile.name}' pode ser pareado com '${possiblePair.name}'.\nDeseja mover o arquivo de\n'${lyricFile.absolutePath}'\npara\n'${possiblePair.absolutePath}'?",
                     "Confirmação",
                     JOptionPane.YES_NO_OPTION
@@ -132,12 +132,12 @@ private fun findAndMovePossiblePairs(lyricFile: File, audioFilesMap: Map<String,
     return result.get()
 }
 
-private fun handleUnmatchedFiles(audioFilesMap: Map<String, File>) {
+private fun handleUnmatchedFiles(audioFiles: Set<File>) {
     unmatchedLyrics.parallelStream().forEach { lyricFile ->
-        findAndMovePossiblePairs(lyricFile, audioFilesMap)
+        findAndMovePossiblePairs(lyricFile, audioFiles)
     }
 
-    val duplicateLyrics = lyricsDirectory.walk().filter { it.extension == "lrc" && it.name in audioFilesMap.keys }
+    val duplicateLyrics = lyricsDirectory.walk().filter { it.extension == "lrc" && audioFiles.contains(it) }
 
     duplicateLyrics.forEach {
         unmatchedLyrics.add(it)
@@ -145,7 +145,7 @@ private fun handleUnmatchedFiles(audioFilesMap: Map<String, File>) {
 
     if (unmatchedLyrics.isNotEmpty()) {
         val optionPane = JOptionPane.showConfirmDialog(
-            frame,
+            null,
             "Não foi possível encontrar um par para alguns arquivos .lrc\nDeseja criar uma nova pasta para movê-los?",
             "Confirmação",
             JOptionPane.YES_NO_OPTION
@@ -197,19 +197,15 @@ private fun moveLyricFile(lyricFile: File, targetDir: File): Boolean {
     val targetFile = File(actualTargetDir, lyricFile.name)
 
     return if (targetFile.exists()) {
-        println("Já existe um arquivo ${targetFile.name} no diretório de destino.")
+        println("Já existe um arquivo ${targetFile.name} no diretório de destino ${targetFile.absolutePath}.")
         false
     } else if (actualTargetDir.parentFile.freeSpace < lyricFile.length()) {
-        errorList.add(
-            Exception("— Não há espaço suficiente no diretório de destino para o arquivo ${lyricFile.name}.\n")
-        )
+        errorList.add(Exception("— Não há espaço suficiente no diretório de destino para o arquivo ${lyricFile.name}.\n"))
         false
     } else {
-        return try {
+        try {
             Files.move(lyricFile.toPath(), targetFile.toPath())
-            movedList.add(
-                "Arquivo \n${lyricFile.name}\nmovido de\n${lyricFile.absolutePath}\npara\n${targetFile.absolutePath}\n"
-            )
+            movedList.add("Arquivo \n${lyricFile.name}\nmovido de\n${lyricFile.absolutePath}\npara\n${targetFile.absolutePath}\n")
             true
         } catch (e: Exception) {
             errorList.add(
@@ -227,18 +223,14 @@ private fun moveLyricFile(lyricFile: File, targetDir: File): Boolean {
 private fun rename(lyricFile: File, targetFile: File) {
     if (lyricFile.nameWithoutExtension != targetFile.nameWithoutExtension) {
         val option = JOptionPane.showConfirmDialog(
-            frame,
+            null,
             "Deseja renomear o arquivo ${lyricFile.name} para ${targetFile.nameWithoutExtension}.lrc?",
             "Renomeação",
             JOptionPane.YES_NO_OPTION
         )
         if (option == JOptionPane.YES_OPTION) {
             if (!lyricFile.renameTo(File(lyricFile.parent, targetFile.nameWithoutExtension + ".lrc"))) {
-                errorList.add(
-                    Exception(
-                        "Falha ao renomear o arquivo ${lyricFile.name} para${targetFile.nameWithoutExtension}.lrc"
-                    )
-                )
+                errorList.add(Exception("Falha ao renomear o arquivo ${lyricFile.name} para${targetFile.nameWithoutExtension}.lrc"))
             }
         } else {
             return
@@ -260,13 +252,11 @@ private fun getDirectory(dialogTitle: String): File {
 }
 
 private fun printFilePermissions(file: File) {
-    println(
-        "Permissões da pasta $file\nLeitura: ${file.canRead()}\nEscrita: ${file.canWrite()}\nExecução: ${file.canExecute()}"
-    )
+    println("Permissões da pasta $file\nLeitura: ${file.canRead()}\nEscrita: ${file.canWrite()}\nExecução: ${file.canExecute()}")
 }
 
-private fun findPossiblePairs(audioFilesMap: Map<String, File>, lyricFile: File): List<File> {
-    return audioFilesMap.values.filter { audioFile ->
+private fun findPossiblePairs(audioFilesMap: Set<File>, lyricFile: File): List<File> {
+    return audioFilesMap.filter { audioFile ->
         LevenshteinDistance().apply(
             audioFile.nameWithoutExtension, lyricFile.nameWithoutExtension
         ) <= (lyricFile.nameWithoutExtension.length / 2)
