@@ -12,7 +12,7 @@ repositories {
 
 dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test:2.0.0-RC2")
-    implementation("org.apache.commons:commons-text:1.11.0")
+    implementation("org.apache.commons:commons-text:1.12.0")
 }
 
 tasks.test {
