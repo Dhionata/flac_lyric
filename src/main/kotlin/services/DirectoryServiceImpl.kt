@@ -1,18 +1,18 @@
-package services
-
+import interfaces.DirectoryService
+import interfaces.FileService
 import java.io.File
 import java.nio.file.Paths
 import javax.swing.JFileChooser
 import javax.swing.UIManager
 import kotlin.system.exitProcess
 
-class DirectoryService(private val fileService: FileService) {
+class DirectoryServiceImpl(private val fileService: FileService) : DirectoryService {
 
     init {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
     }
 
-    fun getDirectory(dialogTitle: String): File {
+    override fun getDirectory(dialogTitle: String): File {
         return JFileChooser().apply {
             fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
             this.dialogTitle = dialogTitle

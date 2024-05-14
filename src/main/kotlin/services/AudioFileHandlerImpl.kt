@@ -1,12 +1,12 @@
-package services
-
+import interfaces.AudioFileHandler
+import interfaces.FileService
 import java.io.File
 
-class AudioFileHandler(private val fileService: FileService) {
+class AudioFileHandlerImpl(private val fileService: FileService) : AudioFileHandler {
 
     private val supportedExtensions = listOf("flac", "mp3", "ogg", "wav", "m4a")
 
-    fun getAudioFiles(musicDirectory: File): Set<File> {
+    override fun getAudioFiles(musicDirectory: File): Set<File> {
         val audioFilesSet = mutableSetOf<File>()
         audioFilesSet.addAll(fileService.getFilesByExtension(musicDirectory, supportedExtensions))
         return audioFilesSet

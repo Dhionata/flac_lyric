@@ -1,19 +1,19 @@
-package services
-
+import interfaces.FileService
+import interfaces.LyricFileHandler
 import models.FilePair
 import org.apache.commons.text.similarity.LevenshteinDistance
 import java.io.File
 
-class LyricFileHandler(private val fileService: FileService) {
+class LyricFileHandlerImpl(private val fileService: FileService) : LyricFileHandler {
 
     private val changedSet = mutableSetOf<String>()
     private val errorSet = mutableSetOf<Exception>()
 
-    fun getLyricFiles(lyricsDirectory: File): Set<File> {
+    override fun getLyricFiles(lyricsDirectory: File): Set<File> {
         return lyricsDirectory.walk().filter { it.extension == "lrc" }.toSet()
     }
 
-    fun matchFiles(lyricFiles: Set<File>, audioFiles: Set<File>): Set<FilePair> {
+    override fun matchFiles(lyricFiles: Set<File>, audioFiles: Set<File>): Set<FilePair> {
         val matchFilesSet = mutableSetOf<FilePair>()
         lyricFiles.parallelStream().forEach { lyricFile ->
             val audioFile = findBestMatch(lyricFile, audioFiles)
@@ -24,9 +24,9 @@ class LyricFileHandler(private val fileService: FileService) {
         return matchFilesSet
     }
 
-    fun handleFilePairs(filePairs: Set<FilePair>, parentDirectory: File, lyricsDirectory: File) {
+    override fun handleFilePairs(filePairs: Set<FilePair>, parentDirectory: File, lyricsDirectory: File) {
         filePairs.parallelStream().forEach { pair ->
-            if (pair.lyricFile.parent != pair.audioFile.parent) {
+            if (!pair.lyricFile.parent.equals(pair.audioFile.parent)) {
                 moveLyricFile(pair.lyricFile, pair.audioFile.parentFile)
                 renameLyricFile(pair.lyricFile, pair.audioFile)
             }
@@ -88,11 +88,11 @@ class LyricFileHandler(private val fileService: FileService) {
         return lyricsDirectory.walk().filter { it.extension == "lrc" && !matchedLyrics.contains(it) }.toSet()
     }
 
-    fun getChangedSet(): Set<String> {
+    override fun getChangedSet(): Set<String> {
         return changedSet
     }
 
-    fun getErrorList(): Set<Exception> {
+    override fun getErrorList(): Set<Exception> {
         return errorSet
     }
 }

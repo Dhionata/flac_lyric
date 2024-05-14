@@ -1,18 +1,17 @@
-package services
+import interfaces.AudioFileHandler
+import interfaces.DirectoryService
+import interfaces.LyricFileHandler
+import interfaces.UserInterface
 
-import ui.UserInterface
+class MusicLyricsService(
+    private val directoryService: DirectoryService,
+    private val audioFileHandler: AudioFileHandler,
+    private val lyricFileHandler: LyricFileHandler,
+    private val userInterface: UserInterface
+) {
 
-class MusicLyricsOrganizer {
-
-    private val fileService = FileService()
-    private val lyricFileHandler = LyricFileHandler(fileService)
-    private val audioFileHandler = AudioFileHandler(fileService)
-    private val directoryService = DirectoryService(fileService)
-    private val userInterface = UserInterface()
-
-    fun run() {
+    fun organizeMusicAndLyrics() {
         val musicDirectory = directoryService.getDirectory("Selecione o diretório das músicas")
-        fileService.printFilePermissions(musicDirectory)
 
         if (!musicDirectory.canWrite()) {
             userInterface.showError("Diretório $musicDirectory somente leitura!")
@@ -20,7 +19,6 @@ class MusicLyricsOrganizer {
         }
 
         val lyricsDirectory = directoryService.getDirectory("Selecione o diretório dos arquivos .lrc")
-        fileService.printFilePermissions(lyricsDirectory)
 
         if (!lyricsDirectory.canWrite()) {
             userInterface.showError("Diretório $lyricsDirectory somente leitura!")

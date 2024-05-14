@@ -1,14 +1,13 @@
-package ui
-
+import interfaces.UserInterface
 import javax.swing.JOptionPane
 
-class UserInterface {
+class UserInterfaceImpl : UserInterface {
 
-    fun showError(message: String) {
+    override fun showError(message: String) {
         JOptionPane.showMessageDialog(null, message, "Erro", JOptionPane.ERROR_MESSAGE)
     }
 
-    fun showResult(changedSet: Set<String>, errorList: Set<Exception>) {
+    override fun showResult(changedSet: Set<String>, errorList: Set<Exception>) {
         if (errorList.isNotEmpty()) {
             val errorMessage = errorList.joinToString("\n") { it.message ?: it.toString() }
             JOptionPane.showMessageDialog(null, errorMessage, "Erros", JOptionPane.ERROR_MESSAGE)
