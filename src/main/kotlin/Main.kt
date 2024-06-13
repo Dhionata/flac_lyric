@@ -1,3 +1,10 @@
+import services.AudioFileHandlerImpl
+import services.DirectoryServiceImpl
+import services.FileServiceImpl
+import services.LyricFileHandlerImpl
+import services.MusicLyricsService
+import ui.UserInterfaceImpl
+
 fun main() {
     val fileService = FileServiceImpl()
     val directoryService = DirectoryServiceImpl(fileService)

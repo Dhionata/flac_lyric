@@ -1,13 +1,13 @@
+package services
+
 import interfaces.FileService
 import java.io.File
-import java.util.logging.Level
 import java.util.logging.Logger
 
 class FileServiceImpl : FileService {
 
     override fun printFilePermissions(file: File) {
-        Logger.getGlobal().log(
-            Level.INFO,
+        Logger.getGlobal().info(
             "Permissões da pasta $file\nLeitura: ${file.canRead()}\nEscrita: ${file.canWrite()}\nExecução: ${file.canExecute()}"
         )
     }
@@ -34,8 +34,7 @@ class FileServiceImpl : FileService {
             try {
                 sourceFile.copyTo(targetFile, overwrite = false)
                 sourceFile.delete()
-                Logger.getGlobal().log(
-                    Level.INFO,
+                Logger.getGlobal().info(
                     "Arquivo \n${sourceFile.name}\nmovido de\n${sourceFile.parent}\npara\n${targetFile.parent}\n"
                 )
                 true

@@ -1,3 +1,5 @@
+package ui
+
 import interfaces.UserInterface
 import javax.swing.JOptionPane
 
