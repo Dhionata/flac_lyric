@@ -2,14 +2,19 @@ package services
 
 import interfaces.FileService
 import interfaces.LyricFileHandler
+import interfaces.UserInterface
 import models.FilePair
-import org.apache.commons.text.similarity.LevenshteinDistance
+import org.apache.commons.text.similarity.CosineDistance
+import ui.UserInterfaceImpl
 import java.io.File
 
-class LyricFileHandlerImpl(private val fileService: FileService) : LyricFileHandler {
+class LyricFileHandlerImpl(
+    private val fileService: FileService = FileServiceImpl(),
+    private val userInterface: UserInterface = UserInterfaceImpl()
+) : LyricFileHandler {
 
-    private val changedSet = mutableSetOf<String>()
-    private val errorSet = mutableSetOf<Exception>()
+    override val changedSet = mutableSetOf<String>()
+    override val errorSet = mutableSetOf<Exception>()
 
     override fun getLyricFiles(lyricsDirectory: File): Set<File> {
         return lyricsDirectory.walk().filter { it.extension == "lrc" }.toSet()
@@ -17,40 +22,50 @@ class LyricFileHandlerImpl(private val fileService: FileService) : LyricFileHand
 
     override fun matchFiles(lyricFiles: Set<File>, audioFiles: Set<File>): Set<FilePair> {
         val matchFilesSet = mutableSetOf<FilePair>()
-        lyricFiles.parallelStream().forEach { lyricFile ->
-            val audioFile = findBestMatch(lyricFile, audioFiles)
-            if (audioFile != null) {
-                matchFilesSet.add(FilePair(lyricFile, audioFile))
+        lyricFiles.forEach { lyricFile ->
+            val bestAudioFileMatch = findBestMatch(lyricFile, audioFiles)
+            if (bestAudioFileMatch != null) {
+                matchFilesSet.add(FilePair(lyricFile, bestAudioFileMatch))
             }
         }
         return matchFilesSet
     }
 
-    override fun handleFilePairs(filePairs: Set<FilePair>, parentDirectory: File, lyricsDirectory: File) {
-        filePairs.parallelStream().forEach { pair ->
-            if (!pair.lyricFile.parent.equals(pair.audioFile.parent)) {
-                moveLyricFile(pair.lyricFile, pair.audioFile.parentFile)
-                renameLyricFile(pair.lyricFile, pair.audioFile)
+    override fun handleFilePairs(filePairs: Set<FilePair>, musicDirectoryParent: File, lyricsDirectory: File) {
+
+        filePairs.forEach { pair ->
+            if (!pair.lyricFile.parentFile.equals(pair.audioFile.parentFile)) {
+                if (pair.audioFile.nameWithoutExtension == pair.lyricFile.nameWithoutExtension) {
+                    moveLyricFile(pair.lyricFile, pair.audioFile.parentFile)
+                } else if (fileService.sameFilesWithDiffNames(
+                        pair.audioFile.parentFile, pair.lyricFile
+                    ) || userInterface.move(pair)
+                ) {
+                    val lyricFileMoved = moveLyricFile(pair.lyricFile, pair.audioFile.parentFile)
+                    if (lyricFileMoved != null) {
+                        renameLyricFile(lyricFileMoved, pair.audioFile)
+                    }
+                }
             }
         }
-
-        handleUnmatchedFiles(filePairs, parentDirectory, lyricsDirectory)
     }
 
     private fun findBestMatch(lyricFile: File, audioFiles: Set<File>): File? {
         return audioFiles.minByOrNull {
-            LevenshteinDistance().apply(it.nameWithoutExtension, lyricFile.nameWithoutExtension)
+            CosineDistance().apply(it.nameWithoutExtension, lyricFile.nameWithoutExtension)
         }
     }
 
-    private fun moveLyricFile(lyricFile: File, targetDir: File) {
+    private fun moveLyricFile(lyricFile: File, targetDir: File): File? {
         try {
             if (fileService.moveFile(lyricFile, targetDir)) {
                 changedSet.add("Arquivo \n${lyricFile.name}\nmovido de\n${lyricFile.parent}\npara\n${targetDir}\n")
+                return File(targetDir, lyricFile.name)
             }
         } catch (e: Exception) {
             errorSet.add(e)
         }
+        return null
     }
 
     private fun renameLyricFile(lyricFile: File, audioFile: File) {
@@ -65,36 +80,38 @@ class LyricFileHandlerImpl(private val fileService: FileService) : LyricFileHand
         }
     }
 
-    private fun handleUnmatchedFiles(filePairs: Set<FilePair>, parentDirectory: File, lyricsDirectory: File) {
-        val unmatchedLyrics = getUnmatchedLyricFiles(filePairs, lyricsDirectory)
-        if (unmatchedLyrics.isNotEmpty()) {
-            val newDirectory = File(parentDirectory, "unmatched_lrc")
+    override fun handleUnmatchedFiles(
+        musicDirectory: File, lyricsDirectory: File
+    ) {
+        // Cria um mapa de todos os arquivos de música no diretório de música e subdiretórios
+        val musicFilesMap =
+            musicDirectory.walk().filter { it.isFile && it.extension != "lrc" }.associateBy { it.nameWithoutExtension }
+
+        // Filtra os arquivos .lrc que não têm correspondência no mapa de arquivos de música
+        val unmatchedLyricFiles =
+            lyricsDirectory.walk().filter { it.isFile && it.extension == "lrc" }.filterNot { lyricFile ->
+                musicFilesMap.containsKey(lyricFile.nameWithoutExtension)
+            }.toList()
+
+        if (unmatchedLyricFiles.isNotEmpty()) {
+            val newDirectory = File(musicDirectory.parentFile, "unmatched_lrc")
             if (!newDirectory.exists()) {
                 newDirectory.mkdirs()
             }
-            unmatchedLyrics.forEach { lyricFile ->
-                moveLyricFile(lyricFile, newDirectory)
-            }
-            if (lyricsDirectory.walk().filter { it.isFile }.none()) {
-                if (lyricsDirectory.delete()) {
-                    changedSet.add("Diretório ${lyricsDirectory.name} excluído por não existir mais arquivos .lrc.")
-                } else {
-                    errorSet.add(Exception("Diretório ${lyricsDirectory.name} não foi exluído."))
+            unmatchedLyricFiles.forEach { lyricFile ->
+                if (lyricFile.parentFile != newDirectory) {
+                    moveLyricFile(lyricFile, newDirectory)
                 }
             }
         }
-    }
 
-    private fun getUnmatchedLyricFiles(filePairs: Set<FilePair>, lyricsDirectory: File): Set<File> {
-        val matchedLyrics = filePairs.map { it.lyricFile }
-        return lyricsDirectory.walk().filter { it.extension == "lrc" && !matchedLyrics.contains(it) }.toSet()
-    }
-
-    override fun getChangedSet(): Set<String> {
-        return changedSet
-    }
-
-    override fun getErrorList(): Set<Exception> {
-        return errorSet
+        // Verifica se o diretório de letras está vazio e tenta excluí-lo
+        if (lyricsDirectory.walk().filter { it.isFile }.none()) {
+            if (lyricsDirectory.delete()) {
+                changedSet.add("Diretório ${lyricsDirectory.name} excluído por não existir mais arquivos .lrc.")
+            } else {
+                errorSet.add(Exception("Diretório ${lyricsDirectory.name} não pôde ser excluído."))
+            }
+        }
     }
 }
