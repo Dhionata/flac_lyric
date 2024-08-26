@@ -4,12 +4,13 @@ import interfaces.AudioFileHandler
 import interfaces.DirectoryService
 import interfaces.LyricFileHandler
 import interfaces.UserInterface
+import ui.UserInterfaceImpl
 
 class MusicLyricsService(
-    private val directoryService: DirectoryService,
-    private val audioFileHandler: AudioFileHandler,
-    private val lyricFileHandler: LyricFileHandler,
-    private val userInterface: UserInterface
+    private val directoryService: DirectoryService = DirectoryServiceImpl(),
+    private val audioFileHandler: AudioFileHandler = AudioFileHandlerImpl(),
+    private val lyricFileHandler: LyricFileHandler = LyricFileHandlerImpl(),
+    private val userInterface: UserInterface = UserInterfaceImpl()
 ) {
 
     fun organizeMusicAndLyrics() {
@@ -34,6 +35,8 @@ class MusicLyricsService(
 
         lyricFileHandler.handleFilePairs(filePairs, musicDirectory.parentFile, lyricsDirectory)
 
-        userInterface.showResult(lyricFileHandler.getChangedSet(), lyricFileHandler.getErrorList())
+        lyricFileHandler.handleUnmatchedFiles(musicDirectory, lyricsDirectory)
+
+        userInterface.showResult(lyricFileHandler.changedSet, lyricFileHandler.errorSet)
     }
 }
