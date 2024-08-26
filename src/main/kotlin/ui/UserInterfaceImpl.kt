@@ -19,7 +19,7 @@ class UserInterfaceImpl : UserInterface {
         JOptionPane.showMessageDialog(null, message, "Erro", JOptionPane.ERROR_MESSAGE)
     }
 
-    override fun showResult(changedSet: Set<String>, errorList: Set<Exception>) {
+    override fun showResult(changedSet: Set<String>, errorSet: Set<Exception>) {
         fun showMessageDialog(content: String, title: String, messageType: Int) {
             val textArea = JTextArea(content).apply {
                 isEditable = false
@@ -32,8 +32,8 @@ class UserInterfaceImpl : UserInterface {
             JOptionPane.showMessageDialog(null, scrollPane, title, messageType)
         }
 
-        if (errorList.isNotEmpty()) {
-            val errorMessage = errorList.joinToString("\n") { it.message ?: it.toString() }
+        if (errorSet.isNotEmpty()) {
+            val errorMessage = errorSet.joinToString("\n") { it.message ?: it.toString() }
             showMessageDialog(errorMessage, "Erros", JOptionPane.ERROR_MESSAGE)
         }
 
@@ -42,7 +42,7 @@ class UserInterfaceImpl : UserInterface {
             showMessageDialog(movedMessage, "Informação", JOptionPane.INFORMATION_MESSAGE)
         }
 
-        if (errorList.isEmpty() && changedSet.isEmpty()) {
+        if (errorSet.isEmpty() && changedSet.isEmpty()) {
             JOptionPane.showMessageDialog(null, "Está tudo no lugar!", "Informação", JOptionPane.INFORMATION_MESSAGE)
         }
     }
