@@ -14,9 +14,8 @@ class DirectoryServiceImpl(private val fileService: FileService = FileServiceImp
 
     init {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
-        jFileChooser = JFileChooser().apply {
+        jFileChooser = JFileChooser(Paths.get(System.getProperty("user.home") + "\\Music").toString()).apply {
             fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
-            currentDirectory = Paths.get(System.getProperty("user.home") + "\\Music").toFile()
         }
     }
 
