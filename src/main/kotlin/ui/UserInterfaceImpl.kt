@@ -32,14 +32,14 @@ class UserInterfaceImpl : UserInterface {
             JOptionPane.showMessageDialog(null, scrollPane, title, messageType)
         }
 
-        if (errorSet.isNotEmpty()) {
-            val errorMessage = errorSet.joinToString("\n") { it.message ?: it.toString() }
-            showMessageDialog(errorMessage, "Erros", JOptionPane.ERROR_MESSAGE)
-        }
-
         if (changedSet.isNotEmpty()) {
             val movedMessage = changedSet.joinToString("\n") { it }
             showMessageDialog(movedMessage, "Informação", JOptionPane.INFORMATION_MESSAGE)
+        }
+
+        if (errorSet.isNotEmpty()) {
+            val errorMessage = errorSet.joinToString("\n") { it.message ?: it.toString() }
+            showMessageDialog(errorMessage, "Erros", JOptionPane.ERROR_MESSAGE)
         }
 
         if (errorSet.isEmpty() && changedSet.isEmpty()) {
