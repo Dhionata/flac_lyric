@@ -47,7 +47,6 @@ class UserInterfaceImpl : UserInterface {
         }
     }
 
-
     override fun move(filePairs: FilePair): Boolean {
         val result = JOptionPane.showConfirmDialog(
             null,
@@ -65,4 +64,20 @@ class UserInterfaceImpl : UserInterface {
 
         return result == JOptionPane.YES_OPTION
     }
+
+    override fun option(): Int {
+        val options = arrayOf("Organizar Música e Lyrics", "Listar nome dos arquivos sem .lrc")
+        val message = "Escolha uma das opções abaixo:"
+
+        val option = JOptionPane.showOptionDialog(
+            null, message, "Selecione", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]
+        )
+
+        if (option == -1) {
+            exitProcess(0)
+        }
+
+        return option
+    }
+
 }
