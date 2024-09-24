@@ -7,12 +7,13 @@ import models.FilePair
 import org.apache.commons.text.similarity.CosineDistance
 import ui.UserInterfaceImpl
 import java.io.File
+import java.util.logging.Logger
 
 class LyricFileHandlerImpl(
     private val fileService: FileService = FileServiceImpl(),
     private val userInterface: UserInterface = UserInterfaceImpl()
 ) : LyricFileHandler {
-
+    private val logger = Logger.getLogger(this.javaClass.name)
     override val changedSet = mutableSetOf<String>()
     override val errorSet = mutableSetOf<Exception>()
 
@@ -22,17 +23,30 @@ class LyricFileHandlerImpl(
 
     override fun matchFiles(lyricFiles: Set<File>, audioFiles: Set<File>): Set<FilePair> {
         val matchFilesSet = mutableSetOf<FilePair>()
-        lyricFiles.forEach { lyricFile ->
-            val bestAudioFileMatch = findBestMatch(lyricFile, audioFiles)
+
+        lyricFiles.parallelStream().forEach { lyricFile ->
+            val parentDirectory = lyricFile.parentFile
+            val matchingAudioFileInSameDir = audioFiles.find { audioFile ->
+                audioFile.parentFile == parentDirectory && audioFile.nameWithoutExtension.equals(
+                    lyricFile.nameWithoutExtension, ignoreCase = true
+                )
+            }
+
+            val bestAudioFileMatch = matchingAudioFileInSameDir ?: findBestMatch(lyricFile, audioFiles).also {
+                logger.info("Best match for\n${lyricFile.name}\nis\n${it?.name}")
+            }
+
             if (bestAudioFileMatch != null) {
                 matchFilesSet.add(FilePair(lyricFile, bestAudioFileMatch))
             }
         }
-        return matchFilesSet
+
+        return matchFilesSet.filter {
+            it.lyricFile.parentFile != it.audioFile.parentFile || it.lyricFile.nameWithoutExtension != it.audioFile.nameWithoutExtension
+        }.toSet()
     }
 
     override fun handleFilePairs(filePairs: Set<FilePair>, musicDirectoryParent: File, lyricsDirectory: File) {
-
         filePairs.forEach { pair ->
             if (!pair.lyricFile.parentFile.equals(pair.audioFile.parentFile)) {
                 if (pair.audioFile.nameWithoutExtension == pair.lyricFile.nameWithoutExtension) {
@@ -51,8 +65,13 @@ class LyricFileHandlerImpl(
     }
 
     private fun findBestMatch(lyricFile: File, audioFiles: Set<File>): File? {
-        return audioFiles.minByOrNull {
-            CosineDistance().apply(it.nameWithoutExtension, lyricFile.nameWithoutExtension)
+        val cosineDistance = CosineDistance()
+        return audioFiles.minByOrNull { audioFile ->
+            cosineDistance.apply(
+                audioFile.nameWithoutExtension.lowercase(), lyricFile.nameWithoutExtension.lowercase()
+            ).also { distance ->
+                logger.info("Distância: $distance\npara lyricFile:\n${lyricFile.name}\n${audioFile.name}\n")
+            }
         }
     }
 
@@ -61,6 +80,8 @@ class LyricFileHandlerImpl(
             if (fileService.moveFile(lyricFile, targetDir)) {
                 changedSet.add("Arquivo \n${lyricFile.name}\nmovido de\n${lyricFile.parent}\npara\n${targetDir}\n")
                 return File(targetDir, lyricFile.name)
+            } else {
+                errorSet.add(Exception("Arquivo ${lyricFile.name} não movido para $targetDir"))
             }
         } catch (e: Exception) {
             errorSet.add(e)
@@ -69,14 +90,12 @@ class LyricFileHandlerImpl(
     }
 
     private fun renameLyricFile(lyricFile: File, audioFile: File) {
-        if (lyricFile.nameWithoutExtension != audioFile.nameWithoutExtension) {
-            try {
-                if (fileService.renameFile(lyricFile, "${audioFile.nameWithoutExtension}.lrc")) {
-                    changedSet.add("Arquivo ${lyricFile.name} renomeado para ${audioFile.nameWithoutExtension}.lrc")
-                }
-            } catch (e: Exception) {
-                errorSet.add(e)
+        try {
+            if (fileService.renameFile(lyricFile, "${audioFile.nameWithoutExtension}.lrc")) {
+                changedSet.add("Arquivo ${lyricFile.name} renomeado para ${audioFile.nameWithoutExtension}.lrc")
             }
+        } catch (e: Exception) {
+            errorSet.add(e)
         }
     }
 
