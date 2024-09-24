@@ -2,6 +2,7 @@ package services
 
 import interfaces.FileService
 import java.io.File
+import java.nio.file.Paths
 import java.util.logging.Logger
 
 class FileServiceImpl : FileService {
@@ -20,6 +21,7 @@ class FileServiceImpl : FileService {
         }
 
         val actualTargetDir = if (targetDir.isDirectory) targetDir else targetDir.parentFile
+
         if (!actualTargetDir.exists()) {
             actualTargetDir.mkdirs()
         }
@@ -52,7 +54,7 @@ class FileServiceImpl : FileService {
                 sourceFile.copyTo(targetFile, overwrite = false)
                 sourceFile.delete()
                 logger.info(
-                    "Arquivo \n${sourceFile.name}\nmovido de\n${sourceFile.parent}\npara\n${targetFile.parent}\n"
+                    "\nArquivo \n${sourceFile.name}\nmovido de\n${sourceFile.parent}\npara\n${targetFile.parent}\n"
                 )
                 true
             } catch (e: Exception) {
@@ -68,16 +70,31 @@ class FileServiceImpl : FileService {
     }
 
     override fun sameFilesWithDiffNames(actualTargetDir: File, sourceFile: File): Boolean =
-        actualTargetDir.listFiles()?.filter {
+        actualTargetDir.walk().filter {
             it.isFile && it.extension == "lrc" && filesAreEqual(it, sourceFile)
-        }?.isNotEmpty() == true
+        }.toList().isNotEmpty() == true
 
     override fun renameFile(file: File, newName: String): Boolean {
         val targetFile = File(file.parent, newName)
         return if (targetFile.exists()) {
-            throw Exception(
-                "Não foi possível renomear!\nJá existe um arquivo\n${targetFile.name}\nno diretório de destino\n${targetFile.parent}.\n"
-            )
+            if (filesAreEqual(targetFile, file)) {
+                file.delete()
+                throw Exception(
+                    "Não foi possível renomear!\nJá existe um arquivo\n${targetFile.name}\nno diretório de destino\n${targetFile.parent}\ncom o mesmo conteúdo.\nArquivo ${file.name} excluído\n"
+                )
+            } else {
+                val targetDirectory =
+                    File(Paths.get(System.getProperty("user.home"), "Desktop").toString(), "Lyrics With Wrong Name")
+
+                if (!targetDirectory.exists()) {
+                    targetDirectory.mkdirs()
+                }
+
+                moveFile(file, targetDirectory)
+                throw Exception(
+                    "Não foi possível renomear!\nJá existe um arquivo\n${targetFile.name}\nno diretório de destino\n${targetFile.parent} com conteúdo diferente.\nArquivo\n${file.name}\nmovido para\n${targetDirectory.absolutePath}\n"
+                )
+            }
         } else {
             file.renameTo(targetFile)
         }
