@@ -47,7 +47,7 @@ class UserInterfaceImpl : UserInterface {
         }
     }
 
-    override fun move(filePairs: FilePair): Boolean {
+    override fun moveAndRename(filePairs: FilePair): Boolean {
         val result = JOptionPane.showConfirmDialog(
             null,
             "Arquivo\n${filePairs.lyricFile.name}\nSerá Movido de\n${filePairs.lyricFile.parentFile}\nPara\n${
@@ -63,6 +63,22 @@ class UserInterfaceImpl : UserInterface {
         }
 
         return result == JOptionPane.YES_OPTION
+    }
+
+    override fun onlyRename(filePair: FilePair): Boolean {
+        val result = JOptionPane.showConfirmDialog(
+            null,
+            "Arquivo\n${filePair.lyricFile.name}\nSerá Renomeado para\n${filePair.audioFile.nameWithoutExtension}.lrc",
+            "Deseja continuar?",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.QUESTION_MESSAGE
+        )
+
+        if (result == JOptionPane.CLOSED_OPTION) {
+            exitProcess(0)
+        }
+
+        return result == JOptionPane.YES_NO_OPTION
     }
 
     override fun option(): Int {
