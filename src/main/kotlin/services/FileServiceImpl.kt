@@ -8,6 +8,8 @@ import java.util.logging.Logger
 class FileServiceImpl : FileService {
 
     private val logger = Logger.getLogger(this.javaClass.name)
+    override val changedSet = mutableSetOf<String>()
+    override val errorSet = mutableSetOf<Exception>()
 
     override fun printFilePermissions(file: File) {
         logger.info(
@@ -69,10 +71,9 @@ class FileServiceImpl : FileService {
         }
     }
 
-    override fun sameFilesWithDiffNames(actualTargetDir: File, sourceFile: File): Boolean =
-        actualTargetDir.walk().filter {
-            it.isFile && it.extension == "lrc" && filesAreEqual(it, sourceFile)
-        }.toList().isNotEmpty() == true
+    override fun sameFilesWithDiffNames(actualTargetDir: File, sourceFile: File): Boolean = actualTargetDir.walk().filter {
+        it.isFile && it.extension == "lrc" && filesAreEqual(it, sourceFile)
+    }.any()
 
     override fun renameFile(file: File, newName: String): Boolean {
         val targetFile = File(file.parent, newName)
@@ -83,8 +84,7 @@ class FileServiceImpl : FileService {
                     "Não foi possível renomear!\nJá existe um arquivo\n${targetFile.name}\nno diretório de destino\n${targetFile.parent}\ncom o mesmo conteúdo.\nArquivo ${file.name} excluído\n"
                 )
             } else {
-                val targetDirectory =
-                    File(Paths.get(System.getProperty("user.home"), "Desktop").toString(), "Lyrics With Wrong Name")
+                val targetDirectory = File(Paths.get(System.getProperty("user.home"), "Desktop").toString(), "Lyrics With Wrong Name")
 
                 if (!targetDirectory.exists()) {
                     targetDirectory.mkdirs()
@@ -100,8 +100,58 @@ class FileServiceImpl : FileService {
         }
     }
 
-    override fun getFilesByExtension(directory: File, supportedExtensions: List<String>): Set<File> {
-        return directory.walk().filter { it.isFile && it.extension in supportedExtensions }.toSet()
+    override fun moveLyricFile(lyricFile: File, targetDir: File): File? {
+        try {
+            if (moveFile(lyricFile, targetDir)) {
+                changedSet.add("Arquivo \n${lyricFile.name}\nmovido de\n${lyricFile.parent}\npara\n${targetDir}\n")
+                return File(targetDir, lyricFile.name)
+            } else {
+                errorSet.add(Exception("Arquivo ${lyricFile.name} não movido para $targetDir"))
+            }
+        } catch (e: Exception) {
+            errorSet.add(e)
+        }
+        return null
+    }
+
+    override fun renameLyricFile(lyricFile: File, audioFile: File) {
+        try {
+            if (renameFile(lyricFile, "${audioFile.nameWithoutExtension}.lrc")) {
+                changedSet.add("Arquivo ${lyricFile.name} renomeado para ${audioFile.nameWithoutExtension}.lrc")
+            }
+        } catch (e: Exception) {
+            errorSet.add(e)
+        }
+    }
+
+    override fun handleUnmatchedFiles(
+        musicDirectory: File, lyricsDirectory: File
+    ) {
+        val musicFilesMap = musicDirectory.walk().filter { it.isFile && it.extension != "lrc" }.associateBy { it.nameWithoutExtension }
+
+        val unmatchedLyricFiles = lyricsDirectory.walk().filter { it.isFile && it.extension == "lrc" }.filterNot { lyricFile ->
+            musicFilesMap.containsKey(lyricFile.nameWithoutExtension)
+        }.toList()
+
+        if (unmatchedLyricFiles.isNotEmpty()) {
+            val newDirectory = File(musicDirectory.parentFile, "unmatched_lrc")
+            if (!newDirectory.exists()) {
+                newDirectory.mkdirs()
+            }
+            unmatchedLyricFiles.forEach { lyricFile ->
+                if (lyricFile.parentFile != newDirectory) {
+                    moveLyricFile(lyricFile, newDirectory)
+                }
+            }
+        }
+
+        if (lyricsDirectory.walk().filter { it.isFile }.none()) {
+            if (lyricsDirectory.delete()) {
+                changedSet.add("Diretório ${lyricsDirectory.name} excluído por não existir mais arquivos .lrc.")
+            } else {
+                errorSet.add(Exception("Diretório ${lyricsDirectory.name} não pôde ser excluído."))
+            }
+        }
     }
 
     private fun filesAreEqual(file1: File, file2: File): Boolean {
