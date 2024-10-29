@@ -1,8 +1,12 @@
 package services
 
+import handlers.AudioFileHandlerImpl
+import handlers.LyricFileHandlerImpl
 import interfaces.AudioFileHandler
 import interfaces.DirectoryService
+import interfaces.FileService
 import interfaces.LyricFileHandler
+import interfaces.MatchService
 import interfaces.UserInterface
 import ui.UserInterfaceImpl
 import java.io.File
@@ -12,7 +16,9 @@ class MusicLyricsService(
     private val directoryService: DirectoryService = DirectoryServiceImpl(),
     private val audioFileHandler: AudioFileHandler = AudioFileHandlerImpl(),
     private val lyricFileHandler: LyricFileHandler = LyricFileHandlerImpl(),
-    private val userInterface: UserInterface = UserInterfaceImpl()
+    private val userInterface: UserInterface = UserInterfaceImpl(),
+    private val matchService: MatchService = MatchServiceImpl(userInterface = userInterface),
+    private val fileService: FileService = FileServiceImpl(),
 ) {
 
     fun organizeMusicAndLyrics() {
@@ -33,13 +39,13 @@ class MusicLyricsService(
         val audioFiles = audioFileHandler.getAudioFiles(musicDirectory)
         val lyricFiles = lyricFileHandler.getLyricFiles(lyricsDirectory)
 
-        val filePairs = lyricFileHandler.matchFiles(lyricFiles, audioFiles)
+        val filePairs = matchService.matchFiles(lyricFiles, audioFiles)
 
-        lyricFileHandler.handleFilePairs(filePairs, musicDirectory.parentFile, lyricsDirectory)
+        matchService.handleFilePairs(filePairs)
 
-        lyricFileHandler.handleUnmatchedFiles(musicDirectory, lyricsDirectory)
+        fileService.handleUnmatchedFiles(musicDirectory, lyricsDirectory)
 
-        userInterface.showResult(lyricFileHandler.changedSet, lyricFileHandler.errorSet)
+        userInterface.showResult(fileService.changedSet, fileService.errorSet)
     }
 
     fun findMusicWithoutLyricsPair() {
