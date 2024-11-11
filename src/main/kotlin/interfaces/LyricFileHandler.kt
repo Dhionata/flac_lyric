@@ -4,5 +4,5 @@ import java.io.File
 
 
 interface LyricFileHandler {
-    fun getLyricFiles(lyricsDirectory: File): Set<File>
+    fun getLyricFiles(lyricsDirectory: File): List<File>
 }

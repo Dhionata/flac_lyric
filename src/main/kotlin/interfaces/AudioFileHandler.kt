@@ -3,5 +3,5 @@ package interfaces
 import java.io.File
 
 interface AudioFileHandler {
-    fun getAudioFiles(musicDirectory: File): Set<File>
+    fun getAudioFiles(musicDirectory: File): List<File>
 }

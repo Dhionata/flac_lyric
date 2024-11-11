@@ -7,6 +7,6 @@ interface MatchService {
     val fileService: FileService
     val userInterface: UserInterface
 
-    fun matchFiles(lyricFiles: Set<File>, audioFiles: Set<File>): List<FilePair>
+    fun matchFiles(lyricFiles: List<File>, audioFiles: List<File>): List<FilePair>
     fun handleFilePairs(filePairs: List<FilePair>)
 }
