@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "br.com.dhionata"
-version = "1.2"
+version = "1.3 Alpha 1"
 
 repositories {
     mavenCentral()

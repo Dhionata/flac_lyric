@@ -10,7 +10,6 @@ import interfaces.MatchService
 import interfaces.UserInterface
 import ui.UserInterfaceImpl
 import java.io.File
-import kotlin.collections.mutableSetOf
 
 class MusicLyricsService(
     private val directoryService: DirectoryService = DirectoryServiceImpl(),
@@ -71,5 +70,9 @@ class MusicLyricsService(
         File("MusicsWithoutLyrics ${musicsWithoutLyrics.hashCode()}.txt").writeText(
             musicsWithoutLyrics.joinToString("\n")
         )
+    }
+
+    fun tryDownloadLyrics() {
+        TODO("Fazer um método que pega as letras e criar arquivos .lrc para cada linha de um .txt gerado por findMusicWithoutLyricsPair()")
     }
 }
