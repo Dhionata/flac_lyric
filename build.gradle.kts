@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "br.com.dhionata"
-version = "1.2"
+version = "1.3 Alpha 1"
 
 repositories {
     mavenCentral()
@@ -12,7 +12,7 @@ repositories {
 
 dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test:2.1.0")
-    implementation("org.apache.commons:commons-text:1.12.0")
+    implementation("org.apache.commons:commons-text:1.13.0")
 }
 
 tasks.test {

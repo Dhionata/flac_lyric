@@ -30,4 +30,19 @@ class DirectoryServiceImpl(private val fileService: FileService = FileServiceImp
             }
         }
     }
+
+    override fun getTxtFile(dialogTitle: String): File {
+        return jFileChooser.apply {
+            this.dialogTitle = dialogTitle
+            fileSelectionMode = JFileChooser.FILES_ONLY
+        }.let { chooser ->
+            if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                chooser.selectedFile.also {
+                    fileService.printFilePermissions(it)
+                }
+            } else {
+                exitProcess(0)
+            }
+        }
+    }
 }
