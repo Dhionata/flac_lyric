@@ -11,7 +11,7 @@ repositories {
 }
 
 dependencies {
-    testImplementation("org.jetbrains.kotlin:kotlin-test:2.1.0")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:2.1.10")
     implementation("org.apache.commons:commons-text:1.13.0")
 }
 
