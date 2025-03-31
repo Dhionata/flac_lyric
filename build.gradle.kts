@@ -1,10 +1,10 @@
 plugins {
-    kotlin("jvm") version "+"
+    kotlin("jvm") version "2.1.20"
     application
 }
 
 group = "br.com.dhionata"
-version = "1.3 Alpha 1"
+version = "1.4"
 
 repositories {
     mavenCentral()
