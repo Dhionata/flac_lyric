@@ -47,32 +47,26 @@ class MusicLyricsService(
         userInterface.showResult(fileService.changedSet, fileService.errorSet)
     }
 
-    fun findMusicWithoutLyricsPair() {
+    fun findMusicWithoutLyricsPair(): List<File> {
         val musicDirectory = directoryService.getDirectory("Selecione o diretório das músicas")
 
         if (!musicDirectory.canWrite()) {
             userInterface.showError("Diretório $musicDirectory somente leitura!")
-            return
+            return emptyList()
         }
 
         val audioFiles = audioFileHandler.getAudioFiles(musicDirectory)
-        val musicsWithoutLyrics = mutableSetOf<String>()
 
-        audioFiles.forEach { audioFile ->
-            val contains = audioFile.parentFile.walk().find { otherFile ->
-                otherFile.name == audioFile.nameWithoutExtension + ".lrc"
-            }
-            if (contains == null) {
-                musicsWithoutLyrics.add(audioFile.nameWithoutExtension)
+        val musicFilesWithoutLyrics = audioFiles.filter { audioFile ->
+            audioFile.parentFile.walk().none { otherFile ->
+                otherFile.name.equals(audioFile.nameWithoutExtension + ".lrc")
             }
         }
 
-        File("MusicsWithoutLyrics ${musicsWithoutLyrics.hashCode()}.txt").writeText(
-            musicsWithoutLyrics.joinToString("\n")
+        File("MusicsWithoutLyrics_${musicFilesWithoutLyrics.hashCode()}.txt").writeText(
+            musicFilesWithoutLyrics.joinToString("\n") { it.name }
         )
-    }
 
-    fun tryDownloadLyrics() {
-        TODO("Fazer um método que pega as letras e criar arquivos .lrc para cada linha de um .txt gerado por findMusicWithoutLyricsPair()")
+        return musicFilesWithoutLyrics
     }
 }

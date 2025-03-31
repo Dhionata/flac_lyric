@@ -12,8 +12,6 @@ fun main() {
             musicLyricsService.organizeMusicAndLyrics()
         } else if (option == 1) {
             musicLyricsService.findMusicWithoutLyricsPair()
-        } else if (option == 2) {
-            musicLyricsService.tryDownloadLyrics()
         }
     } catch (e: Exception) {
         userInterface.showError(e.toString())

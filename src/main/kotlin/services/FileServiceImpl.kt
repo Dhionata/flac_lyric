@@ -8,8 +8,8 @@ import java.util.logging.Logger
 class FileServiceImpl : FileService {
 
     private val logger = Logger.getLogger(this.javaClass.name)
-    override val changedSet = mutableSetOf<String>()
-    override val errorSet = mutableSetOf<Exception>()
+    override val changedSet: MutableSet<String> = mutableSetOf<String>()
+    override val errorSet: MutableSet<Exception> = mutableSetOf<Exception>()
 
     override fun printFilePermissions(file: File) {
         logger.info(

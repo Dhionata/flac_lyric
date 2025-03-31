@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "2.1.10"
+    kotlin("jvm") version "+"
     application
 }
 
@@ -11,8 +11,11 @@ repositories {
 }
 
 dependencies {
-    testImplementation("org.jetbrains.kotlin:kotlin-test:2.1.10")
-    implementation("org.apache.commons:commons-text:1.13.0")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:+")
+    implementation("org.apache.commons:commons-text:+")
+    implementation("com.squareup.okhttp3:okhttp:+")
+    implementation("net.jthink:jaudiotagger:+")
+
 }
 
 tasks.test {
