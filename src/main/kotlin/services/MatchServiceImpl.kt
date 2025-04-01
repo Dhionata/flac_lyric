@@ -4,16 +4,14 @@ import interfaces.FileService
 import interfaces.MatchService
 import interfaces.UserInterface
 import models.FilePair
-
 import org.apache.commons.text.similarity.CosineDistance
 import ui.UserInterfaceImpl
 import java.io.File
 import java.util.logging.Logger
-import kotlin.collections.forEach
 
 class MatchServiceImpl(
+    override val userInterface: UserInterface = UserInterfaceImpl(),
     override val fileService: FileService = FileServiceImpl(),
-    override val userInterface: UserInterface = UserInterfaceImpl()
 ) : MatchService {
     private val logger = Logger.getLogger(this.javaClass.name)
 

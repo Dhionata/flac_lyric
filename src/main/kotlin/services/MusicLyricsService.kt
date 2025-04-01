@@ -12,11 +12,11 @@ import ui.UserInterfaceImpl
 import java.io.File
 
 class MusicLyricsService(
+    private val userInterface: UserInterface = UserInterfaceImpl(),
     private val directoryService: DirectoryService = DirectoryServiceImpl(),
     private val audioFileHandler: AudioFileHandler = AudioFileHandlerImpl(),
     private val lyricFileHandler: LyricFileHandler = LyricFileHandlerImpl(),
-    private val userInterface: UserInterface = UserInterfaceImpl(),
-    private val matchService: MatchService = MatchServiceImpl(userInterface = userInterface),
+    private val matchService: MatchService = MatchServiceImpl(userInterface),
     private val fileService: FileService = FileServiceImpl(),
 ) {
 
@@ -50,16 +50,16 @@ class MusicLyricsService(
     fun findMusicWithoutLyricsPair(): List<File> {
         val musicDirectory = directoryService.getDirectory("Selecione o diretório das músicas")
 
-        if (!musicDirectory.canWrite()) {
-            userInterface.showError("Diretório $musicDirectory somente leitura!")
-            return emptyList()
+        if (!musicDirectory.canRead()) {
+            userInterface.showError("Diretório $musicDirectory sem premissão de leitura!")
+            throw RuntimeException("Diretório $musicDirectory sem premissão de leitura!")
         }
 
         val audioFiles = audioFileHandler.getAudioFiles(musicDirectory)
 
         val musicFilesWithoutLyrics = audioFiles.filter { audioFile ->
-            audioFile.parentFile.walk().none { otherFile ->
-                otherFile.name.equals(audioFile.nameWithoutExtension + ".lrc")
+            audioFile.parentFile.walk().none { audioFileParent ->
+                audioFileParent.name.equals(audioFile.nameWithoutExtension + ".lrc")
             }
         }
 

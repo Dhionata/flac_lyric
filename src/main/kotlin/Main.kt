@@ -6,7 +6,7 @@ fun main() {
     val userInterface: UserInterface = UserInterfaceImpl()
     try {
         val option = userInterface.option()
-        val musicLyricsService = MusicLyricsService(userInterface = userInterface)
+        val musicLyricsService = MusicLyricsService(userInterface)
 
         if (option == 0) {
             musicLyricsService.organizeMusicAndLyrics()
