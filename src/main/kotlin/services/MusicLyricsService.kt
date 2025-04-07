@@ -69,4 +69,18 @@ class MusicLyricsService(
 
         return musicFilesWithoutLyrics
     }
+
+    fun findLyricsWithoutSync(): List<File> {
+        val lyricsDirectory = directoryService.getDirectory("Selecione o diretório dos arquivos .lrc")
+        val lyricFiles = lyricFileHandler.getLyricFiles(lyricsDirectory)
+        val lyricsFilesWithoutSync = lyricFiles.filter { lyricFile ->
+            lyricFile.readLines().none { line -> line.contains(Regex("\\d")) }
+        }
+
+        File("LyricsWithoutSync_${lyricsFilesWithoutSync.hashCode()}.txt").writeText(
+            lyricsFilesWithoutSync.joinToString("\n") { it.name }
+        )
+
+        return lyricsFilesWithoutSync
+    }
 }

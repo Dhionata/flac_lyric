@@ -12,6 +12,10 @@ fun main() {
             musicLyricsService.organizeMusicAndLyrics()
         } else if (option == 1) {
             musicLyricsService.findMusicWithoutLyricsPair()
+        } else if (option == 2) {
+            musicLyricsService.findLyricsWithoutSync()
+        } else {
+            userInterface.showError("Opção inválida!")
         }
     } catch (e: Exception) {
         userInterface.showError(e.toString())
