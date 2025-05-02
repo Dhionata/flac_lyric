@@ -82,7 +82,7 @@ class UserInterfaceImpl : UserInterface {
     }
 
     override fun option(): Int {
-        val options = arrayOf("Organizar Música e Lyrics", "Listar nome dos arquivos sem .lrc", "Listar arquivos .lrc sem sincronia")
+        val options = arrayOf("Organizar Música e Lyrics", "Listar nome dos arquivos sem .lrc", "Listar arquivos .lrc sem sincronia", "Remover 'V1:' de arquivos .lrc")
         val message = "Escolha uma das opções abaixo:"
 
         val option = JOptionPane.showOptionDialog(

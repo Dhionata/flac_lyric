@@ -90,4 +90,30 @@ class MusicLyricsService(
 
         return lyricsFilesWithoutSync
     }
+
+    fun findLyricsWithV1Text(): List<File> {
+        val lyricsDirectory = directoryService.getDirectory("Selecione o diretório dos arquivos .lrc")
+        val lyricFiles = lyricFileHandler.getLyricFiles(lyricsDirectory)
+        val lyricsFilesWithV1 = lyricFiles.filter { lyricFiles ->
+            lyricFiles.readLines().any { line -> line.contains("v1:") }
+        }
+
+        File("LyricsWithV1_${lyricsFilesWithV1.hashCode()}.txt").writeText(
+            lyricsFilesWithV1.joinToString("\n") { it.name }
+        )
+
+        lyricsFilesWithV1.forEach { lyricFile ->
+            lyricFile.readLines().forEach { line ->
+                if (line.contains("v1:")) {
+                    val newLine = line.replace("v1:", "")
+                    lyricFile.writeText(lyricFile.readText().replace(line, newLine))
+                    fileService.changedSet.add(lyricFile.name)
+                }
+            }
+        }
+
+        userInterface.showResult(fileService.changedSet, fileService.errorSet)
+
+        return lyricsFilesWithV1
+    }
 }

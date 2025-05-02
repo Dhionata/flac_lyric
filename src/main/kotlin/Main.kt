@@ -8,14 +8,26 @@ fun main() {
         val option = userInterface.option()
         val musicLyricsService = MusicLyricsService(userInterface)
 
-        if (option == 0) {
-            musicLyricsService.organizeMusicAndLyrics()
-        } else if (option == 1) {
-            musicLyricsService.findMusicWithoutLyricsPair()
-        } else if (option == 2) {
-            musicLyricsService.findLyricsWithoutSync()
-        } else {
-            userInterface.showError("Opção inválida!")
+        when (option) {
+            0 -> {
+                musicLyricsService.organizeMusicAndLyrics()
+            }
+
+            1 -> {
+                musicLyricsService.findMusicWithoutLyricsPair()
+            }
+
+            2 -> {
+                musicLyricsService.findLyricsWithoutSync()
+            }
+
+            3 -> {
+                musicLyricsService.findLyricsWithV1Text()
+            }
+
+            else -> {
+                userInterface.showError("Opção inválida!")
+            }
         }
     } catch (e: Exception) {
         userInterface.showError(e.toString())
