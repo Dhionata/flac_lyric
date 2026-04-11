@@ -1,10 +1,10 @@
 plugins {
-    kotlin("jvm") version "2.2.20"
+    kotlin("jvm") version "2.4.0-Beta1"
     application
 }
 
 group = "br.com.dhionata"
-version = "1.5"
+version = "1.5.1"
 
 repositories {
     mavenCentral()
@@ -34,7 +34,7 @@ tasks.jar {
 }
 
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(25)
 }
 
 application {
