@@ -2,8 +2,15 @@ package ui
 
 import interfaces.UserInterface
 import models.FilePair
+import java.awt.Component
 import java.awt.Dimension
+import javax.swing.Box
+import javax.swing.BoxLayout
+import javax.swing.ButtonGroup
+import javax.swing.JLabel
 import javax.swing.JOptionPane
+import javax.swing.JPanel
+import javax.swing.JRadioButton
 import javax.swing.JScrollPane
 import javax.swing.JTextArea
 import javax.swing.UIManager
@@ -78,22 +85,63 @@ class UserInterfaceImpl : UserInterface {
             exitProcess(0)
         }
 
-        return result == JOptionPane.YES_NO_OPTION
+        return result == JOptionPane.YES_OPTION
     }
 
     override fun option(): Int {
-        val options = arrayOf("Organizar Música e Lyrics", "Listar nome dos arquivos sem .lrc", "Listar arquivos .lrc sem sincronia", "Remover 'V1:' de arquivos .lrc")
-        val message = "Escolha uma das opções abaixo:"
+        val panel = JPanel()
+        panel.layout = BoxLayout(panel, BoxLayout.Y_AXIS)
 
-        val option = JOptionPane.showOptionDialog(
-            null, message, "Selecione", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]
+        val label = JLabel("Escolha uma das opções abaixo:")
+        label.alignmentX = Component.LEFT_ALIGNMENT
+        panel.add(label)
+        panel.add(Box.createVerticalStrut(10))
+
+        val buttonGroup = ButtonGroup()
+
+        data class OptionMenu(val title: String, val hint: String)
+
+        val options = listOf(
+            OptionMenu(
+                "Organizar Música e Lyrics",
+                "Associa arquivos de áudio e letras (.lrc), movendo e renomeando as letras para a pasta do áudio correspondente."
+            ),
+            OptionMenu(
+                "Listar nome dos arquivos sem .lrc",
+                "Verifica na pasta de músicas quais arquivos não possuem um arquivo de letra correspondente."
+            ),
+            OptionMenu(
+                "Listar arquivos .lrc sem sincronia",
+                "Procura e lista os arquivos de letra que não possuem timestamps de sincronização."
+            ),
+            OptionMenu(
+                "Remover 'V1:' de arquivos .lrc",
+                "Limpa os arquivos de letra removendo a string 'V1:' que pode estar indevidamente inserida."
+            ),
+            OptionMenu(
+                "Encontrar e Mover .lrc Isolados",
+                "Procura arquivos .lrc que não possuem par correspondente (áudio), os move para uma pasta à sua escolha, deleta as pastas antigas vazias e cria um .txt listando-os."
+            )
         )
 
-        if (option == -1) {
+        val radioButtons = options.mapIndexed { index, option ->
+            val rb = JRadioButton("<html><b>${option.title}</b><br><small><font color='gray'>${option.hint}</font></small></html>")
+            rb.alignmentX = Component.LEFT_ALIGNMENT
+            if (index == 0) rb.isSelected = true
+            buttonGroup.add(rb)
+            panel.add(rb)
+            panel.add(Box.createVerticalStrut(8))
+            rb
+        }
+
+        val result = JOptionPane.showConfirmDialog(
+            null, panel, "Selecione a Ação", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE
+        )
+
+        if (result != JOptionPane.OK_OPTION) {
             exitProcess(0)
         }
 
-        return option
+        return radioButtons.indexOfFirst { it.isSelected }
     }
-
 }

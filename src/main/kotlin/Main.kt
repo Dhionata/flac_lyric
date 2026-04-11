@@ -24,6 +24,10 @@ fun main() {
             3 -> {
                 musicLyricsService.findLyricsWithV1Text()
             }
+            
+            4 -> {
+                musicLyricsService.findAndMoveAloneLyrics()
+            }
 
             else -> {
                 userInterface.showError("Opção inválida!")

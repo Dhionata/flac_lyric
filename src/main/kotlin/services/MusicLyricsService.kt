@@ -8,8 +8,8 @@ import interfaces.FileService
 import interfaces.LyricFileHandler
 import interfaces.MatchService
 import interfaces.UserInterface
-import ui.UserInterfaceImpl
 import java.io.File
+import ui.UserInterfaceImpl
 
 class MusicLyricsService(
     private val userInterface: UserInterface = UserInterfaceImpl(),
@@ -115,5 +115,43 @@ class MusicLyricsService(
         userInterface.showResult(fileService.changedSet, fileService.errorSet)
 
         return lyricsFilesWithV1
+    }
+
+    fun findAndMoveAloneLyrics(): List<File> {
+        val mainDirectory = directoryService.getDirectory("Selecione o diretório contendo as músicas e os arquivos .lrc")
+        val outDirectory = directoryService.getDirectory("Selecione o diretório para onde mover os arquivos .lrc sozinhos")
+
+        val lyricFiles = lyricFileHandler.getLyricFiles(mainDirectory)
+        val audioFiles = audioFileHandler.getAudioFiles(mainDirectory)
+
+        val audioNamesWithoutExtension = audioFiles.map { it.nameWithoutExtension }.toSet()
+
+        val aloneLyrics = lyricFiles.filter { lyricFile ->
+            !audioNamesWithoutExtension.contains(lyricFile.nameWithoutExtension)
+        }
+
+        val movedLyricsNames = mutableListOf<String>()
+
+        aloneLyrics.forEach { lyric ->
+            val parentFolder = lyric.parentFile
+            fileService.moveLyricFile(lyric, outDirectory)
+            movedLyricsNames.add(lyric.name)
+
+            if (parentFolder.isDirectory && parentFolder.listFiles()?.isEmpty() == true) {
+                if (parentFolder.delete()) {
+                    fileService.changedSet.add("Pasta vazia excluída: ${parentFolder.absolutePath}")
+                }
+            }
+        }
+
+        if (movedLyricsNames.isNotEmpty()) {
+            File("AloneLyricsMoved_${movedLyricsNames.hashCode()}.txt").writeText(
+                movedLyricsNames.joinToString("\n")
+            )
+        }
+
+        userInterface.showResult(fileService.changedSet, fileService.errorSet)
+
+        return aloneLyrics
     }
 }
