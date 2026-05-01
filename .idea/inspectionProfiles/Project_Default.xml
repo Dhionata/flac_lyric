@@ -237,7 +237,6 @@
     <inspection_tool class="ComparableImplementedButEqualsNotOverridden" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="ComparatorNotSerializable" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="CompareToUsesNonFinalVariable" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="ComparisonOfShortAndChar" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="ConditionSignal" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="ConditionalExpressionJS" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="ConditionalExpressionWithIdenticalBranchesJS" enabled="true" level="WARNING" enabled_by_default="true" />
@@ -288,7 +287,6 @@
     </inspection_tool>
     <inspection_tool class="DeclaringClassMigration" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="DeconstructionCanBeUsed" enabled="true" level="INFORMATION" enabled_by_default="true" />
-    <inspection_tool class="DefaultNotLastCaseInSwitch" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="DefaultNotLastCaseInSwitchJS" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="DesignForExtension" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="Destructure" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
@@ -627,7 +625,6 @@
     <inspection_tool class="MagicCharacter" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="MagicNumber" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="MagicNumberJS" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="MaliciousLibrariesLocal" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="MapReplaceableByEnumMap" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="MarkerInterface" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="MavenCoroutinesDeprecation" enabled="true" level="ERROR" enabled_by_default="true" />
@@ -659,7 +656,6 @@
     <inspection_tool class="MethodReturnAlwaysConstant" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="MethodWithMultipleLoops" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="MigrateAssertToMatcherAssert" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="MisorderedAssertEqualsArguments" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="MissingDeprecatedAnnotation" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="MissingJavadoc" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="MissingPackageInfo" enabled="true" level="WARNING" enabled_by_default="true" />
@@ -896,7 +892,6 @@
       <option name="ignoreSerializable" value="false" />
       <option name="ignoreCloneable" value="false" />
     </inspection_tool>
-    <inspection_tool class="RedundantInnerClassModifier" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="RedundantLabelMigration" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
     <inspection_tool class="RedundantNotNullExtensionReceiverOfInline" enabled="true" level="INFORMATION" enabled_by_default="true" />
     <inspection_tool class="RedundantValueArgument" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
@@ -956,7 +951,6 @@
     <inspection_tool class="SqlGotoInspection" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="SqlMissingColumnAliasesInspection" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="SqlNamedArgumentsInspection" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="StandardJS" enabled="true" level="ERROR" enabled_by_default="true" />
     <inspection_tool class="StandardVariableNames" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="StatementsPerFunctionJS" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="StaticCallOnSubclass" enabled="true" level="WARNING" enabled_by_default="true" />
@@ -1105,7 +1099,9 @@
     <inspection_tool class="UnreachableCode" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="UnsecureRandomNumberGeneration" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="UnstableTypeUsedInSignature" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="UnterminatedStatementJS" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="UnterminatedStatementJS" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoreSemicolonAtEndOfBlock" value="true" />
+    </inspection_tool>
     <inspection_tool class="UnusedCatchParameterJS" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="UnusedDefine" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="UnusedLibrary" enabled="true" level="WARNING" enabled_by_default="true" />

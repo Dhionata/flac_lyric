@@ -1,12 +1,12 @@
 package ui
 
 import interfaces.UserInterface
-import models.FilePair
 import java.awt.Component
 import java.awt.Dimension
 import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.ButtonGroup
+import javax.swing.JFrame
 import javax.swing.JLabel
 import javax.swing.JOptionPane
 import javax.swing.JPanel
@@ -15,15 +15,22 @@ import javax.swing.JScrollPane
 import javax.swing.JTextArea
 import javax.swing.UIManager
 import kotlin.system.exitProcess
+import models.FilePair
 
 class UserInterfaceImpl : UserInterface {
 
+    private val frame: JFrame = JFrame("Flac Lyric")
+
     init {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
+        frame.isUndecorated = true
+        frame.setSize(0, 0)
+        frame.setLocationRelativeTo(null)
+        frame.isVisible = true
     }
 
     override fun showError(message: String) {
-        JOptionPane.showMessageDialog(null, message, "Erro", JOptionPane.ERROR_MESSAGE)
+        JOptionPane.showMessageDialog(frame, message, "Erro", JOptionPane.ERROR_MESSAGE)
     }
 
     override fun showResult(changedSet: Set<String>, errorSet: Set<Exception>) {
@@ -36,7 +43,7 @@ class UserInterfaceImpl : UserInterface {
             val scrollPane = JScrollPane(textArea).apply {
                 preferredSize = Dimension(500, 300)
             }
-            JOptionPane.showMessageDialog(null, scrollPane, title, messageType)
+            JOptionPane.showMessageDialog(frame, scrollPane, title, messageType)
         }
 
         if (changedSet.isNotEmpty()) {
@@ -50,13 +57,13 @@ class UserInterfaceImpl : UserInterface {
         }
 
         if (errorSet.isEmpty() && changedSet.isEmpty()) {
-            JOptionPane.showMessageDialog(null, "Está tudo no lugar!", "Informação", JOptionPane.INFORMATION_MESSAGE)
+            JOptionPane.showMessageDialog(frame, "Está tudo no lugar!", "Informação", JOptionPane.INFORMATION_MESSAGE)
         }
     }
 
     override fun moveAndRename(filePairs: FilePair): Boolean {
         val result = JOptionPane.showConfirmDialog(
-            null,
+            frame,
             "Arquivo\n${filePairs.lyricFile.name}\nSerá Movido de\n${filePairs.lyricFile.parentFile}\nPara\n${
                 filePairs.audioFile.parentFile
             }\ne Renomeado para\n${filePairs.audioFile.nameWithoutExtension}.lrc\njunto a\n${filePairs.audioFile.name}",
@@ -74,7 +81,7 @@ class UserInterfaceImpl : UserInterface {
 
     override fun onlyRename(filePair: FilePair): Boolean {
         val result = JOptionPane.showConfirmDialog(
-            null,
+            frame,
             "Arquivo\n${filePair.lyricFile.name}\nSerá Renomeado para\n${filePair.audioFile.nameWithoutExtension}.lrc",
             "Deseja continuar?",
             JOptionPane.YES_NO_OPTION,
@@ -124,8 +131,8 @@ class UserInterfaceImpl : UserInterface {
             )
         )
 
-        val radioButtons = options.mapIndexed { index, option ->
-            val rb = JRadioButton("<html><b>${option.title}</b><br><small><font color='gray'>${option.hint}</font></small></html>")
+        val radioButtons = options.mapIndexed { index, (title, hint) ->
+            val rb = JRadioButton("<html><b>${title}</b><br><small><font color='gray'>${hint}</font></small></html>")
             rb.alignmentX = Component.LEFT_ALIGNMENT
             if (index == 0) rb.isSelected = true
             buttonGroup.add(rb)
@@ -135,7 +142,7 @@ class UserInterfaceImpl : UserInterface {
         }
 
         val result = JOptionPane.showConfirmDialog(
-            null, panel, "Selecione a Ação", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE
+            frame, panel, "Selecione a Ação", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE
         )
 
         if (result != JOptionPane.OK_OPTION) {

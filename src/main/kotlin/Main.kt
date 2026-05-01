@@ -1,6 +1,7 @@
 import interfaces.UserInterface
 import services.MusicLyricsService
 import ui.UserInterfaceImpl
+import kotlin.system.exitProcess
 
 fun main() {
     val userInterface: UserInterface = UserInterfaceImpl()
@@ -24,7 +25,7 @@ fun main() {
             3 -> {
                 musicLyricsService.findLyricsWithV1Text()
             }
-            
+
             4 -> {
                 musicLyricsService.findAndMoveAloneLyrics()
             }
@@ -35,5 +36,7 @@ fun main() {
         }
     } catch (e: Exception) {
         userInterface.showError(e.toString())
+    } finally {
+        exitProcess(0)
     }
 }
