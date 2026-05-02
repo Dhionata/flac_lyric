@@ -154,4 +154,74 @@ class MusicLyricsService(
 
         return aloneLyrics
     }
+
+    fun verifyFileNameStructure(): List<File> {
+        val musicDirectory = directoryService.getDirectory("Selecione o diretório das músicas")
+
+        if (!musicDirectory.canRead()) {
+            userInterface.showError("Diretório $musicDirectory sem premissão de leitura!")
+            throw RuntimeException("Diretório $musicDirectory sem premissão de leitura!")
+        }
+
+        val audioFiles = audioFileHandler.getAudioFiles(musicDirectory)
+        val incorrectlyNamedFiles = mutableListOf<File>()
+
+        for (audioFile in audioFiles) {
+            if (audioFile.extension.lowercase() != "flac") continue
+
+            var isValid = false
+            try {
+                val audioFileObj = org.jaudiotagger.audio.AudioFileIO.read(audioFile)
+                val tag = audioFileObj.tag
+                if (tag != null) {
+                    val artist = tag.getFirst(org.jaudiotagger.tag.FieldKey.ARTIST)
+                    val title = tag.getFirst(org.jaudiotagger.tag.FieldKey.TITLE)
+                    if (artist.isNotBlank() && title.isNotBlank()) {
+                        val expectedName = "$artist - $title"
+                        if (audioFile.nameWithoutExtension == expectedName) {
+                            isValid = true
+                        }
+                    }
+                }
+            } catch (_: Exception) {
+                // Ignore and use fallback
+            }
+
+            if (!isValid) {
+                // Fallback: verificar se existe ' - ' no nome separando o suposto Artista e Música
+                val regex = Regex("^.+ - .+$")
+                if (regex.matches(audioFile.nameWithoutExtension)) {
+                    isValid = true
+                }
+            }
+
+            if (!isValid) {
+                incorrectlyNamedFiles.add(audioFile)
+            }
+        }
+
+        if (incorrectlyNamedFiles.isNotEmpty()) {
+            val outDirectory = directoryService.getDirectory("Selecione o diretório para mover os arquivos com nome incorreto")
+
+            val movedNames = mutableListOf<String>()
+            incorrectlyNamedFiles.forEach { file ->
+                if (fileService.moveFile(file, outDirectory)) {
+                    movedNames.add(file.name)
+                } else {
+                    fileService.errorSet.add(RuntimeException("Falha ao mover o arquivo: ${file.name}"))
+                }
+            }
+
+            File("IncorrectlyNamedFilesMoved_${incorrectlyNamedFiles.hashCode()}.txt").writeText(
+                incorrectlyNamedFiles.joinToString("\n") { it.name }
+            )
+            fileService.changedSet.add("Movidos ${movedNames.size} de ${incorrectlyNamedFiles.size} arquivos FLAC fora do padrão para ${outDirectory.absolutePath}. Verifique o arquivo de texto gerado.")
+        } else {
+            fileService.changedSet.add("Todos os arquivos FLAC verificados estão com a estrutura de nome correta.")
+        }
+
+        userInterface.showResult(fileService.changedSet, fileService.errorSet)
+
+        return incorrectlyNamedFiles
+    }
 }

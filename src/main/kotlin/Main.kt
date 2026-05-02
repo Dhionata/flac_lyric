@@ -30,6 +30,10 @@ fun main() {
                 musicLyricsService.findAndMoveAloneLyrics()
             }
 
+            5 -> {
+                musicLyricsService.verifyFileNameStructure()
+            }
+
             else -> {
                 userInterface.showError("Opção inválida!")
             }

@@ -128,6 +128,10 @@ class UserInterfaceImpl : UserInterface {
             OptionMenu(
                 "Encontrar e Mover .lrc Isolados",
                 "Procura arquivos .lrc que não possuem par correspondente (áudio), os move para uma pasta à sua escolha, deleta as pastas antigas vazias e cria um .txt listando-os."
+            ),
+            OptionMenu(
+                "Verificar Estrutura de Nome",
+                "Verifica se os arquivos FLAC estão no formato 'Artista - Música.extensão', validando com os metadados do arquivo ou via padrão de texto."
             )
         )
 
