@@ -1,7 +1,7 @@
 import interfaces.UserInterface
+import kotlin.system.exitProcess
 import services.MusicLyricsService
 import ui.UserInterfaceImpl
-import kotlin.system.exitProcess
 
 fun main() {
     val userInterface: UserInterface = UserInterfaceImpl()
@@ -31,7 +31,7 @@ fun main() {
             }
 
             5 -> {
-                musicLyricsService.verifyFileNameStructure()
+                musicLyricsService.verifyAdvancedNomenclature()
             }
 
             else -> {

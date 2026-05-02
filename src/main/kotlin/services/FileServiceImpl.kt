@@ -125,7 +125,7 @@ class FileServiceImpl : FileService {
     }
 
     override fun handleUnmatchedFiles(
-        musicDirectory: File, lyricsDirectory: File
+        musicDirectory: File, lyricsDirectory: File,
     ) {
         val musicFilesMap = musicDirectory.walk().filter { it.isFile && it.extension != "lrc" }.associateBy { it.nameWithoutExtension }
 

@@ -95,6 +95,20 @@ class UserInterfaceImpl : UserInterface {
         return result == JOptionPane.YES_OPTION
     }
 
+    override fun askToMoveIncorrectFiles(count: Int, txtFileName: String): Boolean {
+        val result = JOptionPane.showConfirmDialog(
+            frame,
+            "Foram encontrados $count arquivos com nomenclatura/estrutura incorreta.\n" +
+            "Um arquivo de texto foi gerado listando-os: $txtFileName\n\n" +
+            "Deseja mover esses arquivos para outro diretório?",
+            "Mover Arquivos Incorretos",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.QUESTION_MESSAGE
+        )
+
+        return result == JOptionPane.YES_OPTION
+    }
+
     override fun option(): Int {
         val panel = JPanel()
         panel.layout = BoxLayout(panel, BoxLayout.Y_AXIS)
@@ -130,8 +144,8 @@ class UserInterfaceImpl : UserInterface {
                 "Procura arquivos .lrc que não possuem par correspondente (áudio), os move para uma pasta à sua escolha, deleta as pastas antigas vazias e cria um .txt listando-os."
             ),
             OptionMenu(
-                "Verificar Estrutura de Nome",
-                "Verifica se os arquivos FLAC estão no formato 'Artista - Música.extensão', validando com os metadados do arquivo ou via padrão de texto."
+                "Verificar Nomenclatura Completa (com Álbum)",
+                "Verifica se os arquivos de áudio seguem a estrutura: Artista do Álbum / Álbum / Artista - Título (sem feat)."
             )
         )
 

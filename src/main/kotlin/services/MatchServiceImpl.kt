@@ -3,11 +3,11 @@ package services
 import interfaces.FileService
 import interfaces.MatchService
 import interfaces.UserInterface
+import java.io.File
+import java.util.logging.Logger
 import models.FilePair
 import org.apache.commons.text.similarity.CosineDistance
 import ui.UserInterfaceImpl
-import java.io.File
-import java.util.logging.Logger
 
 class MatchServiceImpl(
     override val userInterface: UserInterface = UserInterfaceImpl(),

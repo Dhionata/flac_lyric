@@ -1,7 +1,7 @@
 package interfaces
 
-import models.FilePair
 import java.io.File
+import models.FilePair
 
 interface MatchService {
     val userInterface: UserInterface
