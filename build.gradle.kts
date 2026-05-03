@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "br.com.dhionata"
-version = "1.6.0"
+version = "1.7.0"
 
 repositories {
     mavenCentral()
@@ -15,7 +15,8 @@ dependencies {
     implementation("org.apache.commons:commons-text:+")
     implementation("com.squareup.okhttp3:okhttp:+")
     implementation("net.jthink:jaudiotagger:+")
-
+    implementation("org.jflac:jflac-codec:+")
+    implementation("com.github.wendykierp:JTransforms:+")
 }
 
 tasks.test {

@@ -34,6 +34,10 @@ fun main() {
                 musicLyricsService.verifyAdvancedNomenclature()
             }
 
+            6 -> {
+                musicLyricsService.verifyFakeFlacFiles()
+            }
+
             else -> {
                 userInterface.showError("Opção inválida!")
             }

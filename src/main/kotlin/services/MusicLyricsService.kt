@@ -2,6 +2,7 @@ package services
 
 import handlers.AudioFileHandlerImpl
 import handlers.LyricFileHandlerImpl
+import interfaces.AudioAnalysisService
 import interfaces.AudioFileHandler
 import interfaces.AudioNomenclatureValidator
 import interfaces.DirectoryService
@@ -20,6 +21,7 @@ class MusicLyricsService(
     private val matchService: MatchService = MatchServiceImpl(userInterface),
     private val fileService: FileService = FileServiceImpl(),
     private val nomenclatureValidator: AudioNomenclatureValidator = CleanTitleNomenclatureValidator(),
+    private val audioAnalysisService: AudioAnalysisService = AudioAnalysisServiceImpl(),
 ) {
 
     private fun getValidatedMusicDirectory(message: String): File {
@@ -49,13 +51,16 @@ class MusicLyricsService(
                 val outDirectory = directoryService.getDirectory("Selecione o diretório para mover os arquivos com nome incorreto")
                 val movedNames = mutableListOf<String>()
 
-                incorrectlyNamedFiles.forEach { file ->
+                userInterface.showProgress("Movendo arquivos incorretos", incorrectlyNamedFiles.size)
+                incorrectlyNamedFiles.forEachIndexed { index, file ->
+                    userInterface.updateProgress(index + 1, file.name)
                     if (fileService.moveFile(file, outDirectory)) {
                         movedNames.add(file.name)
                     } else {
                         fileService.errorSet.add(RuntimeException("Falha ao mover o arquivo: ${file.name}"))
                     }
                 }
+                userInterface.closeProgress()
 
                 fileService.changedSet.add("Arquivos listados em: $txtFileName\nMovidos ${movedNames.size} de ${incorrectlyNamedFiles.size} $movedMessagePrefix para ${outDirectory.absolutePath}.")
             } else {
@@ -99,11 +104,19 @@ class MusicLyricsService(
         val musicDirectory = getValidatedMusicDirectory("Selecione o diretório das músicas")
         val audioFiles = audioFileHandler.getAudioFiles(musicDirectory)
 
-        val musicFilesWithoutLyrics = audioFiles.filter { audioFile ->
-            audioFile.parentFile.walk().none { audioFileParent ->
+        userInterface.showProgress("Buscando músicas sem letras", audioFiles.size)
+        val musicFilesWithoutLyrics = mutableListOf<File>()
+
+        audioFiles.forEachIndexed { index, audioFile ->
+            userInterface.updateProgress(index + 1, audioFile.name)
+            val hasLyric = audioFile.parentFile.walk().any { audioFileParent ->
                 audioFileParent.name.equals(audioFile.nameWithoutExtension + ".lrc")
             }
+            if (!hasLyric) {
+                musicFilesWithoutLyrics.add(audioFile)
+            }
         }
+        userInterface.closeProgress()
 
         File("MusicsWithoutLyrics_${musicFilesWithoutLyrics.hashCode()}.txt").writeText(
             musicFilesWithoutLyrics.joinToString("\n") { it.name }
@@ -116,17 +129,24 @@ class MusicLyricsService(
         val lyricsDirectory = directoryService.getDirectory("Selecione o diretório dos arquivos .lrc")
         val outDirectory = directoryService.getDirectory("Selecione o diretório de saída")
         val lyricFiles = lyricFileHandler.getLyricFiles(lyricsDirectory)
-        val lyricsFilesWithoutSync = lyricFiles.filter { lyricFile ->
+
+        userInterface.showProgress("Verificando sincronia das letras", lyricFiles.size)
+        val lyricsFilesWithoutSync = lyricFiles.filterIndexed { index, lyricFile ->
+            userInterface.updateProgress(index + 1, lyricFile.name)
             lyricFile.readLines().none { line -> line.contains(Regex("\\d")) }
         }
+        userInterface.closeProgress()
 
         File("LyricsWithoutSync_${lyricsFilesWithoutSync.hashCode()}.txt").writeText(
             lyricsFilesWithoutSync.joinToString("\n") { it.name }
         )
 
-        lyricsFilesWithoutSync.forEach { lyric ->
+        userInterface.showProgress("Movendo letras sem sincronia", lyricsFilesWithoutSync.size)
+        lyricsFilesWithoutSync.forEachIndexed { index, lyric ->
+            userInterface.updateProgress(index + 1, lyric.name)
             fileService.moveLyricFile(lyric, outDirectory)
         }
+        userInterface.closeProgress()
 
         userInterface.showResult(fileService.changedSet, fileService.errorSet)
 
@@ -136,15 +156,21 @@ class MusicLyricsService(
     fun findLyricsWithV1Text(): List<File> {
         val lyricsDirectory = directoryService.getDirectory("Selecione o diretório dos arquivos .lrc")
         val lyricFiles = lyricFileHandler.getLyricFiles(lyricsDirectory)
-        val lyricsFilesWithV1 = lyricFiles.filter { lyricFiles ->
-            lyricFiles.readLines().any { line -> line.contains("v1:") }
+
+        userInterface.showProgress("Buscando letras com 'V1:'", lyricFiles.size)
+        val lyricsFilesWithV1 = lyricFiles.filterIndexed { index, lyricFile ->
+            userInterface.updateProgress(index + 1, lyricFile.name)
+            lyricFile.readLines().any { line -> line.contains("v1:") }
         }
+        userInterface.closeProgress()
 
         File("LyricsWithV1_${lyricsFilesWithV1.hashCode()}.txt").writeText(
             lyricsFilesWithV1.joinToString("\n") { it.name }
         )
 
-        lyricsFilesWithV1.forEach { lyricFile ->
+        userInterface.showProgress("Removendo 'V1:'", lyricsFilesWithV1.size)
+        lyricsFilesWithV1.forEachIndexed { index, lyricFile ->
+            userInterface.updateProgress(index + 1, lyricFile.name)
             lyricFile.readLines().forEach { line ->
                 if (line.contains("v1:")) {
                     val newLine = line.replace("v1:", "")
@@ -153,6 +179,7 @@ class MusicLyricsService(
                 }
             }
         }
+        userInterface.closeProgress()
 
         userInterface.showResult(fileService.changedSet, fileService.errorSet)
 
@@ -174,7 +201,9 @@ class MusicLyricsService(
 
         val movedLyricsNames = mutableListOf<String>()
 
-        aloneLyrics.forEach { lyric ->
+        userInterface.showProgress("Movendo letras isoladas", aloneLyrics.size)
+        aloneLyrics.forEachIndexed { index, lyric ->
+            userInterface.updateProgress(index + 1, lyric.name)
             val parentFolder = lyric.parentFile
             fileService.moveLyricFile(lyric, outDirectory)
             movedLyricsNames.add(lyric.name)
@@ -185,6 +214,7 @@ class MusicLyricsService(
                 }
             }
         }
+        userInterface.closeProgress()
 
         if (movedLyricsNames.isNotEmpty()) {
             File("AloneLyricsMoved_${movedLyricsNames.hashCode()}.txt").writeText(
@@ -202,11 +232,14 @@ class MusicLyricsService(
         val audioFiles = audioFileHandler.getAudioFiles(musicDirectory)
         val incorrectlyNamedFiles = mutableListOf<File>()
 
-        for (audioFile in audioFiles) {
+        userInterface.showProgress("Verificando nomenclatura", audioFiles.size)
+        audioFiles.forEachIndexed { index, audioFile ->
+            userInterface.updateProgress(index + 1, audioFile.name)
             if (!nomenclatureValidator.isValid(audioFile, musicDirectory)) {
                 incorrectlyNamedFiles.add(audioFile)
             }
         }
+        userInterface.closeProgress()
 
         processIncorrectlyNamedFiles(
             incorrectlyNamedFiles,
@@ -216,5 +249,62 @@ class MusicLyricsService(
         )
 
         return incorrectlyNamedFiles
+    }
+
+    fun verifyFakeFlacFiles(): List<File> {
+        val musicDirectory = getValidatedMusicDirectory("Selecione o diretório das músicas para analisar o espectro")
+        val audioFiles = audioFileHandler.getAudioFiles(musicDirectory).filter { it.extension.lowercase() == "flac" }
+
+        if (audioFiles.isEmpty()) {
+            fileService.changedSet.add("Nenhum arquivo FLAC encontrado para análise.")
+            userInterface.showResult(fileService.changedSet, fileService.errorSet)
+            return emptyList()
+        }
+
+        val isFullAnalysis = userInterface.askForAnalysisType()
+
+        val fakeFiles = mutableListOf<File>()
+        val analysisResults = mutableListOf<String>()
+
+        userInterface.showProgress("Analisando espectro de áudio", audioFiles.size)
+        audioFiles.forEachIndexed { index, file ->
+            userInterface.updateProgress(index + 1, file.name)
+            val result = audioAnalysisService.analyzeCutoff(file, isFullAnalysis)
+            if (result.isFake) {
+                fakeFiles.add(file)
+                analysisResults.add("${file.name} -> ${result.message}")
+            }
+        }
+        userInterface.closeProgress()
+
+        if (fakeFiles.isNotEmpty()) {
+            val txtFileName = "FakeLossless_${fakeFiles.hashCode()}.txt"
+            File(txtFileName).writeText(analysisResults.joinToString("\n"))
+
+            val shouldMove = userInterface.askToMoveFakeLossless(fakeFiles.size, txtFileName)
+
+            if (shouldMove) {
+                val outDirectory = directoryService.getDirectory("Selecione o diretório para mover os arquivos Fake Lossless")
+                val movedNames = mutableListOf<String>()
+
+                fakeFiles.forEach { file ->
+                    if (fileService.moveFile(file, outDirectory)) {
+                        movedNames.add(file.name)
+                    } else {
+                        fileService.errorSet.add(RuntimeException("Falha ao mover o arquivo: ${file.name}"))
+                    }
+                }
+
+                fileService.changedSet.add("Arquivos listados em: $txtFileName\nMovidos ${movedNames.size} de ${fakeFiles.size} arquivos Fake Lossless para ${outDirectory.absolutePath}.")
+            } else {
+                fileService.changedSet.add("Encontrados ${fakeFiles.size} arquivos Fake Lossless.\nApenas listados no arquivo gerado: $txtFileName.")
+            }
+        } else {
+            fileService.changedSet.add("Nenhum arquivo Fake Lossless detectado nos ${audioFiles.size} arquivos analisados.")
+        }
+
+        userInterface.showResult(fileService.changedSet, fileService.errorSet)
+
+        return fakeFiles
     }
 }

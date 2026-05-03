@@ -18,6 +18,8 @@ class MatchServiceImpl(
     override fun matchFiles(lyricFiles: List<File>, audioFiles: List<File>): List<FilePair> {
         val matchFilesSet = mutableListOf<FilePair>()
 
+        userInterface.showProgress("Buscando correspondências", lyricFiles.size)
+        var processedCount = 0
         lyricFiles.parallelStream().forEach { lyricFile ->
             val matchingAudioFileInSameDir = audioFiles.find { audioFile ->
                 audioFile.parentFile == lyricFile.parentFile && audioFile.nameWithoutExtension.equals(
@@ -32,7 +34,13 @@ class MatchServiceImpl(
             if (bestAudioFileMatch != null) {
                 matchFilesSet.add(FilePair(lyricFile, bestAudioFileMatch))
             }
+            
+            synchronized(this) {
+                processedCount++
+                userInterface.updateProgress(processedCount, lyricFile.name)
+            }
         }
+        userInterface.closeProgress()
 
         return matchFilesSet.filter {
             it.lyricFile.parentFile != it.audioFile.parentFile || it.lyricFile.nameWithoutExtension != it.audioFile.nameWithoutExtension
@@ -40,7 +48,9 @@ class MatchServiceImpl(
     }
 
     override fun handleFilePairs(filePairs: List<FilePair>) {
-        filePairs.forEach { pair ->
+        userInterface.showProgress("Organizando arquivos", filePairs.size)
+        filePairs.forEachIndexed { index, pair ->
+            userInterface.updateProgress(index + 1, pair.lyricFile.name)
             if (!pair.lyricFile.parentFile.equals(pair.audioFile.parentFile)) {
                 if (pair.audioFile.nameWithoutExtension == pair.lyricFile.nameWithoutExtension) {
                     fileService.moveLyricFile(pair.lyricFile, pair.audioFile.parentFile)
@@ -64,6 +74,7 @@ class MatchServiceImpl(
                 }
             }
         }
+        userInterface.closeProgress()
     }
 
     private fun findBestMatch(lyricFile: File, audioFiles: List<File>): File? {

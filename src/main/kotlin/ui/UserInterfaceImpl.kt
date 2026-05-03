@@ -7,19 +7,26 @@ import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.ButtonGroup
 import javax.swing.JFrame
+import javax.swing.JDialog
+import javax.swing.JProgressBar
 import javax.swing.JLabel
 import javax.swing.JOptionPane
 import javax.swing.JPanel
 import javax.swing.JRadioButton
 import javax.swing.JScrollPane
 import javax.swing.JTextArea
+import javax.swing.SwingUtilities
 import javax.swing.UIManager
+import javax.swing.border.EmptyBorder
 import kotlin.system.exitProcess
 import models.FilePair
 
 class UserInterfaceImpl : UserInterface {
 
     private val frame: JFrame = JFrame("Flac Lyric")
+    private var progressDialog: JDialog? = null
+    private var progressBar: JProgressBar? = null
+    private var progressLabel: JLabel? = null
 
     init {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
@@ -109,6 +116,83 @@ class UserInterfaceImpl : UserInterface {
         return result == JOptionPane.YES_OPTION
     }
 
+    override fun askToMoveFakeLossless(count: Int, txtFileName: String): Boolean {
+        val result = JOptionPane.showConfirmDialog(
+            frame,
+            "Foram encontrados $count arquivos com suspeita de serem 'Fake Lossless' (cortados).\n" +
+            "Um arquivo de texto foi gerado listando-os: $txtFileName\n\n" +
+            "Deseja mover esses arquivos para outro diretório?",
+            "Mover Falsos Lossless",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.QUESTION_MESSAGE
+        )
+
+        return result == JOptionPane.YES_OPTION
+    }
+
+    override fun askForAnalysisType(): Boolean {
+        val options = arrayOf("Análise Rápida (30 segundos)", "Análise Completa (Arquivo Inteiro)")
+        val result = JOptionPane.showOptionDialog(
+            frame,
+            "Escolha o tipo de análise de frequência:\n\n" +
+            "Rápida: Analisa uma amostra de 30s do meio da música (mais rápido).\n" +
+            "Completa: Analisa a música inteira (mais preciso, porém mais lento).",
+            "Tipo de Análise",
+            JOptionPane.DEFAULT_OPTION,
+            JOptionPane.QUESTION_MESSAGE,
+            null,
+            options,
+            options[0]
+        )
+        return result == 1 // 1 é "Análise Completa"
+    }
+
+    override fun showProgress(title: String, max: Int) {
+        SwingUtilities.invokeLater {
+            progressDialog = JDialog(frame, title, false).apply {
+                val panel = JPanel().apply {
+                    layout = BoxLayout(this, BoxLayout.Y_AXIS)
+                    border = EmptyBorder(15, 15, 15, 15)
+                }
+
+                progressLabel = JLabel("Iniciando...").apply {
+                    alignmentX = Component.CENTER_ALIGNMENT
+                }
+                
+                progressBar = JProgressBar(0, max).apply {
+                    isStringPainted = true
+                    alignmentX = Component.CENTER_ALIGNMENT
+                    preferredSize = Dimension(300, 25)
+                }
+
+                panel.add(progressLabel)
+                panel.add(Box.createVerticalStrut(10))
+                panel.add(progressBar)
+                
+                add(panel)
+                pack()
+                setLocationRelativeTo(frame)
+                isVisible = true
+            }
+        }
+    }
+
+    override fun updateProgress(current: Int, text: String) {
+        SwingUtilities.invokeLater {
+            progressBar?.value = current
+            progressLabel?.text = "<html><body style='width: 250px; text-align: center;'>$text</body></html>"
+        }
+    }
+
+    override fun closeProgress() {
+        SwingUtilities.invokeLater {
+            progressDialog?.dispose()
+            progressDialog = null
+            progressBar = null
+            progressLabel = null
+        }
+    }
+
     override fun option(): Int {
         val panel = JPanel()
         panel.layout = BoxLayout(panel, BoxLayout.Y_AXIS)
@@ -146,6 +230,10 @@ class UserInterfaceImpl : UserInterface {
             OptionMenu(
                 "Verificar Nomenclatura Completa (com Álbum)",
                 "Verifica se os arquivos de áudio seguem a estrutura: Artista do Álbum / Álbum / Artista - Título (sem feat)."
+            ),
+            OptionMenu(
+                "Verificar Falsos FLACs (Análise de Espectro)",
+                "Analisa a frequência máxima do áudio para detectar arquivos cortados (fake lossless)."
             )
         )
 
