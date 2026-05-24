@@ -2,13 +2,13 @@ import exceptions.OperationCancelledException
 import handlers.AudioFileHandlerImpl
 import handlers.LyricFileHandlerImpl
 import interfaces.UserInterface
+import services.AudioAnalysisServiceImpl
+import services.CleanTitleNomenclatureValidator
+import services.DirectoryServiceImpl
+import services.FileServiceImpl
+import services.MatchServiceImpl
 import services.MusicLyricsService
 import ui.UserInterfaceImpl
-import services.FileServiceImpl
-import services.DirectoryServiceImpl
-import services.MatchServiceImpl
-import services.CleanTitleNomenclatureValidator
-import services.AudioAnalysisServiceImpl
 
 /**
  * Entry point of the application.
@@ -26,14 +26,14 @@ fun main() {
     val audioAnalysisService = AudioAnalysisServiceImpl()
 
     val musicLyricsService = MusicLyricsService(
-        userInterface = userInterface,
-        directoryService = directoryService,
-        audioFileHandler = audioFileHandler,
-        lyricFileHandler = lyricFileHandler,
-        matchService = matchService,
-        fileService = fileService,
-        nomenclatureValidator = nomenclatureValidator,
-        audioAnalysisService = audioAnalysisService
+        userInterface,
+        directoryService,
+        audioFileHandler,
+        lyricFileHandler,
+        matchService,
+        fileService,
+        nomenclatureValidator,
+        audioAnalysisService
     )
 
     while (true) {
@@ -73,7 +73,7 @@ fun main() {
                     userInterface.showError("Opção inválida!")
                 }
             }
-        } catch (e: OperationCancelledException) {
+        } catch (_: OperationCancelledException) {
             // Silently return to the main menu
         } catch (e: Exception) {
             userInterface.showError(e.toString())

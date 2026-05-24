@@ -266,13 +266,13 @@ class MusicLyricsService(
         }
         userInterface.closeProgress()
 
-        val result = processIncorrectlyNamedFiles(
+        val (changedSet, errorSet) = processIncorrectlyNamedFiles(
             incorrectlyNamedFiles,
             "AdvancedIncorrectNomenclatureMoved",
             "result.moved_incorrect",
             "result.all_correct"
         )
-        userInterface.showResult(result.changedSet, result.errorSet)
+        userInterface.showResult(changedSet, errorSet)
 
         return incorrectlyNamedFiles
     }
@@ -298,10 +298,10 @@ class MusicLyricsService(
         userInterface.showProgress(Messages.get("progress.analyze_spectrum"), audioFiles.size)
         audioFiles.forEachIndexed { index, file ->
             userInterface.updateProgress(index + 1, file.name)
-            val result = audioAnalysisService.analyzeCutoff(file, isFullAnalysis)
-            if (result.isFake) {
+            val (isFake, _, message) = audioAnalysisService.analyzeCutoff(file, isFullAnalysis)
+            if (isFake) {
                 fakeFiles.add(file)
-                analysisResults.add("${file.name} -> ${result.message}")
+                analysisResults.add("${file.name} -> $message")
             }
         }
         userInterface.closeProgress()

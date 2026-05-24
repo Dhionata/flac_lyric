@@ -7,12 +7,12 @@ import java.awt.Dimension
 import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.ButtonGroup
-import javax.swing.JFrame
 import javax.swing.JDialog
-import javax.swing.JProgressBar
+import javax.swing.JFrame
 import javax.swing.JLabel
 import javax.swing.JOptionPane
 import javax.swing.JPanel
+import javax.swing.JProgressBar
 import javax.swing.JRadioButton
 import javax.swing.JScrollPane
 import javax.swing.JTextArea
@@ -30,10 +30,13 @@ class UserInterfaceImpl : UserInterface {
 
     /** Hidden frame that serves as a parent to center JOptionPane dialog boxes. */
     private val frame: JFrame = JFrame("Flac Lyric")
+
     /** Active progress window. */
     private var progressDialog: JDialog? = null
+
     /** Active progress bar in Swing. */
     private var progressBar: JProgressBar? = null
+
     /** Descriptive text label for the current progress. */
     private var progressLabel: JLabel? = null
 
@@ -187,7 +190,7 @@ class UserInterfaceImpl : UserInterface {
                 progressLabel = JLabel(Messages.get("dialog.progress.starting")).apply {
                     alignmentX = Component.CENTER_ALIGNMENT
                 }
-                
+
                 progressBar = JProgressBar(0, max).apply {
                     isStringPainted = true
                     alignmentX = Component.CENTER_ALIGNMENT
@@ -197,7 +200,7 @@ class UserInterfaceImpl : UserInterface {
                 panel.add(progressLabel)
                 panel.add(Box.createVerticalStrut(10))
                 panel.add(progressBar)
-                
+
                 add(panel)
                 pack()
                 setLocationRelativeTo(frame)

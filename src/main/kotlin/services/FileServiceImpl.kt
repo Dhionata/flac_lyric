@@ -76,9 +76,9 @@ class FileServiceImpl : FileService {
         }
     }
 
-    override fun sameFilesWithDiffNames(actualTargetDir: File, sourceFile: File): Boolean = actualTargetDir.walk().filter {
-        it.isFile && it.extension.lowercase() == sourceFile.extension.lowercase() && filesAreEqual(it, sourceFile)
-    }.any()
+    override fun sameFilesWithDiffNames(actualTargetDir: File, sourceFile: File): Boolean = actualTargetDir.walk().any {
+        it.isFile && it.extension.equals(sourceFile.extension, true) && filesAreEqual(it, sourceFile)
+    }
 
     override fun renameFile(file: File, newName: String): Boolean {
         val targetFile = File(file.parent, newName)
@@ -136,7 +136,7 @@ class FileServiceImpl : FileService {
     }
 
     override fun handleUnmatchedFiles(
-        musicDirectory: File, lyricsDirectory: File, userInterface: UserInterface
+        musicDirectory: File, lyricsDirectory: File, userInterface: UserInterface,
     ): OperationResult {
         val changes = mutableSetOf<String>()
         val errors = mutableSetOf<Exception>()
@@ -162,7 +162,7 @@ class FileServiceImpl : FileService {
             }
         }
 
-        if (lyricsDirectory.walk().filter { it.isFile }.none()) {
+        if (lyricsDirectory.walk().none { it.isFile }) {
             if (lyricsDirectory.delete()) {
                 changes.add("Directory ${lyricsDirectory.name} deleted because there are no more .lrc files.")
             } else {
@@ -184,7 +184,7 @@ class FileServiceImpl : FileService {
                     val read2 = input2.read(buffer2)
                     if (read1 != read2) return false
                     if (read1 == -1) return true
-                    for (i in 0 until read1) {
+                    for (i in 0..<read1) {
                         if (buffer1[i] != buffer2[i]) return false
                     }
                 }

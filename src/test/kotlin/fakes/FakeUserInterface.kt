@@ -2,29 +2,28 @@ package fakes
 
 import interfaces.UserInterface
 import models.FilePair
-import java.lang.Exception
 
 class FakeUserInterface : UserInterface {
     var lastErrorMessage: String? = null
-    val resultsShown = mutableListOf<Pair<Set<String>, Set<Exception>>>()
-    
-    var moveAndRenameResponse = true
-    val moveAndRenameCalls = mutableListOf<FilePair>()
-    
-    var onlyRenameResponse = true
-    val onlyRenameCalls = mutableListOf<FilePair>()
-    
-    var askToMoveIncorrectFilesResponse = true
-    var askToMoveFakeLosslessResponse = true
-    var askToMoveUnmatchedLyricsResponse = true
-    var askForAnalysisTypeResponse = false
-    
+    val resultsShown: MutableList<Pair<Set<String>, Set<Exception>>> = mutableListOf()
+
+    var moveAndRenameResponse: Boolean = true
+    val moveAndRenameCalls: MutableList<FilePair> = mutableListOf()
+
+    var onlyRenameResponse: Boolean = true
+    val onlyRenameCalls: MutableList<FilePair> = mutableListOf()
+
+    var askToMoveIncorrectFilesResponse: Boolean = true
+    var askToMoveFakeLosslessResponse: Boolean = true
+    var askToMoveUnmatchedLyricsResponse: Boolean = true
+    var askForAnalysisTypeResponse: Boolean = false
+
     var progressTitle: String? = null
     var progressMax: Int? = null
-    val progressUpdates = mutableListOf<Pair<Int, String>>()
-    var isProgressClosed = false
-    
-    var optionResponse = 0
+    val progressUpdates: MutableList<Pair<Int, String>> = mutableListOf()
+    var isProgressClosed: Boolean = false
+
+    var optionResponse: Int = 0
 
     override fun showError(message: String) {
         lastErrorMessage = message
