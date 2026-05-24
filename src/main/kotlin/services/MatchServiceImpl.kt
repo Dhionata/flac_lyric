@@ -8,6 +8,7 @@ import java.util.logging.Logger
 import models.FilePair
 import org.apache.commons.text.similarity.CosineDistance
 import ui.UserInterfaceImpl
+import services.Messages
 
 /**
  * Implementation of [MatchService] using Cosine Distance calculation to compare
@@ -21,18 +22,37 @@ class MatchServiceImpl(
     private val logger = Logger.getLogger(this.javaClass.name)
 
     override fun matchFiles(lyricFiles: List<File>, audioFiles: List<File>): List<FilePair> {
+        // Pre-index existing lyric files in the directories of the audio files to quickly determine pairing
+        val existingLyricFilePaths = audioFiles.map { it.parentFile }.distinct().flatMap { dir ->
+            dir.listFiles { _, name -> name.lowercase().endsWith(".lrc") }?.toList() ?: emptyList()
+        }.map { it.absolutePath.lowercase() }.toSet()
+
+        // An audio file is already paired if its expected .lrc file path exists
+        val unpairedAudioFiles = audioFiles.filterNot { audioFile ->
+            val expectedPath = File(audioFile.parentFile, audioFile.nameWithoutExtension + ".lrc").absolutePath.lowercase()
+            existingLyricFilePaths.contains(expectedPath)
+        }
+
+        // A lyric file is already paired if it exists in the same folder as a corresponding audio file with the same name
+        val unpairedLyricFiles = lyricFiles.filterNot { lyricFile ->
+            val expectedAudioFileForLyric = audioFiles.any { audioFile ->
+                audioFile.parentFile == lyricFile.parentFile && audioFile.nameWithoutExtension.equals(lyricFile.nameWithoutExtension, ignoreCase = true)
+            }
+            expectedAudioFileForLyric
+        }
+
         val matchFilesSet = mutableListOf<FilePair>()
 
-        userInterface.showProgress("Buscando correspondências", lyricFiles.size)
+        userInterface.showProgress(Messages.get("progress.match"), unpairedLyricFiles.size)
         var processedCount = 0
-        lyricFiles.parallelStream().forEach { lyricFile ->
-            val matchingAudioFileInSameDir = audioFiles.find { audioFile ->
+        unpairedLyricFiles.parallelStream().forEach { lyricFile ->
+            val matchingAudioFileInSameDir = unpairedAudioFiles.find { audioFile ->
                 audioFile.parentFile == lyricFile.parentFile && audioFile.nameWithoutExtension.equals(
                     lyricFile.nameWithoutExtension, ignoreCase = true
                 )
             }
 
-            val bestAudioFileMatch = (matchingAudioFileInSameDir ?: findBestMatch(lyricFile, audioFiles)).also {
+            val bestAudioFileMatch = (matchingAudioFileInSameDir ?: findBestMatch(lyricFile, unpairedAudioFiles)).also {
                 logger.info("Best match for\n${lyricFile.name}\nis\n${it?.name}")
             }
 
@@ -53,7 +73,7 @@ class MatchServiceImpl(
     }
 
     override fun handleFilePairs(filePairs: List<FilePair>) {
-        userInterface.showProgress("Organizando arquivos", filePairs.size)
+        userInterface.showProgress(Messages.get("progress.organize"), filePairs.size)
         filePairs.forEachIndexed { index, pair ->
             userInterface.updateProgress(index + 1, pair.lyricFile.name)
             if (!pair.lyricFile.parentFile.equals(pair.audioFile.parentFile)) {

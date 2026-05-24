@@ -58,6 +58,14 @@ interface UserInterface {
     fun askToMoveFakeLossless(count: Int, txtFileName: String): Boolean
 
     /**
+     * Asks if the user wants to move lyric files that have no matching audio file.
+     *
+     * @param count The number of unmatched lyric files.
+     * @return true if the user wishes to move them, false otherwise.
+     */
+    fun askToMoveUnmatchedLyrics(count: Int): Boolean
+
+    /**
      * Asks the user which type of audio analysis to perform.
      * @return true for full analysis, false for quick analysis (30s).
      */

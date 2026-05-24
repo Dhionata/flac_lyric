@@ -1,6 +1,7 @@
 package services
 
 import interfaces.FileService
+import interfaces.UserInterface
 import java.io.File
 import java.nio.file.Paths
 import java.util.logging.Logger
@@ -132,7 +133,7 @@ class FileServiceImpl : FileService {
     }
 
     override fun handleUnmatchedFiles(
-        musicDirectory: File, lyricsDirectory: File,
+        musicDirectory: File, lyricsDirectory: File, userInterface: UserInterface
     ) {
         val musicFilesMap = musicDirectory.walk().filter { it.isFile && it.extension != "lrc" }.associateBy { it.nameWithoutExtension }
 
@@ -141,13 +142,15 @@ class FileServiceImpl : FileService {
         }.toList()
 
         if (unmatchedLyricFiles.isNotEmpty()) {
-            val newDirectory = File(musicDirectory.parentFile, "unmatched_lrc")
-            if (!newDirectory.exists()) {
-                newDirectory.mkdirs()
-            }
-            unmatchedLyricFiles.forEach { lyricFile ->
-                if (lyricFile.parentFile != newDirectory) {
-                    moveLyricFile(lyricFile, newDirectory)
+            if (userInterface.askToMoveUnmatchedLyrics(unmatchedLyricFiles.size)) {
+                val newDirectory = File(musicDirectory.parentFile, "unmatched_lrc")
+                if (!newDirectory.exists()) {
+                    newDirectory.mkdirs()
+                }
+                unmatchedLyricFiles.forEach { lyricFile ->
+                    if (lyricFile.parentFile != newDirectory) {
+                        moveLyricFile(lyricFile, newDirectory)
+                    }
                 }
             }
         }

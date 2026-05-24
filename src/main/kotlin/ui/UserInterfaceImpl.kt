@@ -21,6 +21,7 @@ import javax.swing.UIManager
 import javax.swing.border.EmptyBorder
 import kotlin.system.exitProcess
 import models.FilePair
+import services.Messages
 
 /**
  * Graphical implementation of [UserInterface] using Java Swing to display dialogs,
@@ -46,7 +47,7 @@ class UserInterfaceImpl : UserInterface {
     }
 
     override fun showError(message: String) {
-        JOptionPane.showMessageDialog(frame, message, "Erro", JOptionPane.ERROR_MESSAGE)
+        JOptionPane.showMessageDialog(frame, message, Messages.get("dialog.error.title"), JOptionPane.ERROR_MESSAGE)
     }
 
     override fun showResult(changedSet: Set<String>, errorSet: Set<Exception>) {
@@ -64,26 +65,31 @@ class UserInterfaceImpl : UserInterface {
 
         if (changedSet.isNotEmpty()) {
             val movedMessage = changedSet.joinToString("\n") { it }
-            showMessageDialog(movedMessage, "Informação", JOptionPane.INFORMATION_MESSAGE)
+            showMessageDialog(movedMessage, Messages.get("dialog.result.info_title"), JOptionPane.INFORMATION_MESSAGE)
         }
 
         if (errorSet.isNotEmpty()) {
             val errorMessage = errorSet.joinToString("\n") { it.message ?: it.toString() }
-            showMessageDialog(errorMessage, "Erros", JOptionPane.ERROR_MESSAGE)
+            showMessageDialog(errorMessage, Messages.get("dialog.result.errors_title"), JOptionPane.ERROR_MESSAGE)
         }
 
         if (errorSet.isEmpty() && changedSet.isEmpty()) {
-            JOptionPane.showMessageDialog(frame, "Está tudo no lugar!", "Informação", JOptionPane.INFORMATION_MESSAGE)
+            JOptionPane.showMessageDialog(frame, Messages.get("dialog.result.all_in_place"), Messages.get("dialog.result.info_title"), JOptionPane.INFORMATION_MESSAGE)
         }
     }
 
     override fun moveAndRename(filePairs: FilePair): Boolean {
         val result = JOptionPane.showConfirmDialog(
             frame,
-            "Arquivo\n${filePairs.lyricFile.name}\nSerá Movido de\n${filePairs.lyricFile.parentFile}\nPara\n${
-                filePairs.audioFile.parentFile
-            }\ne Renomeado para\n${filePairs.audioFile.nameWithoutExtension}.lrc\njunto a\n${filePairs.audioFile.name}",
-            "Deseja continuar?",
+            Messages.get(
+                "dialog.confirm.move_and_rename",
+                filePairs.lyricFile.name,
+                filePairs.lyricFile.parentFile,
+                filePairs.audioFile.parentFile,
+                filePairs.audioFile.nameWithoutExtension,
+                filePairs.audioFile.name
+            ),
+            Messages.get("dialog.confirm.title"),
             JOptionPane.YES_NO_OPTION,
             JOptionPane.QUESTION_MESSAGE
         )
@@ -98,8 +104,12 @@ class UserInterfaceImpl : UserInterface {
     override fun onlyRename(filePair: FilePair): Boolean {
         val result = JOptionPane.showConfirmDialog(
             frame,
-            "Arquivo\n${filePair.lyricFile.name}\nSerá Renomeado para\n${filePair.audioFile.nameWithoutExtension}.lrc",
-            "Deseja continuar?",
+            Messages.get(
+                "dialog.confirm.only_rename",
+                filePair.lyricFile.name,
+                filePair.audioFile.nameWithoutExtension
+            ),
+            Messages.get("dialog.confirm.title"),
             JOptionPane.YES_NO_OPTION,
             JOptionPane.QUESTION_MESSAGE
         )
@@ -114,10 +124,8 @@ class UserInterfaceImpl : UserInterface {
     override fun askToMoveIncorrectFiles(count: Int, txtFileName: String): Boolean {
         val result = JOptionPane.showConfirmDialog(
             frame,
-            "Foram encontrados $count arquivos com nomenclatura/estrutura incorreta.\n" +
-            "Um arquivo de texto foi gerado listando-os: $txtFileName\n\n" +
-            "Deseja mover esses arquivos para outro diretório?",
-            "Mover Arquivos Incorretos",
+            Messages.get("dialog.confirm.move_incorrect_msg", count, txtFileName),
+            Messages.get("dialog.confirm.move_incorrect_title"),
             JOptionPane.YES_NO_OPTION,
             JOptionPane.QUESTION_MESSAGE
         )
@@ -128,10 +136,8 @@ class UserInterfaceImpl : UserInterface {
     override fun askToMoveFakeLossless(count: Int, txtFileName: String): Boolean {
         val result = JOptionPane.showConfirmDialog(
             frame,
-            "Foram encontrados $count arquivos com suspeita de serem 'Fake Lossless' (cortados).\n" +
-            "Um arquivo de texto foi gerado listando-os: $txtFileName\n\n" +
-            "Deseja mover esses arquivos para outro diretório?",
-            "Mover Falsos Lossless",
+            Messages.get("dialog.confirm.move_fake_msg", count, txtFileName),
+            Messages.get("dialog.confirm.move_fake_title"),
             JOptionPane.YES_NO_OPTION,
             JOptionPane.QUESTION_MESSAGE
         )
@@ -139,14 +145,29 @@ class UserInterfaceImpl : UserInterface {
         return result == JOptionPane.YES_OPTION
     }
 
+    override fun askToMoveUnmatchedLyrics(count: Int): Boolean {
+        val result = JOptionPane.showConfirmDialog(
+            frame,
+            Messages.get("dialog.confirm.unmatched_lyrics_msg", count),
+            Messages.get("dialog.confirm.unmatched_lyrics_title"),
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.QUESTION_MESSAGE
+        )
+        if (result == JOptionPane.CLOSED_OPTION) {
+            throw OperationCancelledException()
+        }
+        return result == JOptionPane.YES_OPTION
+    }
+
     override fun askForAnalysisType(): Boolean {
-        val options = arrayOf("Análise Rápida (30 segundos)", "Análise Completa (Arquivo Inteiro)")
+        val options = arrayOf(
+            Messages.get("dialog.confirm.analysis_type_option_quick"),
+            Messages.get("dialog.confirm.analysis_type_option_full")
+        )
         val result = JOptionPane.showOptionDialog(
             frame,
-            "Escolha o tipo de análise de frequência:\n\n" +
-            "Rápida: Analisa uma amostra de 30s do meio da música (mais rápido).\n" +
-            "Completa: Analisa a música inteira (mais preciso, porém mais lento).",
-            "Tipo de Análise",
+            Messages.get("dialog.confirm.analysis_type_msg"),
+            Messages.get("dialog.confirm.analysis_type_title"),
             JOptionPane.DEFAULT_OPTION,
             JOptionPane.QUESTION_MESSAGE,
             null,
@@ -164,7 +185,7 @@ class UserInterfaceImpl : UserInterface {
                     border = EmptyBorder(15, 15, 15, 15)
                 }
 
-                progressLabel = JLabel("Iniciando...").apply {
+                progressLabel = JLabel(Messages.get("dialog.progress.starting")).apply {
                     alignmentX = Component.CENTER_ALIGNMENT
                 }
                 
@@ -206,7 +227,7 @@ class UserInterfaceImpl : UserInterface {
         val panel = JPanel()
         panel.layout = BoxLayout(panel, BoxLayout.Y_AXIS)
 
-        val label = JLabel("Escolha uma das opções abaixo:")
+        val label = JLabel(Messages.get("dialog.option.label"))
         label.alignmentX = Component.LEFT_ALIGNMENT
         panel.add(label)
         panel.add(Box.createVerticalStrut(10))
@@ -217,32 +238,32 @@ class UserInterfaceImpl : UserInterface {
 
         val options = listOf(
             OptionMenu(
-                "Organizar Música e Lyrics",
-                "Associa arquivos de áudio e letras (.lrc), movendo e renomeando as letras para a pasta do áudio correspondente."
+                Messages.get("menu.option.0.title"),
+                Messages.get("menu.option.0.hint")
             ),
             OptionMenu(
-                "Listar nome dos arquivos sem .lrc",
-                "Verifica na pasta de músicas quais arquivos não possuem um arquivo de letra correspondente."
+                Messages.get("menu.option.1.title"),
+                Messages.get("menu.option.1.hint")
             ),
             OptionMenu(
-                "Listar arquivos .lrc sem sincronia",
-                "Procura e lista os arquivos de letra que não possuem timestamps de sincronização."
+                Messages.get("menu.option.2.title"),
+                Messages.get("menu.option.2.hint")
             ),
             OptionMenu(
-                "Remover 'V1:' de arquivos .lrc",
-                "Limpa os arquivos de letra removendo a string 'V1:' que pode estar indevidamente inserida."
+                Messages.get("menu.option.3.title"),
+                Messages.get("menu.option.3.hint")
             ),
             OptionMenu(
-                "Encontrar e Mover .lrc Isolados",
-                "Procura arquivos .lrc que não possuem par correspondente (áudio), os move para uma pasta à sua escolha, deleta as pastas antigas vazias e cria um .txt listando-os."
+                Messages.get("menu.option.4.title"),
+                Messages.get("menu.option.4.hint")
             ),
             OptionMenu(
-                "Verificar Nomenclatura Completa (com Álbum)",
-                "Verifica se os arquivos de áudio seguem a estrutura: Artista do Álbum / Álbum / Artista - Título (sem feat)."
+                Messages.get("menu.option.5.title"),
+                Messages.get("menu.option.5.hint")
             ),
             OptionMenu(
-                "Verificar Falsos FLACs (Análise de Espectro)",
-                "Analisa a frequência máxima do áudio para detectar arquivos cortados (fake lossless)."
+                Messages.get("menu.option.6.title"),
+                Messages.get("menu.option.6.hint")
             )
         )
 
@@ -257,7 +278,7 @@ class UserInterfaceImpl : UserInterface {
         }
 
         val result = JOptionPane.showConfirmDialog(
-            frame, panel, "Selecione a Ação", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE
+            frame, panel, Messages.get("dialog.option.title"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE
         )
 
         if (result != JOptionPane.OK_OPTION) {

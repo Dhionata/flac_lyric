@@ -50,8 +50,9 @@ interface FileService {
      *
      * @param musicDirectory Directory containing the music files.
      * @param lyricsDirectory Directory containing the lyric files.
+     * @param userInterface The UserInterface reference to query confirmation.
      */
-    fun handleUnmatchedFiles(musicDirectory: File, lyricsDirectory: File)
+    fun handleUnmatchedFiles(musicDirectory: File, lyricsDirectory: File, userInterface: UserInterface)
 
     /**
      * Specifically moves a lyric file (.lrc) to a target directory, handling potential conflicts.

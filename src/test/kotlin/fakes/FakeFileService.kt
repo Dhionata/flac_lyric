@@ -1,6 +1,7 @@
 package fakes
 
 import interfaces.FileService
+import interfaces.UserInterface
 import java.io.File
 import java.lang.Exception
 
@@ -45,7 +46,7 @@ class FakeFileService : FileService {
         return sameFilesWithDiffNamesResponse
     }
 
-    override fun handleUnmatchedFiles(musicDirectory: File, lyricsDirectory: File) {
+    override fun handleUnmatchedFiles(musicDirectory: File, lyricsDirectory: File, userInterface: UserInterface) {
         handleUnmatchedFilesCalls.add(musicDirectory to lyricsDirectory)
     }
 
