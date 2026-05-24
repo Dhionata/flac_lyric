@@ -5,6 +5,9 @@ on:
     branches:
       - master # Executa a cada commit enviado para a branch master
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true' # Suprime avisos de obsolescência do Node.js 20, forçando o uso do Node.js 24
+
 jobs:
   # 1. Validação e Testes (Garante a integridade do código antes de gerar a versão)
   validate-and-test:
@@ -21,12 +24,9 @@ jobs:
           java-version: '25'
           distribution: 'zulu'
 
-      # Otimização de Performance: Configura cache do Gradle
+      # Otimização de Performance: Configura cache do Gradle e valida o Wrapper automaticamente
       - name: Configurar Gradle
         uses: gradle/actions/setup-gradle@v4
-
-      - name: Validar Gradle Wrapper
-        uses: gradle/actions/wrapper-validation-action@v3
 
       - name: Executar Testes Unitários
         run: ./gradlew test
