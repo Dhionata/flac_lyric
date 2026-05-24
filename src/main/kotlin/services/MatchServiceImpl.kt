@@ -3,12 +3,11 @@ package services
 import interfaces.FileService
 import interfaces.MatchService
 import interfaces.UserInterface
-import models.OperationResult
 import java.io.File
 import java.util.logging.Logger
 import models.FilePair
+import models.OperationResult
 import org.apache.commons.text.similarity.CosineDistance
-import services.Messages
 
 /**
  * Implementation of [MatchService] using Cosine Distance calculation to compare
@@ -62,7 +61,7 @@ class MatchServiceImpl(
             if (bestAudioFileMatch != null) {
                 matchFilesSet.add(FilePair(lyricFile, bestAudioFileMatch))
             }
-            
+
             synchronized(this) {
                 processedCount++
                 userInterface.updateProgress(processedCount, lyricFile.name)

@@ -2,22 +2,22 @@ package services
 
 import fakes.FakeUserInterface
 import java.io.File
-import kotlin.test.Test
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import java.nio.file.Files
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 
 class FileServiceImplTest {
 
     @Test
     fun testHandleUnmatchedFilesMoveAccepted() {
-        val tempDir = java.nio.file.Files.createTempDirectory("test-unmatched").toFile()
+        val tempDir = Files.createTempDirectory("test-unmatched").toFile()
         try {
             val musicDir = File(tempDir, "music").apply { mkdirs() }
             val lyricsDir = File(tempDir, "lyrics").apply { mkdirs() }
 
             val unmatchedLyric = File(lyricsDir, "unmatched.lrc").apply { writeText("lyrics here") }
             val matchedLyric = File(lyricsDir, "matched.lrc").apply { writeText("lyrics here") }
-            val matchedAudio = File(musicDir, "matched.flac").apply { writeText("audio data") }
 
             val fakeUi = FakeUserInterface().apply {
                 askToMoveUnmatchedLyricsResponse = true
@@ -41,7 +41,7 @@ class FileServiceImplTest {
 
     @Test
     fun testHandleUnmatchedFilesMoveRejected() {
-        val tempDir = java.nio.file.Files.createTempDirectory("test-unmatched-rejected").toFile()
+        val tempDir = Files.createTempDirectory("test-unmatched-rejected").toFile()
         try {
             val musicDir = File(tempDir, "music").apply { mkdirs() }
             val lyricsDir = File(tempDir, "lyrics").apply { mkdirs() }

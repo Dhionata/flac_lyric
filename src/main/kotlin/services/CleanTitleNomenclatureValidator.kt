@@ -13,6 +13,7 @@ class CleanTitleNomenclatureValidator : AudioNomenclatureValidator {
 
     /** Regex to remove feat. or similar indications from the title. */
     private val featRegex = Regex("(?i)\\s*\\(?feat\\.[^)]*\\)?")
+
     /** Audio extensions supported by the nomenclature validation. */
     private val supportedExtensions = models.AudioConfig.supportedExtensions
 
@@ -50,7 +51,7 @@ class CleanTitleNomenclatureValidator : AudioNomenclatureValidator {
 
             val albumArtistList = tag.getAll(FieldKey.ALBUM_ARTIST)
             val artistList = tag.getAll(FieldKey.ARTIST)
-            
+
             val fmtAlbumArtist = formatMultipleValues(albumArtistList)
             val fmtArtist = formatMultipleValues(artistList)
 

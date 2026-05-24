@@ -3,30 +3,29 @@ package fakes
 import interfaces.FileService
 import interfaces.UserInterface
 import java.io.File
-import java.lang.Exception
 import models.OperationResult
 
 class FakeFileService : FileService {
-    val permissionsPrinted = mutableListOf<File>()
-    
-    val moveFileCalls = mutableListOf<Pair<File, File>>()
-    var moveFileResponse = true
-    
-    val renameFileCalls = mutableListOf<Pair<File, String>>()
-    var renameFileResponse = true
-    
-    val sameFilesWithDiffNamesCalls = mutableListOf<Pair<File, File>>()
-    var sameFilesWithDiffNamesResponse = false
-    
-    val handleUnmatchedFilesCalls = mutableListOf<Pair<File, File>>()
-    var handleUnmatchedFilesResponse = OperationResult()
-    
-    val moveLyricFileCalls = mutableListOf<Pair<File, File>>()
+    val permissionsPrinted: MutableList<File> = mutableListOf<File>()
+
+    val moveFileCalls: MutableList<Pair<File, File>> = mutableListOf()
+    var moveFileResponse: Boolean = true
+
+    val renameFileCalls: MutableList<Pair<File, String>> = mutableListOf()
+    var renameFileResponse: Boolean = true
+
+    val sameFilesWithDiffNamesCalls: MutableList<Pair<File, File>> = mutableListOf()
+    var sameFilesWithDiffNamesResponse: Boolean = false
+
+    val handleUnmatchedFilesCalls: MutableList<Pair<File, File>> = mutableListOf()
+    var handleUnmatchedFilesResponse: OperationResult = OperationResult()
+
+    val moveLyricFileCalls: MutableList<Pair<File, File>> = mutableListOf()
     var moveLyricFileResponse: File? = null
-    var moveLyricOperationResult = OperationResult()
-    
-    val renameLyricFileCalls = mutableListOf<Pair<File, File>>()
-    var renameLyricFileResponse = OperationResult()
+    var moveLyricOperationResult: OperationResult = OperationResult()
+
+    val renameLyricFileCalls: MutableList<Pair<File, File>> = mutableListOf()
+    var renameLyricFileResponse: OperationResult = OperationResult()
 
     override fun printFilePermissions(file: File) {
         permissionsPrinted.add(file)
