@@ -4,11 +4,9 @@ import interfaces.FileService
 import interfaces.UserInterface
 import java.io.File
 import java.lang.Exception
+import models.OperationResult
 
 class FakeFileService : FileService {
-    override val changedSet = mutableSetOf<String>()
-    override val errorSet = mutableSetOf<Exception>()
-
     val permissionsPrinted = mutableListOf<File>()
     
     val moveFileCalls = mutableListOf<Pair<File, File>>()
@@ -21,11 +19,14 @@ class FakeFileService : FileService {
     var sameFilesWithDiffNamesResponse = false
     
     val handleUnmatchedFilesCalls = mutableListOf<Pair<File, File>>()
+    var handleUnmatchedFilesResponse = OperationResult()
     
     val moveLyricFileCalls = mutableListOf<Pair<File, File>>()
     var moveLyricFileResponse: File? = null
+    var moveLyricOperationResult = OperationResult()
     
     val renameLyricFileCalls = mutableListOf<Pair<File, File>>()
+    var renameLyricFileResponse = OperationResult()
 
     override fun printFilePermissions(file: File) {
         permissionsPrinted.add(file)
@@ -46,16 +47,19 @@ class FakeFileService : FileService {
         return sameFilesWithDiffNamesResponse
     }
 
-    override fun handleUnmatchedFiles(musicDirectory: File, lyricsDirectory: File, userInterface: UserInterface) {
+    override fun handleUnmatchedFiles(musicDirectory: File, lyricsDirectory: File, userInterface: UserInterface): OperationResult {
         handleUnmatchedFilesCalls.add(musicDirectory to lyricsDirectory)
+        return handleUnmatchedFilesResponse
     }
 
-    override fun moveLyricFile(lyricFile: File, targetDir: File): File? {
+    override fun moveLyricFile(lyricFile: File, targetDir: File): Pair<File?, OperationResult> {
         moveLyricFileCalls.add(lyricFile to targetDir)
-        return moveLyricFileResponse ?: File(targetDir, lyricFile.name)
+        val fileRes = moveLyricFileResponse ?: File(targetDir, lyricFile.name)
+        return Pair(fileRes, moveLyricOperationResult)
     }
 
-    override fun renameLyricFile(lyricFile: File, audioFile: File) {
+    override fun renameLyricFile(lyricFile: File, audioFile: File): OperationResult {
         renameLyricFileCalls.add(lyricFile to audioFile)
+        return renameLyricFileResponse
     }
 }

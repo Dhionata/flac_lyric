@@ -5,6 +5,7 @@ import interfaces.UserInterface
 import java.io.File
 import java.nio.file.Paths
 import java.util.logging.Logger
+import models.OperationResult
 
 /**
  * Practical implementation of [FileService] to perform copies, deletions,
@@ -14,10 +15,6 @@ class FileServiceImpl : FileService {
 
     /** Internal class logger for registering operations and warnings. */
     private val logger = Logger.getLogger(this.javaClass.name)
-    /** Set of logs of changes performed. */
-    override val changedSet: MutableSet<String> = mutableSetOf<String>()
-    /** Set of captured errors. */
-    override val errorSet: MutableSet<Exception> = mutableSetOf<Exception>()
 
     override fun printFilePermissions(file: File) {
         logger.info(
@@ -80,7 +77,7 @@ class FileServiceImpl : FileService {
     }
 
     override fun sameFilesWithDiffNames(actualTargetDir: File, sourceFile: File): Boolean = actualTargetDir.walk().filter {
-        it.isFile && it.extension == "lrc" && filesAreEqual(it, sourceFile)
+        it.isFile && it.extension.lowercase() == sourceFile.extension.lowercase() && filesAreEqual(it, sourceFile)
     }.any()
 
     override fun renameFile(file: File, newName: String): Boolean {
@@ -108,33 +105,41 @@ class FileServiceImpl : FileService {
         }
     }
 
-    override fun moveLyricFile(lyricFile: File, targetDir: File): File? {
+    override fun moveLyricFile(lyricFile: File, targetDir: File): Pair<File?, OperationResult> {
+        val changes = mutableSetOf<String>()
+        val errors = mutableSetOf<Exception>()
+        var movedFile: File? = null
         try {
             if (moveFile(lyricFile, targetDir)) {
-                changedSet.add("File \n${lyricFile.name}\nmoved from\n${lyricFile.parent}\nto\n${targetDir}\n")
-                return File(targetDir, lyricFile.name)
+                changes.add("File \n${lyricFile.name}\nmoved from\n${lyricFile.parent}\nto\n${targetDir}\n")
+                movedFile = File(targetDir, lyricFile.name)
             } else {
-                errorSet.add(Exception("File ${lyricFile.name} not moved to $targetDir"))
+                errors.add(Exception("File ${lyricFile.name} not moved to $targetDir"))
             }
         } catch (e: Exception) {
-            errorSet.add(e)
+            errors.add(e)
         }
-        return null
+        return Pair(movedFile, OperationResult(changes, errors))
     }
 
-    override fun renameLyricFile(lyricFile: File, audioFile: File) {
+    override fun renameLyricFile(lyricFile: File, audioFile: File): OperationResult {
+        val changes = mutableSetOf<String>()
+        val errors = mutableSetOf<Exception>()
         try {
             if (renameFile(lyricFile, "${audioFile.nameWithoutExtension}.lrc")) {
-                changedSet.add("File ${lyricFile.name} renamed to ${audioFile.nameWithoutExtension}.lrc")
+                changes.add("File ${lyricFile.name} renamed to ${audioFile.nameWithoutExtension}.lrc")
             }
         } catch (e: Exception) {
-            errorSet.add(e)
+            errors.add(e)
         }
+        return OperationResult(changes, errors)
     }
 
     override fun handleUnmatchedFiles(
         musicDirectory: File, lyricsDirectory: File, userInterface: UserInterface
-    ) {
+    ): OperationResult {
+        val changes = mutableSetOf<String>()
+        val errors = mutableSetOf<Exception>()
         val musicFilesMap = musicDirectory.walk().filter { it.isFile && it.extension != "lrc" }.associateBy { it.nameWithoutExtension }
 
         val unmatchedLyricFiles = lyricsDirectory.walk().filter { it.isFile && it.extension == "lrc" }.filterNot { lyricFile ->
@@ -149,7 +154,9 @@ class FileServiceImpl : FileService {
                 }
                 unmatchedLyricFiles.forEach { lyricFile ->
                     if (lyricFile.parentFile != newDirectory) {
-                        moveLyricFile(lyricFile, newDirectory)
+                        val (_, moveResult) = moveLyricFile(lyricFile, newDirectory)
+                        changes.addAll(moveResult.changedSet)
+                        errors.addAll(moveResult.errorSet)
                     }
                 }
             }
@@ -157,19 +164,30 @@ class FileServiceImpl : FileService {
 
         if (lyricsDirectory.walk().filter { it.isFile }.none()) {
             if (lyricsDirectory.delete()) {
-                changedSet.add("Directory ${lyricsDirectory.name} deleted because there are no more .lrc files.")
+                changes.add("Directory ${lyricsDirectory.name} deleted because there are no more .lrc files.")
             } else {
-                errorSet.add(Exception("Directory ${lyricsDirectory.name} could not be deleted."))
+                errors.add(Exception("Directory ${lyricsDirectory.name} could not be deleted."))
             }
         }
+        return OperationResult(changes, errors)
     }
 
     private fun filesAreEqual(file1: File, file2: File): Boolean {
         if (file1.length() != file2.length()) return false
 
-        file1.inputStream().use { input1 ->
-            file2.inputStream().use { input2 ->
-                return input1.buffered().readBytes() contentEquals input2.buffered().readBytes()
+        file1.inputStream().buffered().use { input1 ->
+            file2.inputStream().buffered().use { input2 ->
+                val buffer1 = ByteArray(8192)
+                val buffer2 = ByteArray(8192)
+                while (true) {
+                    val read1 = input1.read(buffer1)
+                    val read2 = input2.read(buffer2)
+                    if (read1 != read2) return false
+                    if (read1 == -1) return true
+                    for (i in 0 until read1) {
+                        if (buffer1[i] != buffer2[i]) return false
+                    }
+                }
             }
         }
     }

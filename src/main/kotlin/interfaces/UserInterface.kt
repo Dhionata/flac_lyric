@@ -95,7 +95,7 @@ interface UserInterface {
     /**
      * Displays the menu with the main actions and returns the option chosen by the user.
      *
-     * @return The numerical index of the selected option (from 0 to N).
+     * @return The numerical index of the selected option (from 0 to N), or null if the user cancelled.
      */
-    fun option(): Int
+    fun option(): Int?
 }

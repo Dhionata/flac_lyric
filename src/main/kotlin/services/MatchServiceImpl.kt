@@ -3,11 +3,11 @@ package services
 import interfaces.FileService
 import interfaces.MatchService
 import interfaces.UserInterface
+import models.OperationResult
 import java.io.File
 import java.util.logging.Logger
 import models.FilePair
 import org.apache.commons.text.similarity.CosineDistance
-import ui.UserInterfaceImpl
 import services.Messages
 
 /**
@@ -15,8 +15,8 @@ import services.Messages
  * file name strings and find the best lyric match for each song.
  */
 class MatchServiceImpl(
-    override val userInterface: UserInterface = UserInterfaceImpl(),
-    override val fileService: FileService = FileServiceImpl(),
+    private val userInterface: UserInterface,
+    private val fileService: FileService,
 ) : MatchService {
     /** Logger for debugging and tracking similarity. */
     private val logger = Logger.getLogger(this.javaClass.name)
@@ -32,6 +32,9 @@ class MatchServiceImpl(
             val expectedPath = File(audioFile.parentFile, audioFile.nameWithoutExtension + ".lrc").absolutePath.lowercase()
             existingLyricFilePaths.contains(expectedPath)
         }
+
+        // Pre-compute lowercased name without extension for unpaired audio files to optimize similarity searches
+        val unpairedAudioFilesWithNames = unpairedAudioFiles.map { it to it.nameWithoutExtension.lowercase() }
 
         // A lyric file is already paired if it exists in the same folder as a corresponding audio file with the same name
         val unpairedLyricFiles = lyricFiles.filterNot { lyricFile ->
@@ -52,7 +55,7 @@ class MatchServiceImpl(
                 )
             }
 
-            val bestAudioFileMatch = (matchingAudioFileInSameDir ?: findBestMatch(lyricFile, unpairedAudioFiles)).also {
+            val bestAudioFileMatch = (matchingAudioFileInSameDir ?: findBestMatch(lyricFile, unpairedAudioFilesWithNames)).also {
                 logger.info("Best match for\n${lyricFile.name}\nis\n${it?.name}")
             }
 
@@ -72,46 +75,52 @@ class MatchServiceImpl(
         }
     }
 
-    override fun handleFilePairs(filePairs: List<FilePair>) {
+    override fun handleFilePairs(filePairs: List<FilePair>): OperationResult {
         userInterface.showProgress(Messages.get("progress.organize"), filePairs.size)
+        var result = OperationResult()
         filePairs.forEachIndexed { index, pair ->
             userInterface.updateProgress(index + 1, pair.lyricFile.name)
             if (!pair.lyricFile.parentFile.equals(pair.audioFile.parentFile)) {
                 if (pair.audioFile.nameWithoutExtension == pair.lyricFile.nameWithoutExtension) {
-                    fileService.moveLyricFile(pair.lyricFile, pair.audioFile.parentFile)
+                    val (_, moveResult) = fileService.moveLyricFile(pair.lyricFile, pair.audioFile.parentFile)
+                    result += moveResult
                 } else if (fileService.sameFilesWithDiffNames(
                         pair.audioFile.parentFile, pair.lyricFile
                     ) || userInterface.moveAndRename(pair)
                 ) {
-                    val lyricFileMoved = fileService.moveLyricFile(pair.lyricFile, pair.audioFile.parentFile)
+                    val (lyricFileMoved, moveResult) = fileService.moveLyricFile(pair.lyricFile, pair.audioFile.parentFile)
+                    result += moveResult
 
                     if (lyricFileMoved != null) {
-                        fileService.renameLyricFile(lyricFileMoved, pair.audioFile)
+                        val renameResult = fileService.renameLyricFile(lyricFileMoved, pair.audioFile)
+                        result += renameResult
                     }
                 }
             } else {
                 logger.info("The FilePair files ${pair.lyricFile.name} and ${pair.audioFile.name} are already in the correct place!")
 
                 if (userInterface.onlyRename(pair)) {
-                    fileService.renameLyricFile(pair.lyricFile, pair.audioFile)
+                    val renameResult = fileService.renameLyricFile(pair.lyricFile, pair.audioFile)
+                    result += renameResult
                 } else {
                     logger.info("Opted not to rename")
                 }
             }
         }
         userInterface.closeProgress()
+        return result
     }
 
-    private fun findBestMatch(lyricFile: File, audioFiles: List<File>): File? {
+    private fun findBestMatch(lyricFile: File, audioFiles: List<Pair<File, String>>): File? {
         val lyricLowercaseName = lyricFile.nameWithoutExtension.lowercase()
         val cosineDistance = CosineDistance()
 
-        return audioFiles.minByOrNull { audioFile ->
+        return audioFiles.minByOrNull { (audioFile, audioLowercaseName) ->
             cosineDistance.apply(
-                audioFile.nameWithoutExtension.lowercase(), lyricLowercaseName
+                audioLowercaseName, lyricLowercaseName
             ).also { distance ->
                 logger.info("Distance: $distance\nfor lyricFile:\n${lyricFile.name}\n${audioFile.name}\n")
             }
-        }
+        }?.first
     }
 }

@@ -14,7 +14,7 @@ class CleanTitleNomenclatureValidator : AudioNomenclatureValidator {
     /** Regex to remove feat. or similar indications from the title. */
     private val featRegex = Regex("(?i)\\s*\\(?feat\\.[^)]*\\)?")
     /** Audio extensions supported by the nomenclature validation. */
-    private val supportedExtensions = setOf("flac", "mp3", "m4a", "wav", "ogg")
+    private val supportedExtensions = models.AudioConfig.supportedExtensions
 
     /**
      * Sanitizes the name by replacing characters prohibited in the file system with underscores.

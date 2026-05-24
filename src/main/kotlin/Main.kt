@@ -1,7 +1,14 @@
 import exceptions.OperationCancelledException
+import handlers.AudioFileHandlerImpl
+import handlers.LyricFileHandlerImpl
 import interfaces.UserInterface
 import services.MusicLyricsService
 import ui.UserInterfaceImpl
+import services.FileServiceImpl
+import services.DirectoryServiceImpl
+import services.MatchServiceImpl
+import services.CleanTitleNomenclatureValidator
+import services.AudioAnalysisServiceImpl
 
 /**
  * Entry point of the application.
@@ -10,10 +17,28 @@ import ui.UserInterfaceImpl
  */
 fun main() {
     val userInterface: UserInterface = UserInterfaceImpl()
+    val fileService = FileServiceImpl()
+    val directoryService = DirectoryServiceImpl(fileService)
+    val audioFileHandler = AudioFileHandlerImpl()
+    val lyricFileHandler = LyricFileHandlerImpl()
+    val matchService = MatchServiceImpl(userInterface, fileService)
+    val nomenclatureValidator = CleanTitleNomenclatureValidator()
+    val audioAnalysisService = AudioAnalysisServiceImpl()
+
+    val musicLyricsService = MusicLyricsService(
+        userInterface = userInterface,
+        directoryService = directoryService,
+        audioFileHandler = audioFileHandler,
+        lyricFileHandler = lyricFileHandler,
+        matchService = matchService,
+        fileService = fileService,
+        nomenclatureValidator = nomenclatureValidator,
+        audioAnalysisService = audioAnalysisService
+    )
+
     while (true) {
         try {
-            val option = userInterface.option()
-            val musicLyricsService = MusicLyricsService(userInterface)
+            val option = userInterface.option() ?: break
 
             when (option) {
                 0 -> {

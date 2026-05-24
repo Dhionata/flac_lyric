@@ -9,7 +9,7 @@ import java.io.File
 class AudioFileHandlerImpl : AudioFileHandler {
 
     /** List of audio file extensions supported by the application. */
-    private val supportedExtensions = listOf("flac", "mp3", "ogg", "wav", "m4a")
+    private val supportedExtensions = models.AudioConfig.supportedExtensions
 
     /**
      * Recursively scans the provided directory and returns all files whose extension

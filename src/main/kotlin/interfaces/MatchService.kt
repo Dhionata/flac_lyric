@@ -2,16 +2,12 @@ package interfaces
 
 import java.io.File
 import models.FilePair
+import models.OperationResult
 
 /**
  * Service responsible for correlating lyric files (.lrc) with their respective audio files.
  */
 interface MatchService {
-    /** Reference to the user interface used for confirmations. */
-    val userInterface: UserInterface
-    /** Reference to the file manipulation service. */
-    val fileService: FileService
-
     /**
      * Maps and correlates the list of lyric files with the list of audio files, finding the corresponding pairs.
      *
@@ -25,6 +21,7 @@ interface MatchService {
      * Processes the list of found pairs, requesting user confirmation and moving/renaming the lyrics.
      *
      * @param filePairs The list of [FilePair] pairs to be processed.
+     * @return [OperationResult] containing successes and failures of the operation.
      */
-    fun handleFilePairs(filePairs: List<FilePair>)
+    fun handleFilePairs(filePairs: List<FilePair>): OperationResult
 }

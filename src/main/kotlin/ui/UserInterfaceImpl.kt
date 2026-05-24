@@ -19,7 +19,6 @@ import javax.swing.JTextArea
 import javax.swing.SwingUtilities
 import javax.swing.UIManager
 import javax.swing.border.EmptyBorder
-import kotlin.system.exitProcess
 import models.FilePair
 import services.Messages
 
@@ -223,7 +222,7 @@ class UserInterfaceImpl : UserInterface {
         }
     }
 
-    override fun option(): Int {
+    override fun option(): Int? {
         val panel = JPanel()
         panel.layout = BoxLayout(panel, BoxLayout.Y_AXIS)
 
@@ -282,7 +281,7 @@ class UserInterfaceImpl : UserInterface {
         )
 
         if (result != JOptionPane.OK_OPTION) {
-            exitProcess(0)
+            return null
         }
 
         return radioButtons.indexOfFirst { it.isSelected }

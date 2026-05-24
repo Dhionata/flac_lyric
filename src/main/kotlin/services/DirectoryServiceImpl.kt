@@ -10,7 +10,7 @@ import javax.swing.UIManager
 /**
  * Implementation of [DirectoryService] that uses Swing's [JFileChooser] to select files and directories interactively.
  */
-class DirectoryServiceImpl(private val fileService: FileService = FileServiceImpl()) : DirectoryService {
+class DirectoryServiceImpl(private val fileService: FileService) : DirectoryService {
 
     /** Graphical dialog for file or directory selection. */
     private val jFileChooser: JFileChooser = JFileChooser()
@@ -21,7 +21,10 @@ class DirectoryServiceImpl(private val fileService: FileService = FileServiceImp
     }
 
     override fun getDirectory(dialogTitle: String): File {
-        return jFileChooser.apply { this.dialogTitle = dialogTitle }.let { chooser ->
+        return jFileChooser.apply {
+            this.dialogTitle = dialogTitle
+            fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
+        }.let { chooser ->
             if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                 chooser.selectedFile.also {
                     fileService.printFilePermissions(it)

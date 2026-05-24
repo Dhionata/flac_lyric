@@ -1,16 +1,12 @@
 package interfaces
 
 import java.io.File
+import models.OperationResult
 
 /**
  * Service responsible for physical file manipulation operations (moving, renaming, verifying permissions, and handling orphan files).
  */
 interface FileService {
-    /** Set of file names or messages for successfully performed modifications. */
-    val changedSet: MutableSet<String>
-    /** Set of exceptions/errors occurred during the execution of operations. */
-    val errorSet: MutableSet<Exception>
-
     /**
      * Prints the read, write, and execute permissions of a file or directory to the console.
      *
@@ -51,23 +47,29 @@ interface FileService {
      * @param musicDirectory Directory containing the music files.
      * @param lyricsDirectory Directory containing the lyric files.
      * @param userInterface The UserInterface reference to query confirmation.
+     * @return [OperationResult] containing successes and failures of the operation.
      */
-    fun handleUnmatchedFiles(musicDirectory: File, lyricsDirectory: File, userInterface: UserInterface)
+    fun handleUnmatchedFiles(
+        musicDirectory: File,
+        lyricsDirectory: File,
+        userInterface: UserInterface,
+    ): OperationResult
 
     /**
      * Specifically moves a lyric file (.lrc) to a target directory, handling potential conflicts.
      *
      * @param lyricFile The .lrc file to be moved.
      * @param targetDir The target directory.
-     * @return The resulting moved file, or null if the operation failed.
+     * @return A Pair containing the resulting moved file (or null if failed) and the [OperationResult].
      */
-    fun moveLyricFile(lyricFile: File, targetDir: File): File?
+    fun moveLyricFile(lyricFile: File, targetDir: File): Pair<File?, OperationResult>
 
     /**
      * Renames a lyric file based on the corresponding audio file's name.
      *
      * @param lyricFile The source .lrc file.
      * @param audioFile The corresponding audio file from which to extract the name.
+     * @return [OperationResult] containing successes and failures of the operation.
      */
-    fun renameLyricFile(lyricFile: File, audioFile: File)
+    fun renameLyricFile(lyricFile: File, audioFile: File): OperationResult
 }
