@@ -1,0 +1,102 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - master # Executa a cada commit enviado para a branch principal (master)
+
+jobs:
+  # 1. Validação e Testes (Garante a integridade do código antes de prosseguir)
+  validate-and-test:
+    name: Validação & Testes
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do Código
+        uses: actions/checkout@v4
+
+      - name: Configurar JDK 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'zulu'
+
+      # Otimização de Performance: Configura cache do Gradle automaticamente para acelerar builds subsequentes
+      - name: Configurar Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Validar Gradle Wrapper
+        uses: gradle/actions/wrapper-validation-action@v3
+
+      - name: Executar Testes Unitários
+        run: ./gradlew test
+
+      - name: Gerar Dokka (Opcional - Validação de Documentação)
+        run: ./gradlew dokkaGenerate
+
+      - name: Construir JAR
+        run: ./gradlew jar
+
+      # Upload do JAR como artefato para reutilizá-lo no job de deploy/release sem precisar recompilar
+      - name: Upload do Artefato Temporário
+        uses: actions/upload-artifact@v4
+        with:
+          name: flac-lyric-app
+          path: build/libs/*.jar
+          retention-days: 1
+
+  # 2. Deploy/Release (Responsável exclusivo por empacotar e publicar a versão)
+  release:
+    name: Gerar Nova Versão & Deploy
+    needs: validate-and-test # Garante que só executa se a validação/testes passarem (Responsabilidade Única / Separação de Conceitos)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Permissão necessária para criar Releases no repositório
+
+    steps:
+      - name: Checkout do Código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Necessário para ler o histórico de commits se for gerar notas de release dinâmicas
+
+      # Baixa o JAR que foi validado e compilado no job anterior
+      - name: Download do Artefato Temporário
+        uses: actions/download-artifact@v4
+        with:
+          name: flac-lyric-app
+          path: build/libs
+
+      # Determina a tag da versão de forma dinâmica para cada commit
+      - name: Definir Tag da Versão
+        id: versioning
+        run: |
+          # Versão base definida no build.gradle.kts
+          BASE_VERSION="1.7.0"
+          
+          # Pega os primeiros 7 caracteres do commit SHA atual
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          
+          # Cria uma tag única usando o número de execução do GitHub e o SHA do commit
+          # Exemplo de Tag: v1.7.0-b42-a1b2c3d
+          TAG_NAME="v$BASE_VERSION-b${{ github.run_number }}-$SHORT_SHA"
+          
+          echo "TAG=$TAG_NAME" >> $GITHUB_ENV
+          echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
+        shell: bash
+
+      # Cria um GitHub Release com o JAR anexado
+      - name: Criar GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG }}
+          name: Release ${{ env.TAG }}
+          body: |
+            Nova versão gerada automaticamente pelo Pipeline de CI/CD.
+            
+            **Detalhes do Commit:**
+            - **Mensagem:** ${{ github.event.head_commit.message }}
+            - **Commit SHA:** [${{ github.sha }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
+            - **Autor:** ${{ github.event.head_commit.author.name }}
+          draft: false
+          prerelease: false
+          files: build/libs/*.jar
