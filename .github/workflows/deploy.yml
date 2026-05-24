@@ -22,7 +22,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: '25'
-          distribution: 'zulu'
+          distribution: 'temurin'
 
       # Otimização de Performance: Configura cache do Gradle e valida o Wrapper automaticamente
       - name: Configurar Gradle
@@ -51,7 +51,8 @@ jobs:
         uses: mathieudutour/github-tag-action@v6.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          default_bump: patch # Se o commit não for feat/fix, incrementa a menor versão (patch)
+          default_bump: patch
+          initial_version: 1.7.0
           # Mapeia mensagens do seu prompt para SemVer:
           # fix: -> patch
           # feat: -> minor
@@ -61,7 +62,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: '25'
-          distribution: 'zulu'
+          distribution: 'temurin'
 
       - name: Configurar Gradle
         uses: gradle/actions/setup-gradle@v4
