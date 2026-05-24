@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "br.com.dhionata"
-version = "1.7.0"
+version = findProperty("version") as? String ?: "1.7.0"
 
 repositories {
     mavenCentral()

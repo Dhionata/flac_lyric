@@ -1,12 +1,12 @@
-name: CI/CD Pipeline
+name: CI/CD Pipeline Semântico
 
 on:
   push:
     branches:
-      - master # Executa a cada commit enviado para a branch principal (master)
+      - master # Executa a cada commit enviado para a branch master
 
 jobs:
-  # 1. Validação e Testes (Garante a integridade do código antes de prosseguir)
+  # 1. Validação e Testes (Garante a integridade do código antes de gerar a versão)
   validate-and-test:
     name: Validação & Testes
     runs-on: ubuntu-latest
@@ -21,7 +21,7 @@ jobs:
           java-version: '25'
           distribution: 'zulu'
 
-      # Otimização de Performance: Configura cache do Gradle automaticamente para acelerar builds subsequentes
+      # Otimização de Performance: Configura cache do Gradle
       - name: Configurar Gradle
         uses: gradle/actions/setup-gradle@v4
 
@@ -31,72 +31,56 @@ jobs:
       - name: Executar Testes Unitários
         run: ./gradlew test
 
-      - name: Gerar Dokka (Opcional - Validação de Documentação)
-        run: ./gradlew dokkaGenerate
-
-      - name: Construir JAR
-        run: ./gradlew jar
-
-      # Upload do JAR como artefato para reutilizá-lo no job de deploy/release sem precisar recompilar
-      - name: Upload do Artefato Temporário
-        uses: actions/upload-artifact@v4
-        with:
-          name: flac-lyric-app
-          path: build/libs/*.jar
-          retention-days: 1
-
-  # 2. Deploy/Release (Responsável exclusivo por empacotar e publicar a versão)
+  # 2. Deploy & Release Semântico (Calcula a versão, compila o JAR final e faz o deploy)
   release:
-    name: Gerar Nova Versão & Deploy
-    needs: validate-and-test # Garante que só executa se a validação/testes passarem (Responsabilidade Única / Separação de Conceitos)
+    name: Gerar Versão Semântica & Deploy
+    needs: validate-and-test # Só executa se todos os testes passarem
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Permissão necessária para criar Releases no repositório
+      contents: write # Permissão necessária para criar tags e releases
 
     steps:
       - name: Checkout do Código
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Necessário para ler o histórico de commits se for gerar notas de release dinâmicas
+          fetch-depth: 0 # Necessário para analisar o histórico de commits e calcular o SemVer
 
-      # Baixa o JAR que foi validado e compilado no job anterior
-      - name: Download do Artefato Temporário
-        uses: actions/download-artifact@v4
+      # Calcula a nova versão com base nas mensagens de commit convencionais e cria a tag no GitHub
+      - name: Calcular Versão & Criar Tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.2
         with:
-          name: flac-lyric-app
-          path: build/libs
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: patch # Se o commit não for feat/fix, incrementa a menor versão (patch)
+          # Mapeia mensagens do seu prompt para SemVer:
+          # fix: -> patch
+          # feat: -> minor
+          # feat!: ou BREAKING CHANGE: -> major
 
-      # Determina a tag da versão de forma dinâmica para cada commit
-      - name: Definir Tag da Versão
-        id: versioning
-        run: |
-          # Versão base definida no build.gradle.kts
-          BASE_VERSION="1.7.0"
-          
-          # Pega os primeiros 7 caracteres do commit SHA atual
-          SHORT_SHA=$(git rev-parse --short HEAD)
-          
-          # Cria uma tag única usando o número de execução do GitHub e o SHA do commit
-          # Exemplo de Tag: v1.7.0-b42-a1b2c3d
-          TAG_NAME="v$BASE_VERSION-b${{ github.run_number }}-$SHORT_SHA"
-          
-          echo "TAG=$TAG_NAME" >> $GITHUB_ENV
-          echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
-        shell: bash
+      - name: Configurar JDK 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'zulu'
 
-      # Cria um GitHub Release com o JAR anexado
+      - name: Configurar Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      # Compila o JAR final injetando a versão semântica calculada no build.gradle.kts
+      - name: Construir JAR com Versão Semântica
+        run: ./gradlew jar -Pversion=${{ steps.tag_version.outputs.new_version }}
+
+      # Cria o GitHub Release e anexa o JAR compilado
       - name: Criar GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ env.TAG }}
-          name: Release ${{ env.TAG }}
+          tag_name: ${{ steps.tag_version.outputs.new_tag }}
+          name: Release ${{ steps.tag_version.outputs.new_tag }}
           body: |
-            Nova versão gerada automaticamente pelo Pipeline de CI/CD.
+            Nova versão gerada automaticamente baseada nas mensagens de commit.
             
-            **Detalhes do Commit:**
-            - **Mensagem:** ${{ github.event.head_commit.message }}
-            - **Commit SHA:** [${{ github.sha }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
-            - **Autor:** ${{ github.event.head_commit.author.name }}
+            ### Alterações nesta Versão
+            ${{ steps.tag_version.outputs.changelog }}
           draft: false
           prerelease: false
           files: build/libs/*.jar
