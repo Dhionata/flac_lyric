@@ -18,7 +18,6 @@ class FileServiceImplTest {
 
             val unmatchedLyric = File(lyricsDir, "unmatched.lrc").apply { writeText("lyrics here") }
             val matchedLyric = File(lyricsDir, "matched.lrc").apply { writeText("lyrics here") }
-            val matchedAudio = File(musicDir, "matched.flac").apply { writeText("audio data") }
 
             val fakeUi = FakeUserInterface().apply {
                 askToMoveUnmatchedLyricsResponse = true
