@@ -12,15 +12,29 @@ import org.jflac.metadata.Metadata
 import org.jflac.metadata.StreamInfo
 import org.jtransforms.fft.DoubleFFT_1D
 
+/**
+ * Implementation of the audio analysis service using FLAC decoding
+ * and Fast Fourier Transform (FFT) to detect frequency cutoffs (upscale / fake lossless).
+ */
 class AudioAnalysisServiceImpl : AudioAnalysisService {
 
+    /** Window size for FFT calculation. */
     private val windowSize = 4096
+    /** Maximum time in seconds for sample extraction in quick analysis. */
     private val sampleAnalyzeSeconds = 30
-    private val skipSeconds = 30 // Pular o início para evitar silêncio
+    /** Seconds to be ignored at the beginning of the audio to avoid silence. */
+    private val skipSeconds = 30
 
+    /**
+     * Analyzes the frequency spectrum of the provided FLAC file to detect signs of prior compression (e.g. MP3 upscale).
+     *
+     * @param file The .flac file to be analyzed.
+     * @param fullAnalysis If true, processes the entire file. If false, analyzes only a 30-second window.
+     * @return [AudioAnalysisService.AnalysisResult] containing the evaluation of the file.
+     */
     override fun analyzeCutoff(file: File, fullAnalysis: Boolean): AudioAnalysisService.AnalysisResult {
         if (!file.exists() || file.extension.lowercase() != "flac") {
-            return AudioAnalysisService.AnalysisResult(false, 0, "Arquivo inválido ou não suportado.")
+            return AudioAnalysisService.AnalysisResult(false, 0, "Invalid or unsupported file.")
         }
 
         val inputStream = FileInputStream(file)
@@ -51,7 +65,7 @@ class AudioAnalysisServiceImpl : AudioAnalysisService {
                     if (currentSecond > skipSeconds + sampleAnalyzeSeconds) return
                 }
 
-                // Pegamos apenas o primeiro canal para análise de espectro simplificada
+                // We take only the first channel for simplified spectrum analysis
                 val channelData = decoder.channelData[0].output
                 for (i in 0..<frame.header.blockSize) {
                     samples.add(channelData[i].toDouble())
@@ -64,17 +78,17 @@ class AudioAnalysisServiceImpl : AudioAnalysisService {
 
         try {
             streamInfo = decoder.readStreamInfo()
-            if (streamInfo == null) return AudioAnalysisService.AnalysisResult(false, 0, "Não foi possível ler info do FLAC.")
+            if (streamInfo == null) return AudioAnalysisService.AnalysisResult(false, 0, "Could not read FLAC info.")
 
             decoder.decode()
         } catch (e: Exception) {
-            return AudioAnalysisService.AnalysisResult(false, 0, "Erro ao decodificar: ${e.message}")
+            return AudioAnalysisService.AnalysisResult(false, 0, "Error decoding: ${e.message}")
         } finally {
             inputStream.close()
         }
 
         if (samples.isEmpty()) {
-            return AudioAnalysisService.AnalysisResult(false, 0, "Não foi possível extrair samples.")
+            return AudioAnalysisService.AnalysisResult(false, 0, "Could not extract samples.")
         }
 
         val sampleRate = streamInfo.sampleRate
@@ -90,7 +104,7 @@ class AudioAnalysisServiceImpl : AudioAnalysisService {
             val windowData = DoubleArray(windowSize)
             System.arraycopy(data, w * windowSize, windowData, 0, windowSize)
 
-            // Aplicar janela de Hamming para reduzir leakage
+            // Apply Hamming window to reduce leakage
             for (i in 0..<windowSize) {
                 windowData[i] *= 0.54 - 0.46 * kotlin.math.cos(2.0 * Math.PI * i / (windowSize - 1))
             }
@@ -105,19 +119,19 @@ class AudioAnalysisServiceImpl : AudioAnalysisService {
             }
         }
 
-        // Média das magnitudes
+        // Average of magnitudes
         for (i in avgEnergies.indices) {
             avgEnergies[i] /= numWindows.toDouble()
         }
 
-        // Converter para dB (escala logarítmica)
+        // Convert to dB (logarithmic scale)
         val energiesDb = DoubleArray(avgEnergies.size) { i ->
             if (avgEnergies[i] > 0) 20 * log10(avgEnergies[i]) else -100.0
         }
 
         val binFreq = sampleRate.toDouble() / windowSize
 
-        // Frequências de interesse
+        // Frequencies of interest
         val index16k = (16000 / binFreq).toInt().coerceAtMost(energiesDb.size - 1)
         val index18k = (18000 / binFreq).toInt().coerceAtMost(energiesDb.size - 1)
         val index20k = (20000 / binFreq).toInt().coerceAtMost(energiesDb.size - 1)
@@ -128,20 +142,20 @@ class AudioAnalysisServiceImpl : AudioAnalysisService {
         val energy18k = energiesDb.sliceArray(index18k - 5..index18k + 5).average()
         val energy20k = energiesDb.sliceArray(index20k - 5..index20k + 5).average()
 
-        // Critério de corte: Se a energia cai mais de 30dB em relação à base e continua caindo
-        // Valores baseados em observações comuns de fakes
+        // Cutoff criterion: If the energy drops more than 30dB relative to the base and keeps falling
+        // Values based on common observations of fakes
         if (energyBase - energy16k > 35 && energy16k - energy18k > 5) {
-            return AudioAnalysisService.AnalysisResult(true, 16000, "Corte detectado em ~16kHz (Possível upscale de MP3 128kbps)")
+            return AudioAnalysisService.AnalysisResult(true, 16000, "Cutoff detected at ~16kHz (Possible upscale of 128kbps MP3)")
         }
 
-        if (energyBase - energy20k > 35 && energy20k > -80.0) { // -80dB é quase silêncio digital
-            // Se houver uma queda brusca antes de 20k
+        if (energyBase - energy20k > 35 && energy20k > -80.0) { // -80dB is close to digital silence
+            // If there is a sharp drop before 20k
             val energy19k = energiesDb.sliceArray((19000 / binFreq).toInt() - 5..(19000 / binFreq).toInt() + 5).average()
             if (energy19k - energy20k > 20) {
-                return AudioAnalysisService.AnalysisResult(true, 20000, "Corte detectado em ~20kHz (Possível upscale de MP3 320kbps)")
+                return AudioAnalysisService.AnalysisResult(true, 20000, "Cutoff detected at ~20kHz (Possible upscale of 320kbps MP3)")
             }
         }
 
-        return AudioAnalysisService.AnalysisResult(false, 0, "Espectro parece saudável.")
+        return AudioAnalysisService.AnalysisResult(false, 0, "Spectrum seems healthy.")
     }
 }

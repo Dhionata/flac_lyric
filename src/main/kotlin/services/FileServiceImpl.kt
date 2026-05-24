@@ -5,21 +5,28 @@ import java.io.File
 import java.nio.file.Paths
 import java.util.logging.Logger
 
+/**
+ * Practical implementation of [FileService] to perform copies, deletions,
+ * moves, and renaming of physical files, managing and reporting successes and errors.
+ */
 class FileServiceImpl : FileService {
 
+    /** Internal class logger for registering operations and warnings. */
     private val logger = Logger.getLogger(this.javaClass.name)
+    /** Set of logs of changes performed. */
     override val changedSet: MutableSet<String> = mutableSetOf<String>()
+    /** Set of captured errors. */
     override val errorSet: MutableSet<Exception> = mutableSetOf<Exception>()
 
     override fun printFilePermissions(file: File) {
         logger.info(
-            "Permissões da pasta $file\nLeitura: ${file.canRead()}\nEscrita: ${file.canWrite()}\nExecução: ${file.canExecute()}"
+            "Folder permissions for $file\nRead: ${file.canRead()}\nWrite: ${file.canWrite()}\nExecute: ${file.canExecute()}"
         )
     }
 
     override fun moveFile(sourceFile: File, targetDir: File): Boolean {
         if (!sourceFile.exists()) {
-            throw Exception("\n-- O arquivo ${sourceFile.name} não existe.\n")
+            throw Exception("\n-- The file ${sourceFile.name} does not exist.\n")
         }
 
         val actualTargetDir = if (targetDir.isDirectory) targetDir else targetDir.parentFile
@@ -34,36 +41,36 @@ class FileServiceImpl : FileService {
             val sameFileWithDifferentName = sameFilesWithDiffNames(targetFile.parentFile, sourceFile)
             if (sameFileWithDifferentName && sourceFile.parentFile != targetFile.parentFile) {
                 logger.warning(
-                    "Será deletado o arquivo\n$sourceFile"
+                    "The file will be deleted\n$sourceFile"
                 )
                 sourceFile.delete().also {
                     logger.info(
-                        "Arquivo\n$sourceFile\nexcluído, já existe um arquivo com o mesmo conteúdo e tamanho no diretório alvo"
+                        "File\n$sourceFile\ndeleted, a file with the same content and size already exists in the target directory"
                     )
                 }
 
             } else {
                 throw Exception(
-                    "Já existe um arquivo\n${targetFile.name}\ndo diretório\n${sourceFile.parentFile}\nno diretório de destino\n${
+                    "A file\n${targetFile.name}\nfrom directory\n${sourceFile.parentFile}\nalready exists in the destination directory\n${
                         targetFile.parent
-                    }\nMas conteúdo ou tamanho diferente\n"
+                    }\nBut has different content or size\n"
                 )
             }
         } else if (actualTargetDir.parentFile.freeSpace < sourceFile.length()) {
-            throw Exception("— Não há espaço suficiente no diretório de destino para o arquivo ${sourceFile.name}.\n")
+            throw Exception("— There is not enough space in the destination directory for file ${sourceFile.name}.\n")
         } else {
             try {
                 sourceFile.copyTo(targetFile, overwrite = false)
                 sourceFile.delete()
                 logger.info(
-                    "\nArquivo \n${sourceFile.name}\nmovido de\n${sourceFile.parent}\npara\n${targetFile.parent}\n"
+                    "\nFile \n${sourceFile.name}\nmoved from\n${sourceFile.parent}\nto\n${targetFile.parent}\n"
                 )
                 true
             } catch (e: Exception) {
                 throw Exception(
-                    "Falha ao mover o arquivo\n${sourceFile.name}\nde\n${
+                    "Failed to move file\n${sourceFile.name}\nfrom\n${
                         sourceFile.parent
-                    }\npara\n${
+                    }\nto\n${
                         targetFile.parent
                     }\n${e.javaClass}\n"
                 )
@@ -81,7 +88,7 @@ class FileServiceImpl : FileService {
             if (filesAreEqual(targetFile, file)) {
                 file.delete()
                 throw Exception(
-                    "Não foi possível renomear!\nJá existe um arquivo\n${targetFile.name}\nno diretório de destino\n${targetFile.parent}\ncom o mesmo conteúdo.\nArquivo ${file.name} excluído\n"
+                    "Could not rename!\nThere already exists a file\n${targetFile.name}\nin target directory\n${targetFile.parent}\nwith the same content.\nFile ${file.name} deleted\n"
                 )
             } else {
                 val targetDirectory = File(Paths.get(System.getProperty("user.home"), "Desktop").toString(), "Lyrics With Wrong Name")
@@ -92,7 +99,7 @@ class FileServiceImpl : FileService {
 
                 moveFile(file, targetDirectory)
                 throw Exception(
-                    "Não foi possível renomear!\nJá existe um arquivo\n${targetFile.name}\nno diretório de destino\n${targetFile.parent} com conteúdo diferente.\nArquivo\n${file.name}\nmovido para\n${targetDirectory.absolutePath}\n"
+                    "Could not rename!\nThere already exists a file\n${targetFile.name}\nin target directory\n${targetFile.parent} with different content.\nFile\n${file.name}\nmoved to\n${targetDirectory.absolutePath}\n"
                 )
             }
         } else {
@@ -103,10 +110,10 @@ class FileServiceImpl : FileService {
     override fun moveLyricFile(lyricFile: File, targetDir: File): File? {
         try {
             if (moveFile(lyricFile, targetDir)) {
-                changedSet.add("Arquivo \n${lyricFile.name}\nmovido de\n${lyricFile.parent}\npara\n${targetDir}\n")
+                changedSet.add("File \n${lyricFile.name}\nmoved from\n${lyricFile.parent}\nto\n${targetDir}\n")
                 return File(targetDir, lyricFile.name)
             } else {
-                errorSet.add(Exception("Arquivo ${lyricFile.name} não movido para $targetDir"))
+                errorSet.add(Exception("File ${lyricFile.name} not moved to $targetDir"))
             }
         } catch (e: Exception) {
             errorSet.add(e)
@@ -117,7 +124,7 @@ class FileServiceImpl : FileService {
     override fun renameLyricFile(lyricFile: File, audioFile: File) {
         try {
             if (renameFile(lyricFile, "${audioFile.nameWithoutExtension}.lrc")) {
-                changedSet.add("Arquivo ${lyricFile.name} renomeado para ${audioFile.nameWithoutExtension}.lrc")
+                changedSet.add("File ${lyricFile.name} renamed to ${audioFile.nameWithoutExtension}.lrc")
             }
         } catch (e: Exception) {
             errorSet.add(e)
@@ -147,9 +154,9 @@ class FileServiceImpl : FileService {
 
         if (lyricsDirectory.walk().filter { it.isFile }.none()) {
             if (lyricsDirectory.delete()) {
-                changedSet.add("Diretório ${lyricsDirectory.name} excluído por não existir mais arquivos .lrc.")
+                changedSet.add("Directory ${lyricsDirectory.name} deleted because there are no more .lrc files.")
             } else {
-                errorSet.add(Exception("Diretório ${lyricsDirectory.name} não pôde ser excluído."))
+                errorSet.add(Exception("Directory ${lyricsDirectory.name} could not be deleted."))
             }
         }
     }

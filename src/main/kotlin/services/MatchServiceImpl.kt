@@ -9,10 +9,15 @@ import models.FilePair
 import org.apache.commons.text.similarity.CosineDistance
 import ui.UserInterfaceImpl
 
+/**
+ * Implementation of [MatchService] using Cosine Distance calculation to compare
+ * file name strings and find the best lyric match for each song.
+ */
 class MatchServiceImpl(
     override val userInterface: UserInterface = UserInterfaceImpl(),
     override val fileService: FileService = FileServiceImpl(),
 ) : MatchService {
+    /** Logger for debugging and tracking similarity. */
     private val logger = Logger.getLogger(this.javaClass.name)
 
     override fun matchFiles(lyricFiles: List<File>, audioFiles: List<File>): List<FilePair> {
@@ -65,12 +70,12 @@ class MatchServiceImpl(
                     }
                 }
             } else {
-                logger.info("Os arquivos de FilePair ${pair.lyricFile.name} e ${pair.audioFile.name} já estão no lugar correto!")
+                logger.info("The FilePair files ${pair.lyricFile.name} and ${pair.audioFile.name} are already in the correct place!")
 
                 if (userInterface.onlyRename(pair)) {
                     fileService.renameLyricFile(pair.lyricFile, pair.audioFile)
                 } else {
-                    logger.info("Optou por não renomear")
+                    logger.info("Opted not to rename")
                 }
             }
         }
@@ -85,7 +90,7 @@ class MatchServiceImpl(
             cosineDistance.apply(
                 audioFile.nameWithoutExtension.lowercase(), lyricLowercaseName
             ).also { distance ->
-                logger.info("Distância: $distance\npara lyricFile:\n${lyricFile.name}\n${audioFile.name}\n")
+                logger.info("Distance: $distance\nfor lyricFile:\n${lyricFile.name}\n${audioFile.name}\n")
             }
         }
     }

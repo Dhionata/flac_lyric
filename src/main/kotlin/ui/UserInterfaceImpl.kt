@@ -1,5 +1,6 @@
 package ui
 
+import exceptions.OperationCancelledException
 import interfaces.UserInterface
 import java.awt.Component
 import java.awt.Dimension
@@ -21,11 +22,19 @@ import javax.swing.border.EmptyBorder
 import kotlin.system.exitProcess
 import models.FilePair
 
+/**
+ * Graphical implementation of [UserInterface] using Java Swing to display dialogs,
+ * error messages, confirmation dialog boxes, progress bars, and the main menu.
+ */
 class UserInterfaceImpl : UserInterface {
 
+    /** Hidden frame that serves as a parent to center JOptionPane dialog boxes. */
     private val frame: JFrame = JFrame("Flac Lyric")
+    /** Active progress window. */
     private var progressDialog: JDialog? = null
+    /** Active progress bar in Swing. */
     private var progressBar: JProgressBar? = null
+    /** Descriptive text label for the current progress. */
     private var progressLabel: JLabel? = null
 
     init {
@@ -80,7 +89,7 @@ class UserInterfaceImpl : UserInterface {
         )
 
         if (result == JOptionPane.CLOSED_OPTION) {
-            exitProcess(0)
+            throw OperationCancelledException()
         }
 
         return result == JOptionPane.YES_OPTION
@@ -96,7 +105,7 @@ class UserInterfaceImpl : UserInterface {
         )
 
         if (result == JOptionPane.CLOSED_OPTION) {
-            exitProcess(0)
+            throw OperationCancelledException()
         }
 
         return result == JOptionPane.YES_OPTION
@@ -144,7 +153,7 @@ class UserInterfaceImpl : UserInterface {
             options,
             options[0]
         )
-        return result == 1 // 1 é "Análise Completa"
+        return result == 1 // 1 is "Full Analysis"
     }
 
     override fun showProgress(title: String, max: Int) {

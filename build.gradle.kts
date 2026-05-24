@@ -1,6 +1,7 @@
 plugins {
     kotlin("jvm") version "+"
     application
+    id("org.jetbrains.dokka") version "+"
 }
 
 group = "br.com.dhionata"

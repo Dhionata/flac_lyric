@@ -6,13 +6,22 @@ import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.tag.FieldKey
 
 /**
- * Validador específico para o padrão "Artista - Título" limpo com Álbum (Single Responsibility Principle)
+ * Specific validator for the clean "Artist - Title" pattern with Album (Single Responsibility Principle).
+ * Validates the expected directory structure: Album Artist / Album / Artist - Title.
  */
 class CleanTitleNomenclatureValidator : AudioNomenclatureValidator {
 
+    /** Regex to remove feat. or similar indications from the title. */
     private val featRegex = Regex("(?i)\\s*\\(?feat\\.[^)]*\\)?")
+    /** Audio extensions supported by the nomenclature validation. */
     private val supportedExtensions = setOf("flac", "mp3", "m4a", "wav", "ogg")
 
+    /**
+     * Sanitizes the name by replacing characters prohibited in the file system with underscores.
+     *
+     * @param name Name to be sanitized.
+     * @return Sanitized name.
+     */
     private fun sanitize(name: String): String {
         return name.replace(Regex("[\\\\/:*?\"<>|]"), "_")
     }
@@ -68,7 +77,7 @@ class CleanTitleNomenclatureValidator : AudioNomenclatureValidator {
                 return true
             }
 
-            // Fallback: Tentativa de validação sem sanitização, caso as pastas originais não tenham sido sanitizadas da mesma forma
+            // Fallback: Attempt validation without sanitization, in case the original folders were not sanitized the same way
             val expectedRelativePathUnsanitized = if (fmtAlbumArtist.isNotBlank() && album.isNotBlank()) {
                 File(File(folder1), album).resolve(fileName)
             } else {
@@ -81,7 +90,7 @@ class CleanTitleNomenclatureValidator : AudioNomenclatureValidator {
             }
 
         } catch (_: Exception) {
-            // Ignorar e retornar false caso não seja possível ler as tags
+            // Ignore and return false if tags cannot be read
         }
 
         return false

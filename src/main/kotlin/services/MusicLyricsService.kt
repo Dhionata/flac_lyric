@@ -13,6 +13,10 @@ import interfaces.UserInterface
 import java.io.File
 import ui.UserInterfaceImpl
 
+/**
+ * Orchestrator service that centralizes all business rules related to music and lyrics.
+ * Coordinates pairing actions, nomenclature verification, spectrum analysis, and synchronization.
+ */
 class MusicLyricsService(
     private val userInterface: UserInterface = UserInterfaceImpl(),
     private val directoryService: DirectoryService = DirectoryServiceImpl(),

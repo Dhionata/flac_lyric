@@ -1,14 +1,18 @@
 package services
 
+import exceptions.OperationCancelledException
 import interfaces.DirectoryService
 import interfaces.FileService
 import java.io.File
 import javax.swing.JFileChooser
 import javax.swing.UIManager
-import kotlin.system.exitProcess
 
+/**
+ * Implementation of [DirectoryService] that uses Swing's [JFileChooser] to select files and directories interactively.
+ */
 class DirectoryServiceImpl(private val fileService: FileService = FileServiceImpl()) : DirectoryService {
 
+    /** Graphical dialog for file or directory selection. */
     private val jFileChooser: JFileChooser = JFileChooser()
 
     init {
@@ -23,7 +27,7 @@ class DirectoryServiceImpl(private val fileService: FileService = FileServiceImp
                     fileService.printFilePermissions(it)
                 }
             } else {
-                exitProcess(0)
+                throw OperationCancelledException()
             }
         }
     }
@@ -38,7 +42,7 @@ class DirectoryServiceImpl(private val fileService: FileService = FileServiceImp
                     fileService.printFilePermissions(it)
                 }
             } else {
-                exitProcess(0)
+                throw OperationCancelledException()
             }
         }
     }
