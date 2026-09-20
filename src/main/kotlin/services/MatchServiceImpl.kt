@@ -4,6 +4,7 @@ import interfaces.FileService
 import interfaces.MatchService
 import interfaces.UserInterface
 import java.io.File
+import java.util.Collections
 import java.util.logging.Logger
 import models.FilePair
 import models.OperationResult
@@ -22,7 +23,7 @@ class MatchServiceImpl(
 
     override fun matchFiles(lyricFiles: List<File>, audioFiles: List<File>): List<FilePair> {
         // Pre-index existing lyric files in the directories of the audio files to quickly determine pairing
-        val existingLyricFilePaths = audioFiles.map { it.parentFile }.distinct().flatMap { dir ->
+        val existingLyricFilePaths = audioFiles.mapNotNull { it.parentFile }.distinct().flatMap { dir ->
             dir.listFiles { _, name -> name.lowercase().endsWith(".lrc") }?.toList() ?: emptyList()
         }.map { it.absolutePath.lowercase() }.toSet()
 
@@ -43,7 +44,7 @@ class MatchServiceImpl(
             expectedAudioFileForLyric
         }
 
-        val matchFilesSet = mutableListOf<FilePair>()
+        val matchFilesSet = Collections.synchronizedList(mutableListOf<FilePair>())
 
         userInterface.showProgress(Messages.get("progress.match"), unpairedLyricFiles.size)
         var processedCount = 0
@@ -70,7 +71,7 @@ class MatchServiceImpl(
         userInterface.closeProgress()
 
         return matchFilesSet.filter {
-            it.lyricFile.parentFile != it.audioFile.parentFile || it.lyricFile.nameWithoutExtension != it.audioFile.nameWithoutExtension
+            it.lyricFile.parentFile != it.audioFile.parentFile || !it.lyricFile.nameWithoutExtension.equals(it.audioFile.nameWithoutExtension, ignoreCase = true)
         }
     }
 
@@ -80,7 +81,7 @@ class MatchServiceImpl(
         filePairs.forEachIndexed { index, pair ->
             userInterface.updateProgress(index + 1, pair.lyricFile.name)
             if (!pair.lyricFile.parentFile.equals(pair.audioFile.parentFile)) {
-                if (pair.audioFile.nameWithoutExtension == pair.lyricFile.nameWithoutExtension) {
+                if (pair.audioFile.nameWithoutExtension.equals(pair.lyricFile.nameWithoutExtension, ignoreCase = true)) {
                     val (_, moveResult) = fileService.moveLyricFile(pair.lyricFile, pair.audioFile.parentFile)
                     result += moveResult
                 } else if (fileService.sameFilesWithDiffNames(
@@ -111,15 +112,20 @@ class MatchServiceImpl(
     }
 
     private fun findBestMatch(lyricFile: File, audioFiles: List<Pair<File, String>>): File? {
+        if (audioFiles.isEmpty()) return null
         val lyricLowercaseName = lyricFile.nameWithoutExtension.lowercase()
         val cosineDistance = CosineDistance()
 
-        return audioFiles.minByOrNull { (audioFile, audioLowercaseName) ->
-            cosineDistance.apply(
-                audioLowercaseName, lyricLowercaseName
-            ).also { distance ->
-                logger.info("Distance: $distance\nfor lyricFile:\n${lyricFile.name}\n${audioFile.name}\n")
+        var bestFile: File? = null
+        var minDistance = Double.MAX_VALUE
+
+        for ((audioFile, audioLowercaseName) in audioFiles) {
+            val distance = cosineDistance.apply(audioLowercaseName, lyricLowercaseName)
+            if (distance < minDistance) {
+                minDistance = distance
+                bestFile = audioFile
             }
-        }?.first
+        }
+        return bestFile
     }
 }

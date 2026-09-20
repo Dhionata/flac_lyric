@@ -79,4 +79,6 @@ fun main() {
             userInterface.showError(e.toString())
         }
     }
+
+    kotlin.system.exitProcess(0)
 }

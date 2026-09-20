@@ -27,7 +27,7 @@ class FileServiceImpl : FileService {
             throw Exception("\n-- The file ${sourceFile.name} does not exist.\n")
         }
 
-        val actualTargetDir = if (targetDir.isDirectory) targetDir else targetDir.parentFile
+        val actualTargetDir = if (targetDir.isDirectory) targetDir else (targetDir.parentFile ?: targetDir)
 
         if (!actualTargetDir.exists()) {
             actualTargetDir.mkdirs()
@@ -36,7 +36,7 @@ class FileServiceImpl : FileService {
         val targetFile = File(actualTargetDir, sourceFile.name)
 
         return if (targetFile.exists()) {
-            val sameFileWithDifferentName = sameFilesWithDiffNames(targetFile.parentFile, sourceFile)
+            val sameFileWithDifferentName = sameFilesWithDiffNames(actualTargetDir, sourceFile)
             if (sameFileWithDifferentName && sourceFile.parentFile != targetFile.parentFile) {
                 logger.warning(
                     "The file will be deleted\n$sourceFile"
@@ -46,7 +46,6 @@ class FileServiceImpl : FileService {
                         "File\n$sourceFile\ndeleted, a file with the same content and size already exists in the target directory"
                     )
                 }
-
             } else {
                 throw Exception(
                     "A file\n${targetFile.name}\nfrom directory\n${sourceFile.parentFile}\nalready exists in the destination directory\n${
@@ -54,12 +53,15 @@ class FileServiceImpl : FileService {
                     }\nBut has different content or size\n"
                 )
             }
-        } else if (actualTargetDir.parentFile.freeSpace < sourceFile.length()) {
+        } else if (actualTargetDir.usableSpace in 1..<sourceFile.length()) {
             throw Exception("— There is not enough space in the destination directory for file ${sourceFile.name}.\n")
         } else {
             try {
-                sourceFile.copyTo(targetFile, overwrite = false)
-                sourceFile.delete()
+                val moved = sourceFile.renameTo(targetFile)
+                if (!moved) {
+                    sourceFile.copyTo(targetFile, overwrite = false)
+                    sourceFile.delete()
+                }
                 logger.info(
                     "\nFile \n${sourceFile.name}\nmoved from\n${sourceFile.parent}\nto\n${targetFile.parent}\n"
                 )
@@ -140,15 +142,19 @@ class FileServiceImpl : FileService {
     ): OperationResult {
         val changes = mutableSetOf<String>()
         val errors = mutableSetOf<Exception>()
-        val musicFilesMap = musicDirectory.walk().filter { it.isFile && it.extension != "lrc" }.associateBy { it.nameWithoutExtension }
+        val musicFilesMap = musicDirectory.walk()
+            .filter { it.isFile && it.extension.lowercase() in models.AudioConfig.supportedExtensions }
+            .associateBy { it.nameWithoutExtension.lowercase() }
 
-        val unmatchedLyricFiles = lyricsDirectory.walk().filter { it.isFile && it.extension == "lrc" }.filterNot { lyricFile ->
-            musicFilesMap.containsKey(lyricFile.nameWithoutExtension)
-        }.toList()
+        val unmatchedLyricFiles = lyricsDirectory.walk()
+            .filter { it.isFile && it.extension.equals("lrc", ignoreCase = true) }
+            .filterNot { lyricFile ->
+                musicFilesMap.containsKey(lyricFile.nameWithoutExtension.lowercase())
+            }.toList()
 
         if (unmatchedLyricFiles.isNotEmpty()) {
             if (userInterface.askToMoveUnmatchedLyrics(unmatchedLyricFiles.size)) {
-                val newDirectory = File(musicDirectory.parentFile, "unmatched_lrc")
+                val newDirectory = File(musicDirectory.parentFile ?: musicDirectory, "unmatched_lrc")
                 if (!newDirectory.exists()) {
                     newDirectory.mkdirs()
                 }
@@ -163,7 +169,7 @@ class FileServiceImpl : FileService {
         }
 
         if (lyricsDirectory.walk().none { it.isFile }) {
-            if (lyricsDirectory.delete()) {
+            if (lyricsDirectory.deleteRecursively()) {
                 changes.add("Directory ${lyricsDirectory.name} deleted because there are no more .lrc files.")
             } else {
                 errors.add(Exception("Directory ${lyricsDirectory.name} could not be deleted."))

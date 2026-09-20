@@ -13,12 +13,12 @@ class AudioFileHandlerImpl : AudioFileHandler {
 
     /**
      * Recursively scans the provided directory and returns all files whose extension
-     * is present in the list of supported extensions.
+     * is present in the list of supported extensions (case-insensitive).
      *
      * @param musicDirectory The base directory to scan.
      * @return List of valid audio files.
      */
     override fun getAudioFiles(musicDirectory: File): List<File> {
-        return musicDirectory.walk().filter { it.isFile && it.extension in supportedExtensions }.toList()
+        return musicDirectory.walk().filter { it.isFile && it.extension.lowercase() in supportedExtensions }.toList()
     }
 }

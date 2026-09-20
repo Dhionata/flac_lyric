@@ -74,7 +74,10 @@ class CleanTitleNomenclatureValidator : AudioNomenclatureValidator {
 
             val expectedFile = File(baseDirectory, expectedRelativePath.path)
 
-            if (file.absolutePath == expectedFile.absolutePath) {
+            if (file.canonicalFile == expectedFile.canonicalFile ||
+                file.canonicalPath.equals(expectedFile.canonicalPath, ignoreCase = true) ||
+                file.absolutePath.equals(expectedFile.absolutePath, ignoreCase = true)
+            ) {
                 return true
             }
 
@@ -86,7 +89,10 @@ class CleanTitleNomenclatureValidator : AudioNomenclatureValidator {
             }
             val expectedFileUnsanitized = File(baseDirectory, expectedRelativePathUnsanitized.path)
 
-            if (file.absolutePath == expectedFileUnsanitized.absolutePath) {
+            if (file.canonicalFile == expectedFileUnsanitized.canonicalFile ||
+                file.canonicalPath.equals(expectedFileUnsanitized.canonicalPath, ignoreCase = true) ||
+                file.absolutePath.equals(expectedFileUnsanitized.absolutePath, ignoreCase = true)
+            ) {
                 return true
             }
 

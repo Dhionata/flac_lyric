@@ -118,18 +118,29 @@ class MusicLyricsService(
 
         audioFiles.forEachIndexed { index, audioFile ->
             userInterface.updateProgress(index + 1, audioFile.name)
-            val hasLyric = audioFile.parentFile.walk().any { audioFileParent ->
-                audioFileParent.name.equals(audioFile.nameWithoutExtension + ".lrc")
-            }
+            val parent = audioFile.parentFile
+            val hasLyric = parent != null && parent.listFiles { _, name ->
+                name.equals("${audioFile.nameWithoutExtension}.lrc", ignoreCase = true)
+            }?.isNotEmpty() == true
+
             if (!hasLyric) {
                 musicFilesWithoutLyrics.add(audioFile)
             }
         }
         userInterface.closeProgress()
 
-        File("MusicsWithoutLyrics_${musicFilesWithoutLyrics.hashCode()}.txt").writeText(
-            musicFilesWithoutLyrics.joinToString("\n") { it.name }
-        )
+        val changes = mutableSetOf<String>()
+        if (musicFilesWithoutLyrics.isNotEmpty()) {
+            val txtFileName = "MusicsWithoutLyrics_${musicFilesWithoutLyrics.hashCode()}.txt"
+            File(txtFileName).writeText(
+                musicFilesWithoutLyrics.joinToString("\n") { it.name }
+            )
+            changes.add("Found ${musicFilesWithoutLyrics.size} audio file(s) without .lrc.\nList saved to: $txtFileName")
+        } else {
+            changes.add("All ${audioFiles.size} audio file(s) have matching .lrc lyrics.")
+        }
+
+        userInterface.showResult(changes, emptySet())
 
         return musicFilesWithoutLyrics
     }
@@ -139,16 +150,24 @@ class MusicLyricsService(
         val outDirectory = directoryService.getDirectory(Messages.get("prompt.select.out_dir"))
         val lyricFiles = lyricFileHandler.getLyricFiles(lyricsDirectory)
 
+        val timestampRegex = Regex("""\[\d{1,2}:\d{2}""")
+
         userInterface.showProgress(Messages.get("progress.check_sync"), lyricFiles.size)
         val lyricsFilesWithoutSync = lyricFiles.filterIndexed { index, lyricFile ->
             userInterface.updateProgress(index + 1, lyricFile.name)
-            lyricFile.readLines().none { line -> line.contains(Regex("\\d")) }
+            try {
+                !timestampRegex.containsMatchIn(lyricFile.readText())
+            } catch (_: Exception) {
+                false
+            }
         }
         userInterface.closeProgress()
 
-        File("LyricsWithoutSync_${lyricsFilesWithoutSync.hashCode()}.txt").writeText(
-            lyricsFilesWithoutSync.joinToString("\n") { it.name }
-        )
+        if (lyricsFilesWithoutSync.isNotEmpty()) {
+            File("LyricsWithoutSync_${lyricsFilesWithoutSync.hashCode()}.txt").writeText(
+                lyricsFilesWithoutSync.joinToString("\n") { it.name }
+            )
+        }
 
         val changes = mutableSetOf<String>()
         val errors = mutableSetOf<Exception>()
@@ -174,33 +193,39 @@ class MusicLyricsService(
         userInterface.showProgress(Messages.get("progress.find_v1"), lyricFiles.size)
         val lyricsFilesWithV1 = lyricFiles.filterIndexed { index, lyricFile ->
             userInterface.updateProgress(index + 1, lyricFile.name)
-            lyricFile.readLines().any { line -> line.contains("v1:") }
+            try {
+                lyricFile.readText().contains("v1:", ignoreCase = true)
+            } catch (_: Exception) {
+                false
+            }
         }
         userInterface.closeProgress()
-
-        File("LyricsWithV1_${lyricsFilesWithV1.hashCode()}.txt").writeText(
-            lyricsFilesWithV1.joinToString("\n") { it.name }
-        )
 
         val changes = mutableSetOf<String>()
         val errors = mutableSetOf<Exception>()
 
-        userInterface.showProgress(Messages.get("progress.remove_v1"), lyricsFilesWithV1.size)
-        lyricsFilesWithV1.forEachIndexed { index, lyricFile ->
-            userInterface.updateProgress(index + 1, lyricFile.name)
-            try {
-                lyricFile.readLines().forEach { line ->
-                    if (line.contains("v1:")) {
-                        val newLine = line.replace("v1:", "")
-                        lyricFile.writeText(lyricFile.readText().replace(line, newLine))
+        if (lyricsFilesWithV1.isNotEmpty()) {
+            val txtFileName = "LyricsWithV1_${lyricsFilesWithV1.hashCode()}.txt"
+            File(txtFileName).writeText(
+                lyricsFilesWithV1.joinToString("\n") { it.name }
+            )
+
+            userInterface.showProgress(Messages.get("progress.remove_v1"), lyricsFilesWithV1.size)
+            lyricsFilesWithV1.forEachIndexed { index, lyricFile ->
+                userInterface.updateProgress(index + 1, lyricFile.name)
+                try {
+                    val originalText = lyricFile.readText()
+                    if (originalText.contains("v1:", ignoreCase = true)) {
+                        val updatedText = originalText.replace(Regex("(?i)v1:"), "")
+                        lyricFile.writeText(updatedText)
                         changes.add(lyricFile.name)
                     }
+                } catch (e: Exception) {
+                    errors.add(e)
                 }
-            } catch (e: Exception) {
-                errors.add(e)
             }
+            userInterface.closeProgress()
         }
-        userInterface.closeProgress()
 
         userInterface.showResult(changes, errors)
 
@@ -214,10 +239,10 @@ class MusicLyricsService(
         val lyricFiles = lyricFileHandler.getLyricFiles(mainDirectory)
         val audioFiles = audioFileHandler.getAudioFiles(mainDirectory)
 
-        val audioNamesWithoutExtension = audioFiles.map { it.nameWithoutExtension }.toSet()
+        val audioNamesWithoutExtension = audioFiles.map { it.nameWithoutExtension.lowercase() }.toSet()
 
         val aloneLyrics = lyricFiles.filter { lyricFile ->
-            !audioNamesWithoutExtension.contains(lyricFile.nameWithoutExtension)
+            !audioNamesWithoutExtension.contains(lyricFile.nameWithoutExtension.lowercase())
         }
 
         val movedLyricsNames = mutableListOf<String>()
@@ -233,7 +258,7 @@ class MusicLyricsService(
             errors.addAll(moveResult.errorSet)
             movedLyricsNames.add(lyric.name)
 
-            if (parentFolder.isDirectory && parentFolder.listFiles()?.isEmpty() == true) {
+            if (parentFolder != null && parentFolder != mainDirectory && parentFolder.isDirectory && parentFolder.listFiles()?.isEmpty() == true) {
                 if (parentFolder.delete()) {
                     changes.add("Pasta vazia excluída: ${parentFolder.absolutePath}")
                 }
