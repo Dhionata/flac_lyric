@@ -1,7 +1,6 @@
 package services
 
-import java.util.Locale
-import java.util.ResourceBundle
+import java.util.*
 
 object Messages {
     private val bundle: ResourceBundle = ResourceBundle.getBundle("messages", Locale.getDefault())

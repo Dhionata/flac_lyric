@@ -19,8 +19,8 @@ data class OperationResult(
      */
     operator fun plus(other: OperationResult): OperationResult {
         return OperationResult(
-            changedSet = this.changedSet + other.changedSet,
-            errorSet = this.errorSet + other.errorSet
+            this.changedSet + other.changedSet,
+            this.errorSet + other.errorSet
         )
     }
 }

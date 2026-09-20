@@ -20,8 +20,10 @@ class AudioAnalysisServiceImpl : AudioAnalysisService {
 
     /** Window size for FFT calculation. */
     private val windowSize = 4096
+
     /** Maximum time in seconds for sample extraction in quick analysis. */
     private val sampleAnalyzeSeconds = 30
+
     /** Seconds to be ignored at the beginning of the audio to avoid silence. */
     private val skipSeconds = 30
 
