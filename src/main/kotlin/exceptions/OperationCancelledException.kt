@@ -6,4 +6,4 @@ package exceptions
  *
  * @param message Descriptive message of the exception.
  */
-class OperationCancelledException(message: String = "Operation cancelled by the user") : RuntimeException(message)
+class OperationCancelledException(message: String = "Operation canceled by the user") : RuntimeException(message)

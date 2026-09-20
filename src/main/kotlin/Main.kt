@@ -2,6 +2,7 @@ import exceptions.OperationCancelledException
 import handlers.AudioFileHandlerImpl
 import handlers.LyricFileHandlerImpl
 import interfaces.UserInterface
+import kotlin.system.exitProcess
 import services.AudioAnalysisServiceImpl
 import services.CleanTitleNomenclatureValidator
 import services.DirectoryServiceImpl
@@ -80,5 +81,5 @@ fun main() {
         }
     }
 
-    kotlin.system.exitProcess(0)
+    exitProcess(0)
 }

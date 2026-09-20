@@ -4,7 +4,7 @@ import interfaces.FileService
 import interfaces.MatchService
 import interfaces.UserInterface
 import java.io.File
-import java.util.Collections
+import java.util.*
 import java.util.logging.Logger
 import models.FilePair
 import models.OperationResult
@@ -23,7 +23,7 @@ class MatchServiceImpl(
 
     override fun matchFiles(lyricFiles: List<File>, audioFiles: List<File>): List<FilePair> {
         // Pre-index existing lyric files in the directories of the audio files to quickly determine pairing
-        val existingLyricFilePaths = audioFiles.mapNotNull { it.parentFile }.distinct().flatMap { dir ->
+        val existingLyricFilePaths = audioFiles.asSequence().mapNotNull { it.parentFile }.distinct().flatMap { dir ->
             dir.listFiles { _, name -> name.lowercase().endsWith(".lrc") }?.toList() ?: emptyList()
         }.map { it.absolutePath.lowercase() }.toSet()
 
