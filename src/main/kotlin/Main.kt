@@ -7,6 +7,7 @@ import services.AudioAnalysisServiceImpl
 import services.CleanTitleNomenclatureValidator
 import services.DirectoryServiceImpl
 import services.FileServiceImpl
+import services.LyricSyncValidatorImpl
 import services.MatchServiceImpl
 import services.MusicLyricsService
 import ui.UserInterfaceImpl
@@ -25,6 +26,7 @@ fun main() {
     val matchService = MatchServiceImpl(userInterface, fileService)
     val nomenclatureValidator = CleanTitleNomenclatureValidator()
     val audioAnalysisService = AudioAnalysisServiceImpl()
+    val lyricSyncValidator = LyricSyncValidatorImpl()
 
     val musicLyricsService = MusicLyricsService(
         userInterface,
@@ -34,7 +36,8 @@ fun main() {
         matchService,
         fileService,
         nomenclatureValidator,
-        audioAnalysisService
+        audioAnalysisService,
+        lyricSyncValidator
     )
 
     while (true) {
@@ -68,6 +71,10 @@ fun main() {
 
                 6 -> {
                     musicLyricsService.verifyFakeFlacFiles()
+                }
+
+                7 -> {
+                    musicLyricsService.verifyLyricsSyncAndCompatibility()
                 }
 
                 else -> {

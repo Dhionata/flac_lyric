@@ -161,6 +161,18 @@ class UserInterfaceImpl : UserInterface {
         return result == JOptionPane.YES_OPTION
     }
 
+    override fun askToMoveProblematicLyrics(count: Int, txtFileName: String): Boolean {
+        val result = JOptionPane.showConfirmDialog(
+            frame,
+            Messages.get("dialog.confirm.move_problematic_lyrics_msg", count, txtFileName),
+            Messages.get("dialog.confirm.move_problematic_lyrics_title"),
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.QUESTION_MESSAGE
+        )
+
+        return result == JOptionPane.YES_OPTION
+    }
+
     override fun askForAnalysisType(): Boolean {
         val options = arrayOf(
             Messages.get("dialog.confirm.analysis_type_option_quick"),
@@ -266,6 +278,10 @@ class UserInterfaceImpl : UserInterface {
             OptionMenu(
                 Messages.get("menu.option.6.title"),
                 Messages.get("menu.option.6.hint")
+            ),
+            OptionMenu(
+                Messages.get("menu.option.7.title"),
+                Messages.get("menu.option.7.hint")
             )
         )
 

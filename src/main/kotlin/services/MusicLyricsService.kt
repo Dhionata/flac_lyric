@@ -6,9 +6,11 @@ import interfaces.AudioNomenclatureValidator
 import interfaces.DirectoryService
 import interfaces.FileService
 import interfaces.LyricFileHandler
+import interfaces.LyricSyncValidator
 import interfaces.MatchService
 import interfaces.UserInterface
 import java.io.File
+import models.LyricValidationIssue
 import models.OperationResult
 
 /**
@@ -24,6 +26,7 @@ class MusicLyricsService(
     private val fileService: FileService,
     private val nomenclatureValidator: AudioNomenclatureValidator,
     private val audioAnalysisService: AudioAnalysisService,
+    private val lyricSyncValidator: LyricSyncValidator = LyricSyncValidatorImpl(),
 ) {
 
     private fun getValidatedMusicDirectory(message: String): File {
@@ -364,5 +367,99 @@ class MusicLyricsService(
         userInterface.showResult(changes, errors)
 
         return fakeFiles
+    }
+
+    fun verifyLyricsSyncAndCompatibility(): List<LyricValidationIssue> {
+        val musicDirectory = getValidatedMusicDirectory(Messages.get("prompt.select.music_lyrics_dir"))
+        val lyricFiles = lyricFileHandler.getLyricFiles(musicDirectory)
+        val audioFiles = audioFileHandler.getAudioFiles(musicDirectory)
+
+        val changes = mutableSetOf<String>()
+        val errors = mutableSetOf<Exception>()
+
+        if (lyricFiles.isEmpty()) {
+            changes.add(Messages.get("result.no_lyrics_found"))
+            userInterface.showResult(changes, errors)
+            return emptyList()
+        }
+
+        val audioMap = audioFiles.groupBy { it.nameWithoutExtension.lowercase() }
+        val allIssues = mutableListOf<LyricValidationIssue>()
+
+        userInterface.showProgress(Messages.get("progress.check_sync_compatibility"), lyricFiles.size)
+        lyricFiles.forEachIndexed { index, lyricFile ->
+            userInterface.updateProgress(index + 1, lyricFile.name)
+            try {
+                val candidates = audioMap[lyricFile.nameWithoutExtension.lowercase()]
+                val matchingAudio = candidates?.find { it.parentFile == lyricFile.parentFile }
+                    ?: candidates?.firstOrNull()
+
+                val issues = lyricSyncValidator.validate(lyricFile, matchingAudio)
+                allIssues.addAll(issues)
+            } catch (e: Exception) {
+                errors.add(e)
+            }
+        }
+        userInterface.closeProgress()
+
+        if (allIssues.isNotEmpty()) {
+            val distinctProblematicFiles = allIssues.map { it.lyricFile }.distinct()
+            val txtFileName = "LyricsSyncIssues_${allIssues.hashCode()}.txt"
+
+            val reportContent = buildString {
+                appendLine("=== RELATÓRIO DE INCONSISTÊNCIAS E DESSINCRONIA DE LETRAS (.LRC) ===")
+                appendLine("Total de arquivos com problemas: ${distinctProblematicFiles.size}")
+                appendLine("Total de ocorrências apontadas: ${allIssues.size}")
+                appendLine("=".repeat(70))
+                appendLine()
+
+                allIssues.groupBy { it.lyricFile }.forEach { (file, fileIssues) ->
+                    appendLine("Arquivo: ${file.name}")
+                    appendLine("Caminho: ${file.absolutePath}")
+                    val audio = fileIssues.firstOrNull()?.audioFile
+                    if (audio != null) {
+                        appendLine("Áudio correspondente: ${audio.name}")
+                    }
+                    appendLine("Problemas:")
+                    fileIssues.forEach { issue ->
+                        appendLine("  - [${issue.issueType}] ${issue.description}")
+                    }
+                    appendLine("-".repeat(50))
+                }
+            }
+
+            File(txtFileName).writeText(reportContent)
+
+            val shouldMove = userInterface.askToMoveProblematicLyrics(distinctProblematicFiles.size, txtFileName)
+
+            if (shouldMove) {
+                val outDirectory = directoryService.getDirectory(Messages.get("prompt.select.move_problematic_lyrics"))
+                val movedFiles = mutableListOf<String>()
+
+                userInterface.showProgress(Messages.get("progress.move_problematic_lyrics"), distinctProblematicFiles.size)
+                distinctProblematicFiles.forEachIndexed { index, file ->
+                    userInterface.updateProgress(index + 1, file.name)
+                    try {
+                        val (_, moveResult) = fileService.moveLyricFile(file, outDirectory)
+                        changes.addAll(moveResult.changedSet)
+                        errors.addAll(moveResult.errorSet)
+                        movedFiles.add(file.name)
+                    } catch (e: Exception) {
+                        errors.add(e)
+                    }
+                }
+                userInterface.closeProgress()
+
+                changes.add(Messages.get("result.moved_problematic_lyrics", txtFileName, movedFiles.size, distinctProblematicFiles.size, outDirectory.absolutePath))
+            } else {
+                changes.add(Messages.get("result.found_problematic_lyrics", distinctProblematicFiles.size, txtFileName))
+            }
+        } else {
+            changes.add(Messages.get("result.all_lyrics_synced", lyricFiles.size))
+        }
+
+        userInterface.showResult(changes, errors)
+
+        return allIssues
     }
 }

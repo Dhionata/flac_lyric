@@ -66,6 +66,15 @@ interface UserInterface {
     fun askToMoveUnmatchedLyrics(count: Int): Boolean
 
     /**
+     * Asks if the user wants to move lyric files that were verified as desynchronized or incompatible.
+     *
+     * @param count The number of problematic lyric files.
+     * @param txtFileName Name of the text file listing the problematic files.
+     * @return true if the user wishes to move them, false otherwise.
+     */
+    fun askToMoveProblematicLyrics(count: Int, txtFileName: String): Boolean
+
+    /**
      * Asks the user which type of audio analysis to perform.
      * @return true for full analysis, false for quick analysis (30s).
      */
@@ -95,7 +104,6 @@ interface UserInterface {
     /**
      * Displays the menu with the main actions and returns the option chosen by the user.
      *
-     * @return The numerical index of the selected option (from 0 to N), or null if the user cancelled.
-     */
+     * @return The numerical index of the selected option (from 0 to N), or null if the user cancelled.\n     */
     fun option(): Int?
 }

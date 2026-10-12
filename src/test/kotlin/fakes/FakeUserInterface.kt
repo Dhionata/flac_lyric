@@ -16,6 +16,7 @@ class FakeUserInterface : UserInterface {
     var askToMoveIncorrectFilesResponse: Boolean = true
     var askToMoveFakeLosslessResponse: Boolean = true
     var askToMoveUnmatchedLyricsResponse: Boolean = true
+    var askToMoveProblematicLyricsResponse: Boolean = true
     var askForAnalysisTypeResponse: Boolean = false
 
     var progressTitle: String? = null
@@ -53,6 +54,10 @@ class FakeUserInterface : UserInterface {
 
     override fun askToMoveUnmatchedLyrics(count: Int): Boolean {
         return askToMoveUnmatchedLyricsResponse
+    }
+
+    override fun askToMoveProblematicLyrics(count: Int, txtFileName: String): Boolean {
+        return askToMoveProblematicLyricsResponse
     }
 
     override fun askForAnalysisType(): Boolean {
