@@ -1,11 +1,11 @@
 package services
 
 import interfaces.FileService
+import interfaces.LogService
 import interfaces.MatchService
 import interfaces.UserInterface
 import java.io.File
 import java.util.*
-import java.util.logging.Logger
 import models.FilePair
 import models.OperationResult
 import org.apache.commons.text.similarity.CosineDistance
@@ -17,9 +17,8 @@ import org.apache.commons.text.similarity.CosineDistance
 class MatchServiceImpl(
     private val userInterface: UserInterface,
     private val fileService: FileService,
+    private val logService: LogService = JdkLogService(MatchServiceImpl::class.java),
 ) : MatchService {
-    /** Logger for debugging and tracking similarity. */
-    private val logger = Logger.getLogger(this.javaClass.name)
 
     override fun matchFiles(lyricFiles: List<File>, audioFiles: List<File>): List<FilePair> {
         // Pre-index existing lyric files in the directories of the audio files to quickly determine pairing
@@ -56,7 +55,7 @@ class MatchServiceImpl(
             }
 
             val bestAudioFileMatch = (matchingAudioFileInSameDir ?: findBestMatch(lyricFile, unpairedAudioFilesWithNames)).also {
-                logger.info("Best match for\n${lyricFile.name}\nis\n${it?.name}")
+                logService.info("log.match.best_match", lyricFile.name, it?.name ?: "")
             }
 
             if (bestAudioFileMatch != null) {
@@ -97,13 +96,13 @@ class MatchServiceImpl(
                     }
                 }
             } else {
-                logger.info("The FilePair files ${pair.lyricFile.name} and ${pair.audioFile.name} are already in the correct place!")
+                logService.info("log.match.already_in_place", pair.lyricFile.name, pair.audioFile.name)
 
                 if (userInterface.onlyRename(pair)) {
                     val renameResult = fileService.renameLyricFile(pair.lyricFile, pair.audioFile)
                     result += renameResult
                 } else {
-                    logger.info("Opted not to rename")
+                    logService.info("log.match.opted_not_to_rename")
                 }
             }
         }

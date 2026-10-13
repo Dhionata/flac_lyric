@@ -14,5 +14,5 @@ data class LyricValidationIssue(
     val lyricFile: File,
     val audioFile: File?,
     val issueType: String,
-    val description: String
+    val description: String,
 )

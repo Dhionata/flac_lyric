@@ -1,6 +1,8 @@
 package services
 
 import java.io.File
+import java.util.Locale
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -12,6 +14,12 @@ class LyricSyncValidatorImplTest {
     lateinit var tempDir: File
 
     private val validator = LyricSyncValidatorImpl()
+    private val originalLocale = Messages.getLocale()
+
+    @AfterEach
+    fun tearDown() {
+        Messages.setLocale(originalLocale)
+    }
 
     @Test
     fun testValidSynchronizedLyric() {
@@ -116,5 +124,37 @@ class LyricSyncValidatorImplTest {
 
         val issues = validator.validate(lrc, dummyAudio)
         assertTrue(issues.any { it.issueType == "MUSICA_DIFERENTE" })
+    }
+
+    @Test
+    fun testIssueDescriptionsLocalizedInPortuguese() {
+        Messages.setLocale(Locale.forLanguageTag("pt-BR"))
+        val lrc = File(tempDir, "TestNoSync.lrc").apply {
+            writeText("Apenas texto sem timestamps")
+        }
+
+        val issues = validator.validate(lrc, null)
+        assertEquals(1, issues.size)
+        assertEquals("SEM_TIMESTAMPS", issues[0].issueType)
+        assertTrue(
+            issues[0].description.contains("não possui marcações de timestamp"),
+            "Expected Portuguese description, got: ${issues[0].description}"
+        )
+    }
+
+    @Test
+    fun testIssueDescriptionsLocalizedInEnglish() {
+        Messages.setLocale(Locale.ENGLISH)
+        val lrc = File(tempDir, "TestNoSyncEn.lrc").apply {
+            writeText("Plain text without timestamps")
+        }
+
+        val issues = validator.validate(lrc, null)
+        assertEquals(1, issues.size)
+        assertEquals("SEM_TIMESTAMPS", issues[0].issueType)
+        assertTrue(
+            issues[0].description.contains("no [mm:ss] timestamps"),
+            "Expected English description, got: ${issues[0].description}"
+        )
     }
 }

@@ -44,3 +44,4 @@ bin/
 
 ### Generated Reports ###
 *.txt
+/logs/flac_lyric.log.0

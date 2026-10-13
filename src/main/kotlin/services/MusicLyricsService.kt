@@ -5,6 +5,7 @@ import interfaces.AudioFileHandler
 import interfaces.AudioNomenclatureValidator
 import interfaces.DirectoryService
 import interfaces.FileService
+import interfaces.LogService
 import interfaces.LyricFileHandler
 import interfaces.LyricSyncValidator
 import interfaces.MatchService
@@ -27,6 +28,7 @@ class MusicLyricsService(
     private val nomenclatureValidator: AudioNomenclatureValidator,
     private val audioAnalysisService: AudioAnalysisService,
     private val lyricSyncValidator: LyricSyncValidator = LyricSyncValidatorImpl(),
+    private val logService: LogService = JdkLogService(MusicLyricsService::class.java),
 ) {
 
     private fun getValidatedMusicDirectory(message: String): File {
@@ -102,6 +104,8 @@ class MusicLyricsService(
         val audioFiles = audioFileHandler.getAudioFiles(musicDirectory)
         val lyricFiles = lyricFileHandler.getLyricFiles(lyricsDirectory)
 
+        logService.info("log.organize.started", audioFiles.size, lyricFiles.size)
+
         val filePairs = matchService.matchFiles(lyricFiles, audioFiles)
 
         var result = matchService.handleFilePairs(filePairs)
@@ -138,9 +142,9 @@ class MusicLyricsService(
             File(txtFileName).writeText(
                 musicFilesWithoutLyrics.joinToString("\n") { it.name }
             )
-            changes.add("Found ${musicFilesWithoutLyrics.size} audio file(s) without .lrc.\nList saved to: $txtFileName")
+            changes.add(Messages.get("result.found_no_lyrics", musicFilesWithoutLyrics.size, txtFileName))
         } else {
-            changes.add("All ${audioFiles.size} audio file(s) have matching .lrc lyrics.")
+            changes.add(Messages.get("result.no_lyrics_unpaired", audioFiles.size))
         }
 
         userInterface.showResult(changes, emptySet())
@@ -263,7 +267,7 @@ class MusicLyricsService(
 
             if (parentFolder != null && parentFolder != mainDirectory && parentFolder.isDirectory && parentFolder.listFiles()?.isEmpty() == true) {
                 if (parentFolder.delete()) {
-                    changes.add("Pasta vazia excluída: ${parentFolder.absolutePath}")
+                    changes.add(Messages.get("result.deleted_empty_dir", parentFolder.absolutePath))
                 }
             }
         }
@@ -293,6 +297,8 @@ class MusicLyricsService(
             }
         }
         userInterface.closeProgress()
+
+        logService.info("log.nomenclature.checked", audioFiles.size, incorrectlyNamedFiles.size)
 
         val (changedSet, errorSet) = processIncorrectlyNamedFiles(
             incorrectlyNamedFiles,
@@ -333,6 +339,8 @@ class MusicLyricsService(
             }
         }
         userInterface.closeProgress()
+
+        logService.info("log.spectrum.checked", audioFiles.size, fakeFiles.size)
 
         if (fakeFiles.isNotEmpty()) {
             val txtFileName = "FakeLossless_${fakeFiles.hashCode()}.txt"
@@ -406,21 +414,23 @@ class MusicLyricsService(
             val distinctProblematicFiles = allIssues.map { it.lyricFile }.distinct()
             val txtFileName = "LyricsSyncIssues_${allIssues.hashCode()}.txt"
 
+            logService.warning("log.sync.checked", lyricFiles.size, allIssues.size)
+
             val reportContent = buildString {
-                appendLine("=== RELATÓRIO DE INCONSISTÊNCIAS E DESSINCRONIA DE LETRAS (.LRC) ===")
-                appendLine("Total de arquivos com problemas: ${distinctProblematicFiles.size}")
-                appendLine("Total de ocorrências apontadas: ${allIssues.size}")
+                appendLine(Messages.get("lyric.report.header"))
+                appendLine(Messages.get("lyric.report.problematic_files", distinctProblematicFiles.size))
+                appendLine(Messages.get("lyric.report.total_issues", allIssues.size))
                 appendLine("=".repeat(70))
                 appendLine()
 
                 allIssues.groupBy { it.lyricFile }.forEach { (file, fileIssues) ->
-                    appendLine("Arquivo: ${file.name}")
-                    appendLine("Caminho: ${file.absolutePath}")
+                    appendLine(Messages.get("lyric.report.file_label", file.name))
+                    appendLine(Messages.get("lyric.report.path_label", file.absolutePath))
                     val audio = fileIssues.firstOrNull()?.audioFile
                     if (audio != null) {
-                        appendLine("Áudio correspondente: ${audio.name}")
+                        appendLine(Messages.get("lyric.report.audio_label", audio.name))
                     }
-                    appendLine("Problemas:")
+                    appendLine(Messages.get("lyric.report.issues_label"))
                     fileIssues.forEach { issue ->
                         appendLine("  - [${issue.issueType}] ${issue.description}")
                     }
@@ -455,6 +465,7 @@ class MusicLyricsService(
                 changes.add(Messages.get("result.found_problematic_lyrics", distinctProblematicFiles.size, txtFileName))
             }
         } else {
+            logService.info("log.sync.all_ok", lyricFiles.size)
             changes.add(Messages.get("result.all_lyrics_synced", lyricFiles.size))
         }
 

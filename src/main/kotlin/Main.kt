@@ -7,6 +7,7 @@ import services.AudioAnalysisServiceImpl
 import services.CleanTitleNomenclatureValidator
 import services.DirectoryServiceImpl
 import services.FileServiceImpl
+import services.LoggingInitializer
 import services.LyricSyncValidatorImpl
 import services.MatchServiceImpl
 import services.MusicLyricsService
@@ -14,10 +15,12 @@ import ui.UserInterfaceImpl
 
 /**
  * Entry point of the application.
- * Initializes the graphical user interface and runs the main loop displaying the options menu.
+ * Initializes logging, graphical user interface, and runs the main loop displaying the options menu.
  * Captures cancellation exceptions to silently return to the menu and displays other errors.
  */
 fun main() {
+    LoggingInitializer.init()
+
     val userInterface: UserInterface = UserInterfaceImpl()
     val fileService = FileServiceImpl()
     val directoryService = DirectoryServiceImpl(fileService)

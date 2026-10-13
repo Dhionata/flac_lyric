@@ -1,30 +1,27 @@
 package services
 
 import interfaces.FileService
+import interfaces.LogService
 import interfaces.UserInterface
 import java.io.File
 import java.nio.file.Paths
-import java.util.logging.Logger
 import models.OperationResult
 
 /**
  * Practical implementation of [FileService] to perform copies, deletions,
  * moves, and renaming of physical files, managing and reporting successes and errors.
  */
-class FileServiceImpl : FileService {
-
-    /** Internal class logger for registering operations and warnings. */
-    private val logger = Logger.getLogger(this.javaClass.name)
+class FileServiceImpl(
+    private val logService: LogService = JdkLogService(FileServiceImpl::class.java)
+) : FileService {
 
     override fun printFilePermissions(file: File) {
-        logger.info(
-            "Folder permissions for $file\nRead: ${file.canRead()}\nWrite: ${file.canWrite()}\nExecute: ${file.canExecute()}"
-        )
+        logService.info("log.file.permissions", file, file.canRead(), file.canWrite(), file.canExecute())
     }
 
     override fun moveFile(sourceFile: File, targetDir: File): Boolean {
         if (!sourceFile.exists()) {
-            throw Exception("\n-- The file ${sourceFile.name} does not exist.\n")
+            throw Exception(Messages.get("error.file_not_found", sourceFile.name))
         }
 
         val actualTargetDir = if (targetDir.isDirectory) targetDir else (targetDir.parentFile ?: targetDir)
@@ -38,23 +35,17 @@ class FileServiceImpl : FileService {
         return if (targetFile.exists()) {
             val sameFileWithDifferentName = sameFilesWithDiffNames(actualTargetDir, sourceFile)
             if (sameFileWithDifferentName && sourceFile.parentFile != targetFile.parentFile) {
-                logger.warning(
-                    "The file will be deleted\n$sourceFile"
-                )
+                logService.warning("log.file.will_delete", sourceFile)
                 sourceFile.delete().also {
-                    logger.info(
-                        "File\n$sourceFile\ndeleted, a file with the same content and size already exists in the target directory"
-                    )
+                    logService.info("log.file.deleted_duplicate", sourceFile)
                 }
             } else {
                 throw Exception(
-                    "A file\n${targetFile.name}\nfrom directory\n${sourceFile.parentFile}\nalready exists in the destination directory\n${
-                        targetFile.parent
-                    }\nBut has different content or size\n"
+                    Messages.get("error.file_conflict", targetFile.name, sourceFile.parentFile, targetFile.parent)
                 )
             }
         } else if (actualTargetDir.usableSpace in 1..<sourceFile.length()) {
-            throw Exception("— There is not enough space in the destination directory for file ${sourceFile.name}.\n")
+            throw Exception(Messages.get("error.not_enough_space", sourceFile.name))
         } else {
             try {
                 val moved = sourceFile.renameTo(targetFile)
@@ -62,17 +53,11 @@ class FileServiceImpl : FileService {
                     sourceFile.copyTo(targetFile, overwrite = false)
                     sourceFile.delete()
                 }
-                logger.info(
-                    "\nFile \n${sourceFile.name}\nmoved from\n${sourceFile.parent}\nto\n${targetFile.parent}\n"
-                )
+                logService.info("log.file.moved", sourceFile.name, sourceFile.parent, targetFile.parent)
                 true
             } catch (e: Exception) {
                 throw Exception(
-                    "Failed to move file\n${sourceFile.name}\nfrom\n${
-                        sourceFile.parent
-                    }\nto\n${
-                        targetFile.parent
-                    }\n${e.javaClass}\n"
+                    Messages.get("error.move_failed", sourceFile.name, sourceFile.parent, targetFile.parent, e.javaClass.simpleName)
                 )
             }
         }
@@ -88,7 +73,7 @@ class FileServiceImpl : FileService {
             if (filesAreEqual(targetFile, file)) {
                 file.delete()
                 throw Exception(
-                    "Could not rename!\nThere already exists a file\n${targetFile.name}\nin target directory\n${targetFile.parent}\nwith the same content.\nFile ${file.name} deleted\n"
+                    Messages.get("error.rename_duplicate", targetFile.name, targetFile.parent, file.name)
                 )
             } else {
                 val targetDirectory = File(Paths.get(System.getProperty("user.home"), "Desktop").toString(), "Lyrics With Wrong Name")
@@ -99,7 +84,7 @@ class FileServiceImpl : FileService {
 
                 moveFile(file, targetDirectory)
                 throw Exception(
-                    "Could not rename!\nThere already exists a file\n${targetFile.name}\nin target directory\n${targetFile.parent} with different content.\nFile\n${file.name}\nmoved to\n${targetDirectory.absolutePath}\n"
+                    Messages.get("error.rename_conflict", targetFile.name, targetFile.parent, file.name, targetDirectory.absolutePath)
                 )
             }
         } else {
@@ -113,10 +98,10 @@ class FileServiceImpl : FileService {
         var movedFile: File? = null
         try {
             if (moveFile(lyricFile, targetDir)) {
-                changes.add("File \n${lyricFile.name}\nmoved from\n${lyricFile.parent}\nto\n${targetDir}\n")
+                changes.add(Messages.get("result.lyric_moved", lyricFile.name, lyricFile.parent, targetDir))
                 movedFile = File(targetDir, lyricFile.name)
             } else {
-                errors.add(Exception("File ${lyricFile.name} not moved to $targetDir"))
+                errors.add(Exception(Messages.get("error.lyric_not_moved", lyricFile.name, targetDir)))
             }
         } catch (e: Exception) {
             errors.add(e)
@@ -129,7 +114,7 @@ class FileServiceImpl : FileService {
         val errors = mutableSetOf<Exception>()
         try {
             if (renameFile(lyricFile, "${audioFile.nameWithoutExtension}.lrc")) {
-                changes.add("File ${lyricFile.name} renamed to ${audioFile.nameWithoutExtension}.lrc")
+                changes.add(Messages.get("result.lyric_renamed", lyricFile.name, audioFile.nameWithoutExtension))
             }
         } catch (e: Exception) {
             errors.add(e)
@@ -170,9 +155,9 @@ class FileServiceImpl : FileService {
 
         if (lyricsDirectory.walk().none { it.isFile }) {
             if (lyricsDirectory.deleteRecursively()) {
-                changes.add("Directory ${lyricsDirectory.name} deleted because there are no more .lrc files.")
+                changes.add(Messages.get("result.lyrics_dir_deleted", lyricsDirectory.name))
             } else {
-                errors.add(Exception("Directory ${lyricsDirectory.name} could not be deleted."))
+                errors.add(Exception(Messages.get("error.lyrics_dir_delete_failed", lyricsDirectory.name)))
             }
         }
         return OperationResult(changes, errors)

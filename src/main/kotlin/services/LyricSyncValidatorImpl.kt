@@ -12,6 +12,7 @@ import org.jaudiotagger.tag.FieldKey
 /**
  * Implementation of [LyricSyncValidator] that verifies whether a lyric file (.lrc)
  * is properly synchronized and corresponds to the matching audio file.
+ * All issue descriptions are localized using [Messages].
  */
 class LyricSyncValidatorImpl : LyricSyncValidator {
 
@@ -38,7 +39,7 @@ class LyricSyncValidatorImpl : LyricSyncValidator {
                         lyricFile,
                         audioFile,
                         "ERRO_LEITURA",
-                        "Não foi possível ler o conteúdo do arquivo .lrc."
+                        Messages.get("lyric.issue.read_error")
                     )
                 )
             }
@@ -82,7 +83,7 @@ class LyricSyncValidatorImpl : LyricSyncValidator {
                     lyricFile,
                     audioFile,
                     "SEM_TIMESTAMPS",
-                    "O arquivo não possui marcações de timestamp [mm:ss] (letra não sincronizada)."
+                    Messages.get("lyric.issue.no_timestamps")
                 )
             )
             return issues
@@ -98,7 +99,7 @@ class LyricSyncValidatorImpl : LyricSyncValidator {
                     lyricFile,
                     audioFile,
                     "TIMESTAMPS_ESTATICOS",
-                    "Todos os timestamps são estáticos/idênticos (${formatTime(firstTs)}) - letra sem sincronização real."
+                    Messages.get("lyric.issue.static_timestamps", formatTime(firstTs))
                 )
             )
         }
@@ -113,15 +114,15 @@ class LyricSyncValidatorImpl : LyricSyncValidator {
             // A. Check metadata belonging (wrong song detection)
             if (isSongMismatch(lrcArtist, lrcTitle, audioArtist, audioTitle, audioFile.nameWithoutExtension)) {
                 val lrcInfo = listOfNotNull(
-                    lrcArtist?.let { "artista: '$it'" },
-                    lrcTitle?.let { "título: '$it'" }
+                    lrcArtist?.let { Messages.get("lyric.issue.meta.artist", it) },
+                    lrcTitle?.let { Messages.get("lyric.issue.meta.title", it) }
                 ).joinToString(", ")
                 issues.add(
                     LyricValidationIssue(
                         lyricFile,
                         audioFile,
                         "MUSICA_DIFERENTE",
-                        "A letra possui metadados de outra música ($lrcInfo)."
+                        Messages.get("lyric.issue.wrong_song", lrcInfo)
                     )
                 )
             }
@@ -135,7 +136,7 @@ class LyricSyncValidatorImpl : LyricSyncValidator {
                             lyricFile,
                             audioFile,
                             "ULTRAPASSOU_DURACAO",
-                            "Timestamps ultrapassam o término do áudio (último verso em ${formatTime(lastTs)} para faixa de ${formatTime(audioDuration)})."
+                            Messages.get("lyric.issue.exceeds_duration", formatTime(lastTs), formatTime(audioDuration))
                         )
                     )
                 }
@@ -149,7 +150,7 @@ class LyricSyncValidatorImpl : LyricSyncValidator {
                                 lyricFile,
                                 audioFile,
                                 "TAG_LENGTH_DIVERGENTE",
-                                "A tag de duração do LRC [length: ${formatTime(lrcLength)}] diverge em ${diff.toInt()}s da duração da faixa (${formatTime(audioDuration)})."
+                                Messages.get("lyric.issue.length_mismatch", formatTime(lrcLength), diff.toInt(), formatTime(audioDuration))
                             )
                         )
                     }
@@ -162,7 +163,7 @@ class LyricSyncValidatorImpl : LyricSyncValidator {
                             lyricFile,
                             audioFile,
                             "TERMINO_PREMATURO",
-                            "Letra encerra prematuramente no verso em ${formatTime(lastTs)} para uma faixa de ${formatTime(audioDuration)}."
+                            Messages.get("lyric.issue.premature_end", formatTime(lastTs), formatTime(audioDuration))
                         )
                     )
                 }
@@ -237,7 +238,6 @@ class LyricSyncValidatorImpl : LyricSyncValidator {
         audioTitle: String?,
         fallbackFileName: String
     ): Boolean {
-        // If LRC has no explicit artist or title metadata, we cannot accuse mismatch solely from header tags
         if (lrcArtist.isNullOrBlank() && lrcTitle.isNullOrBlank()) {
             return false
         }
@@ -257,7 +257,6 @@ class LyricSyncValidatorImpl : LyricSyncValidator {
             val artistContains = targetArtist.contains(normLrcArtist) || normLrcArtist.contains(targetArtist)
 
             if (!sharesArtistWord && !artistContains) {
-                // If artists are completely different, it's a mismatch (even if title has common words)
                 return true
             }
         }
@@ -270,7 +269,6 @@ class LyricSyncValidatorImpl : LyricSyncValidator {
             if (titleWordsLrc.isNotEmpty() && titleWordsTarget.isNotEmpty()) {
                 val commonWords = titleWordsLrc.intersect(titleWordsTarget.toSet())
                 if (commonWords.isEmpty() && !targetTitle.contains(normLrcTitle) && !normLrcTitle.contains(targetTitle)) {
-                    // Title has zero common words and is distinct
                     return true
                 }
             }
