@@ -282,6 +282,10 @@ class UserInterfaceImpl : UserInterface {
             OptionMenu(
                 Messages.get("menu.option.7.title"),
                 Messages.get("menu.option.7.hint")
+            ),
+            OptionMenu(
+                Messages.get("menu.option.8.title"),
+                Messages.get("menu.option.8.hint")
             )
         )
 
@@ -295,8 +299,13 @@ class UserInterfaceImpl : UserInterface {
             rb
         }
 
+        val scrollPane = JScrollPane(panel).apply {
+            border = EmptyBorder(0, 0, 0, 0)
+            preferredSize = Dimension(480, 420)
+        }
+
         val result = JOptionPane.showConfirmDialog(
-            frame, panel, Messages.get("dialog.option.title"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE
+            frame, scrollPane, Messages.get("dialog.option.title"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE
         )
 
         if (result != JOptionPane.OK_OPTION) {

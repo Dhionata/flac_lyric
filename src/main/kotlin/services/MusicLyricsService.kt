@@ -1,5 +1,6 @@
 package services
 
+import comparison.application.services.LyricReviewCoordinatorService
 import interfaces.AudioAnalysisService
 import interfaces.AudioFileHandler
 import interfaces.AudioNomenclatureValidator
@@ -472,5 +473,18 @@ class MusicLyricsService(
         userInterface.showResult(changes, errors)
 
         return allIssues
+    }
+
+    /**
+     * Launches the embedded web server and opens the browser for interactive
+     * side-by-side lyrics comparison with LRCLIB.
+     *
+     * @param coordinatorService The coordinator service managing server lifecycle.
+     * @return The bound web interface URL.
+     */
+    fun launchLyricComparisonWeb(
+        coordinatorService: LyricReviewCoordinatorService = LyricReviewCoordinatorService()
+    ): String {
+        return coordinatorService.startReview(preferredPort = 8080, openBrowser = true)
     }
 }

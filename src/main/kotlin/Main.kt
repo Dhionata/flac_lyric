@@ -1,3 +1,5 @@
+import comparison.application.services.LyricReviewCoordinatorService
+import comparison.infrastructure.services.WebActionRunnerService
 import exceptions.OperationCancelledException
 import handlers.AudioFileHandlerImpl
 import handlers.LyricFileHandlerImpl
@@ -15,8 +17,8 @@ import ui.UserInterfaceImpl
 
 /**
  * Entry point of the application.
- * Initializes logging, graphical user interface, and runs the main loop displaying the options menu.
- * Captures cancellation exceptions to silently return to the menu and displays other errors.
+ * Initializes logging, starts the modern web interface by default, opens the browser,
+ * and maintains the UserInterfaceImpl (Swing GUI) available for fallback or command execution.
  */
 fun main() {
     LoggingInitializer.init()
@@ -43,51 +45,23 @@ fun main() {
         lyricSyncValidator
     )
 
+    val webActionRunner = WebActionRunnerService(fileService, directoryService)
+    val coordinatorService = LyricReviewCoordinatorService(actionRunner = webActionRunner)
+
+    // Default startup: Launch modern Web Interface directly and open user's default browser
+    val webUrl = coordinatorService.startReview(preferredPort = 8080, openBrowser = true)
+    println("=================================================================")
+    println("FLAC Lyric - Interface Web iniciada por padrão em: $webUrl")
+    println("Pressione Ctrl+C para encerrar o servidor web.")
+    println("=================================================================")
+
+    // Keep server running
     while (true) {
         try {
-            val option = userInterface.option() ?: break
-
-            when (option) {
-                0 -> {
-                    musicLyricsService.organizeMusicAndLyrics()
-                }
-
-                1 -> {
-                    musicLyricsService.findMusicWithoutLyricsPair()
-                }
-
-                2 -> {
-                    musicLyricsService.findLyricsWithoutSync()
-                }
-
-                3 -> {
-                    musicLyricsService.findLyricsWithV1Text()
-                }
-
-                4 -> {
-                    musicLyricsService.findAndMoveAloneLyrics()
-                }
-
-                5 -> {
-                    musicLyricsService.verifyAdvancedNomenclature()
-                }
-
-                6 -> {
-                    musicLyricsService.verifyFakeFlacFiles()
-                }
-
-                7 -> {
-                    musicLyricsService.verifyLyricsSyncAndCompatibility()
-                }
-
-                else -> {
-                    userInterface.showError("Opção inválida!")
-                }
-            }
-        } catch (_: OperationCancelledException) {
-            // Silently return to the main menu
-        } catch (e: Exception) {
-            userInterface.showError(e.toString())
+            Thread.sleep(1000)
+        } catch (_: InterruptedException) {
+            coordinatorService.stopReview()
+            break
         }
     }
 

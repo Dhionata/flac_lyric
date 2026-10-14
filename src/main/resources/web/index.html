@@ -1,0 +1,2661 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flac Lyric - Painel e Comparador de Letras</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0b0d13;
+      --bg-card: #151822;
+      --bg-card-hover: #1e2230;
+      --bg-card-border: #282f42;
+      --accent-local: #10b981;
+      --accent-local-glow: rgba(16, 185, 129, 0.25);
+      --accent-lrclib: #3b82f6;
+      --accent-lrclib-glow: rgba(59, 130, 246, 0.25);
+      --accent-purple: #8b5cf6;
+      --accent-cyan: #06b6d4;
+      --text-main: #f3f4f6;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-main);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Top Navigation Header */
+    header {
+      background: rgba(19, 23, 33, 0.95);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--bg-card-border);
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      z-index: 50;
+      flex-shrink: 0;
+      height: 58px;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .logo {
+      font-size: 1.15rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    /* Navigation Tabs */
+    .nav-tabs {
+      display: flex;
+      background: #0f121a;
+      padding: 4px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--bg-card-border);
+      gap: 4px;
+    }
+    .nav-tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .nav-tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .nav-tab-btn.active {
+      background: #252d3f;
+      color: #38bdf8;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      border-radius: 9999px;
+      font-size: 0.73rem;
+      font-weight: 600;
+      background: #272f42;
+      color: #e5e7eb;
+    }
+    .badge-warning { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+    .badge-success { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+    .badge-info { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .report-select {
+      background: #10141f;
+      border: 1px solid var(--bg-card-border);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      max-width: 250px;
+    }
+
+    /* Views container */
+    .view-content {
+      width: 100%;
+      height: calc(100vh - 58px);
+      display: none;
+      overflow: hidden;
+      position: relative;
+    }
+    .view-content.active {
+      display: flex;
+    }
+
+    /* ==========================================================================
+       VIEW 1: MENU PRINCIPAL (DASHBOARD MODERNO)
+       ========================================================================== */
+    #viewMenu {
+      flex-direction: column;
+      overflow-y: auto;
+    }
+    .menu-view-container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 36px 24px 60px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .menu-header-hero {
+      text-align: center;
+      margin-bottom: 32px;
+      max-width: 720px;
+    }
+    .menu-header-hero h1 {
+      font-size: 2.1rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #f8fafc, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .menu-header-hero p {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 20px;
+      width: 100%;
+    }
+    .option-card {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .option-card:hover {
+      background: var(--bg-card-hover);
+      border-color: #3b82f6;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+    }
+    .option-card.highlight {
+      background: linear-gradient(145deg, #161b2b, #1e2439);
+      border-color: #38bdf8;
+      box-shadow: 0 8px 30px rgba(56, 189, 248, 0.15);
+    }
+    .option-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .option-card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: #1e2436;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #38bdf8;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+    .option-card.highlight .option-card-icon {
+      background: linear-gradient(135deg, #0284c7, #6366f1);
+      color: #fff;
+    }
+    .option-card-number {
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .option-card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #f8fafc;
+    }
+    .option-card-hint {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+      flex: 1;
+    }
+    .option-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 8px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #38bdf8;
+    }
+
+    /* ==========================================================================
+       VIEW 2: COMPARADOR & PLAYER
+       ========================================================================== */
+    .app-main {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Sidebar Drawer */
+    .sidebar {
+      width: 310px;
+      background: #11141d;
+      border-right: 1px solid var(--bg-card-border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      transition: margin-left 0.25s ease;
+    }
+    .sidebar.collapsed {
+      margin-left: -310px;
+    }
+    .sidebar-header {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--bg-card-border);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .search-input {
+      width: 100%;
+      background: #181d2a;
+      border: 1px solid var(--bg-card-border);
+      color: var(--text-main);
+      padding: 7px 12px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+    }
+    .filter-tabs {
+      display: flex;
+      gap: 6px;
+    }
+    .filter-btn {
+      flex: 1;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 4px;
+      border-radius: 4px;
+      font-size: 0.74rem;
+      cursor: pointer;
+    }
+    .filter-btn.active {
+      background: #232a3d;
+      color: var(--text-main);
+      border-color: var(--bg-card-border);
+      font-weight: 600;
+    }
+
+    .track-list {
+      flex: 1;
+      overflow-y: auto;
+      list-style: none;
+    }
+    .track-item {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(44, 51, 69, 0.4);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+    .track-item:hover { background: var(--bg-card-hover); }
+    .track-item.active {
+      background: #1b2130;
+      border-left: 3px solid #38bdf8;
+    }
+    .track-item-title {
+      font-size: 0.84rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .track-item-issues {
+      font-size: 0.72rem;
+      color: #fbbf24;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    /* 3 Columns Comparison Grid */
+    .comparison-grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 340px 1fr;
+      overflow: hidden;
+    }
+
+    /* Columns */
+    .column-panel {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border-right: 1px solid var(--bg-card-border);
+      background: #11141d;
+    }
+    .column-panel:last-child { border-right: none; }
+
+    .column-header {
+      padding: 10px 16px;
+      background: #161a25;
+      border-bottom: 1px solid var(--bg-card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .column-header h3 {
+      font-size: 0.88rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Offset Toolbars */
+    .offset-toolbar {
+      padding: 8px 14px;
+      background: #131722;
+      border-bottom: 1px solid var(--bg-card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+    .offset-btn-group {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-offset {
+      background: #1e2434;
+      border: 1px solid var(--bg-card-border);
+      color: var(--text-main);
+      padding: 3px 7px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-offset:hover {
+      background: #2b334a;
+      border-color: #38bdf8;
+    }
+    .offset-input {
+      width: 52px;
+      background: #181d2a;
+      border: 1px solid var(--bg-card-border);
+      color: #fff;
+      padding: 3px 6px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-family: 'JetBrains Mono', monospace;
+      text-align: center;
+    }
+
+    /* Candidate alternatives section */
+    .candidates-box {
+      background: #131723;
+      border-bottom: 1px solid var(--bg-card-border);
+      padding: 8px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.78rem;
+      flex-shrink: 0;
+    }
+    .candidates-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      color: #60a5fa;
+      font-weight: 600;
+      user-select: none;
+    }
+    .candidates-list {
+      max-height: 140px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 4px;
+    }
+    .candidate-chip {
+      background: #1a2030;
+      border: 1px solid var(--bg-card-border);
+      padding: 6px 10px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .candidate-chip:hover {
+      background: #232b40;
+      border-color: #3b82f6;
+    }
+    .candidate-chip.active {
+      border-color: #38bdf8;
+      background: rgba(56, 189, 248, 0.12);
+    }
+    .candidate-info {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .candidate-name {
+      font-weight: 600;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .candidate-meta {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    /* Lyrics Scroller */
+    .lyrics-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 14px 70px 14px;
+      scroll-behavior: smooth;
+      position: relative;
+    }
+    .lyric-line {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 10px;
+      border-radius: 8px;
+      transition: all 0.18s ease;
+      font-size: 0.90rem;
+      line-height: 1.45;
+      color: #94a3b8;
+      margin-bottom: 4px;
+      position: relative;
+      cursor: pointer;
+      user-select: none;
+      border-left: 3px solid transparent;
+    }
+    .lyric-line:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #f8fafc;
+      transform: translateX(3px);
+    }
+    .lyric-line.active {
+      color: #ffffff;
+      font-weight: 700;
+      transform: scale(1.02);
+      transform-origin: left center;
+    }
+    .column-left .lyric-line.active {
+      background: rgba(16, 185, 129, 0.22);
+      border-left: 4px solid var(--accent-local);
+      color: #a7f3d0;
+      box-shadow: 0 0 18px var(--accent-local-glow);
+    }
+    .column-right .lyric-line.active {
+      background: rgba(59, 130, 246, 0.25);
+      border-left: 4px solid var(--accent-lrclib);
+      color: #bfdbfe;
+      box-shadow: 0 0 18px var(--accent-lrclib-glow);
+    }
+
+    .timestamp-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.76rem;
+      padding: 2px 7px;
+      border-radius: 5px;
+      background: #1b202e;
+      color: #64748b;
+      user-select: none;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .lyric-line:hover .timestamp-tag {
+      background: #252e42;
+      color: #93c5fd;
+    }
+    .column-left .lyric-line.active .timestamp-tag {
+      background: #059669;
+      color: white;
+      font-weight: 700;
+    }
+    .column-right .lyric-line.active .timestamp-tag {
+      background: #2563eb;
+      color: white;
+      font-weight: 700;
+    }
+
+    .lyric-text-span {
+      flex: 1;
+      cursor: pointer;
+      word-break: break-word;
+    }
+
+    /* Line action buttons (inline) */
+    .line-actions {
+      display: none;
+      align-items: center;
+      gap: 3px;
+      flex-shrink: 0;
+    }
+    .lyric-line:hover .line-actions,
+    .lyric-line.editing .line-actions {
+      display: flex;
+    }
+    .btn-line-action {
+      background: #1e2434;
+      border: 1px solid var(--bg-card-border);
+      color: var(--text-muted);
+      border-radius: 4px;
+      padding: 2px 5px;
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-line-action:hover {
+      background: #2b334a;
+      color: #fff;
+    }
+    .btn-sync-time {
+      background: rgba(6, 182, 212, 0.2);
+      border-color: rgba(6, 182, 212, 0.4);
+      color: #67e8f9;
+      font-weight: 600;
+    }
+    .btn-sync-time:hover {
+      background: rgba(6, 182, 212, 0.4);
+    }
+
+    /* Editable line input */
+    .line-input-text {
+      flex: 1;
+      background: #181d2a;
+      border: 1px solid #38bdf8;
+      color: #fff;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+    .line-input-time {
+      width: 72px;
+      background: #181d2a;
+      border: 1px solid #38bdf8;
+      color: #38bdf8;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      text-align: center;
+    }
+
+    /* Column Bottom Action Footer */
+    .column-footer {
+      padding: 12px 16px;
+      background: rgba(20, 24, 34, 0.95);
+      border-top: 1px solid var(--bg-card-border);
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .btn-action {
+      flex: 1;
+      padding: 11px 16px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: none;
+      transition: all 0.2s;
+    }
+    .btn-local {
+      background: #059669;
+      color: white;
+      box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35);
+    }
+    .btn-local:hover {
+      background: #10b981;
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+    }
+    .btn-lrclib {
+      background: #2563eb;
+      color: white;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+    }
+    .btn-lrclib:hover {
+      background: #3b82f6;
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+    }
+
+    /* Center Column: Player & Album Art */
+    .column-center {
+      background: #0d1017;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 14px;
+      overflow-y: auto;
+    }
+
+    .album-art-wrapper {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      margin: 6px 0;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6), 0 0 20px rgba(59, 130, 246, 0.15);
+      border: 1px solid var(--bg-card-border);
+      background: #181d2a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .album-art {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .vinyl-placeholder {
+      width: 130px;
+      height: 130px;
+      opacity: 0.35;
+    }
+
+    .song-details {
+      text-align: center;
+      margin: 8px 0;
+      max-width: 100%;
+    }
+    .song-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 3px;
+      word-break: break-word;
+    }
+    .song-artist {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #94a3b8;
+    }
+    .song-album {
+      font-size: 0.76rem;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
+    /* Open Folder Button */
+    .btn-open-folder {
+      background: #181f2f;
+      border: 1px solid var(--bg-card-border);
+      color: #38bdf8;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin: 4px 0 8px 0;
+      transition: all 0.15s;
+    }
+    .btn-open-folder:hover {
+      background: #222b40;
+      border-color: #38bdf8;
+    }
+
+    /* Issue Card */
+    .issues-card {
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 8px;
+      padding: 8px 12px;
+      width: 100%;
+      margin: 6px 0;
+      font-size: 0.74rem;
+      color: #fde68a;
+    }
+    .issues-card h4 {
+      font-size: 0.76rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: #fbbf24;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* Player Controls */
+    .player-controls-panel {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: auto;
+    }
+
+    /* Slider Mais Grossinho */
+    .seek-slider-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .seek-time-row {
+      display: flex;
+      justify-content: space-between;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.74rem;
+      color: #94a3b8;
+    }
+
+    input[type=range].chunky-slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 16px;
+      border-radius: 8px;
+      background: #252b3b;
+      outline: none;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.15s;
+    }
+    input[type=range].chunky-slider:hover {
+      background: #2e3649;
+    }
+    input[type=range].chunky-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #38bdf8;
+      border: 3px solid #0b0d13;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.7);
+      cursor: pointer;
+      transition: transform 0.15s, background-color 0.15s;
+    }
+    input[type=range].chunky-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+      background: #7dd3fc;
+    }
+    input[type=range].chunky-slider::-moz-range-thumb {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #38bdf8;
+      border: 3px solid #0b0d13;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.7);
+      cursor: pointer;
+    }
+
+    .playback-buttons {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+    }
+    .btn-circle {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: #1c212f;
+      border: 1px solid var(--bg-card-border);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-circle:hover {
+      background: #293144;
+      transform: scale(1.05);
+    }
+    .btn-circle-large {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, #0ea5e9, #6366f1);
+      border: none;
+      box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4);
+    }
+    .btn-circle-large:hover {
+      transform: scale(1.08);
+      box-shadow: 0 8px 24px rgba(14, 165, 233, 0.6);
+    }
+
+    .nav-buttons-row {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+    }
+    .btn-secondary {
+      flex: 1;
+      padding: 8px;
+      border-radius: 6px;
+      background: #171c28;
+      border: 1px solid var(--bg-card-border);
+      color: var(--text-main);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-secondary:hover { background: #232b3d; }
+
+    /* ==========================================================================
+       ACTION EXECUTION MODAL
+       ========================================================================== */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(8, 10, 16, 0.82);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 20px;
+    }
+    .modal-card {
+      background: #141824;
+      border: 1px solid var(--bg-card-border);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 680px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75);
+      overflow: hidden;
+      animation: modalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.96) translateY(10px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .modal-header {
+      padding: 16px 22px;
+      background: #181d2c;
+      border-bottom: 1px solid var(--bg-card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-title-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .modal-action-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: #232a3d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+    }
+    .modal-title-group h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #f8fafc;
+    }
+    .modal-action-subtitle {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #38bdf8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .btn-close-modal {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.25rem;
+      cursor: pointer;
+      padding: 6px 10px;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+    .btn-close-modal:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+    .modal-body {
+      padding: 22px 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .modal-desc {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .form-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #cbd5e1;
+    }
+    .text-danger { color: var(--danger); font-weight: bold; }
+    .input-with-action {
+      display: flex;
+      gap: 8px;
+    }
+    .form-input {
+      flex: 1;
+      background: #10131d;
+      border: 1px solid var(--bg-card-border);
+      color: var(--text-main);
+      padding: 9px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-family: 'JetBrains Mono', monospace;
+      transition: border-color 0.15s;
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: #38bdf8;
+    }
+    .btn-browse {
+      background: #1e2434;
+      border: 1px solid var(--bg-card-border);
+      color: #38bdf8;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .btn-browse:hover {
+      background: #2b334a;
+      border-color: #38bdf8;
+    }
+    .quick-paths-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+    .btn-chip-path {
+      background: #171c29;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #64748b;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-family: 'JetBrains Mono', monospace;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-chip-path:hover {
+      background: #20273a;
+      color: #94a3b8;
+      border-color: #38bdf8;
+    }
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: #10131d;
+      border: 1px solid var(--bg-card-border);
+      border-radius: 6px;
+      cursor: pointer;
+      user-select: none;
+      font-size: 0.84rem;
+      color: #cbd5e1;
+    }
+    .checkbox-group input[type=checkbox] {
+      cursor: pointer;
+      width: 17px;
+      height: 17px;
+      accent-color: #38bdf8;
+    }
+    .select-input {
+      background: #10131d;
+      border: 1px solid var(--bg-card-border);
+      color: var(--text-main);
+      padding: 9px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+    }
+    .modal-progress-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 16px 0;
+    }
+    .progress-info-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.85rem;
+    }
+    .progress-title {
+      font-weight: 600;
+      color: #38bdf8;
+    }
+    .progress-count {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+    }
+    .progress-bar-wrapper {
+      width: 100%;
+      height: 12px;
+      background: #10141f;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid var(--bg-card-border);
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #0284c7, #38bdf8);
+      border-radius: 6px;
+      transition: width 0.3s ease;
+    }
+    .progress-current-item {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      word-break: break-all;
+    }
+    .modal-result-section {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .result-banner {
+      padding: 12px 16px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .result-banner.success {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+    }
+    .result-banner.error {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #f87171;
+    }
+    .result-report-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #1a2233;
+      border: 1px solid #38bdf8;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 0.84rem;
+      gap: 10px;
+    }
+    .btn-highlight-action {
+      background: linear-gradient(135deg, #0284c7, #6366f1);
+      color: #fff;
+      border: none;
+      padding: 9px 16px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.84rem;
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+    .btn-highlight-action:hover {
+      transform: scale(1.03);
+    }
+    .result-details-box {
+      background: #0f121b;
+      border: 1px solid var(--bg-card-border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+    .result-details-box h4 {
+      font-size: 0.78rem;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .result-log-list {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.76rem;
+      color: #cbd5e1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .result-log-item {
+      padding: 3px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      word-break: break-all;
+    }
+    .modal-footer {
+      padding: 14px 24px;
+      background: #181d2c;
+      border-top: 1px solid var(--bg-card-border);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .btn-primary {
+      background: #0284c7;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #0369a1;
+    }
+
+    /* Toast Notification */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1b2130;
+      border: 1px solid #38bdf8;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.25s ease;
+      z-index: 300;
+      pointer-events: none;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #262d3e; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #37425b; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-left">
+      <div id="logoBtn" class="logo" title="Voltar ao Menu Principal">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M9 18V5l12-2v13"></path>
+          <circle cx="6" cy="18" r="3"></circle>
+          <circle cx="18" cy="16" r="3"></circle>
+        </svg>
+        FLAC Lyric
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="nav-tabs">
+        <button id="tabMenuBtn" class="nav-tab-btn active">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          Menu Principal
+        </button>
+        <button id="tabComparatorBtn" class="nav-tab-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          Comparador de Letras (LRCLIB)
+        </button>
+      </nav>
+
+      <span id="headerProgress" class="badge badge-info">Pronto</span>
+    </div>
+
+    <div class="header-right">
+      <button id="btnToggleSidebar" class="btn-secondary" style="padding: 5px 10px;">☰ Faixas</button>
+      <select id="reportSelect" class="report-select" title="Selecionar arquivo de relatório"></select>
+      <span class="badge" title="Atalhos: [Espaço] Play/Pause | [1] Manter Local | [2] Salvar LRCLIB | [Setas] -5s / +5s">⌨️ [Espaço] [1] [2]</span>
+    </div>
+  </header>
+
+  <!-- =========================================================================
+       VIEW 1: MENU PRINCIPAL DE OPÇÕES
+       ========================================================================= -->
+  <main id="viewMenu" class="view-content active">
+    <div class="menu-view-container">
+      <div class="menu-header-hero">
+        <h1>Painel Geral de Operações</h1>
+        <p>Gerencie sua biblioteca de áudio FLAC e arquivos .lrc com ferramentas avançadas de organização, verificação de espectro acústico e sincronização com LRCLIB.</p>
+      </div>
+
+      <div id="optionsGrid" class="options-grid"></div>
+    </div>
+  </main>
+
+  <!-- =========================================================================
+       VIEW 2: COMPARADOR & PLAYER INTERATIVO
+       ========================================================================= -->
+  <main id="viewComparator" class="view-content app-main">
+    <!-- Sidebar: Lista de Músicas Problemáticas -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <input type="text" id="trackSearchInput" class="search-input" placeholder="🔍 Filtrar música ou artista...">
+        <div class="filter-tabs">
+          <button class="filter-btn active" data-filter="ALL">Todos (<span id="countAll">0</span>)</button>
+          <button class="filter-btn" data-filter="PENDING">Pendentes (<span id="countPending">0</span>)</button>
+          <button class="filter-btn" data-filter="RESOLVED">Resolvidos (<span id="countResolved">0</span>)</button>
+        </div>
+      </div>
+      <ul id="trackList" class="track-list"></ul>
+    </aside>
+
+    <!-- 3-Column Comparison Grid -->
+    <div class="comparison-grid">
+      <!-- Coluna Esquerda: Letra Local -->
+      <section class="column-panel column-left">
+        <div class="column-header">
+          <h3>
+            <span style="color: var(--accent-local);">●</span>
+            Letra Atual (Local .lrc)
+          </h3>
+          <span id="localStatusBadge" class="badge badge-warning">...</span>
+        </div>
+
+        <!-- Offset Toolbar (Local) -->
+        <div class="offset-toolbar">
+          <span>Ajuste Geral:</span>
+          <div class="offset-btn-group">
+            <button class="btn-offset" onclick="applyGlobalOffset('local', -1.0)">-1.0s</button>
+            <button class="btn-offset" onclick="applyGlobalOffset('local', -0.5)">-0.5s</button>
+            <button class="btn-offset" onclick="applyGlobalOffset('local', 0.5)">+0.5s</button>
+            <button class="btn-offset" onclick="applyGlobalOffset('local', 1.0)">+1.0s</button>
+            <input type="number" id="localOffsetInput" class="offset-input" step="0.1" value="0.5">
+            <button class="btn-offset" onclick="applyCustomOffset('local')">Aplicar</button>
+          </div>
+          <button class="btn-offset" style="color: #34d399;" onclick="addNewLyricLine('local')">+ Novo Verso</button>
+        </div>
+
+        <div id="localLyricsScroller" class="lyrics-container">
+          <p style="text-align: center; color: #64748b; margin-top: 40px;">Selecione uma faixa para visualizar</p>
+        </div>
+
+        <div class="column-footer">
+          <button id="btnKeepLocal" class="btn-action btn-local" title="Manter ou salvar a letra local ajustada (Atalho: [1])">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            Manter / Salvar Local [1]
+          </button>
+        </div>
+      </section>
+
+      <!-- Coluna Central: Player de Áudio, Capa e Slider Grossinho -->
+      <section class="column-center">
+        <div class="album-art-wrapper">
+          <img id="albumArtImg" class="album-art" src="" alt="Capa do Álbum" style="display: none;">
+          <svg id="vinylFallback" class="vinyl-placeholder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"></circle>
+            <circle cx="12" cy="12" r="4"></circle>
+            <circle cx="12" cy="12" r="1"></circle>
+          </svg>
+        </div>
+
+        <div class="song-details">
+          <div id="songTitle" class="song-title">Selecione uma música</div>
+          <div id="songArtist" class="song-artist">-</div>
+          <div id="songAlbum" class="song-album">-</div>
+        </div>
+
+        <button id="btnOpenFolder" class="btn-open-folder" title="Abre a pasta contendo este áudio e .lrc no explorador de arquivos">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+          </svg>
+          Abrir Local do Arquivo
+        </button>
+
+        <div id="issuesBox" class="issues-card" style="display: none;">
+          <h4>⚠️ Problemas Apontados no Relatório:</h4>
+          <ul id="issuesList" style="margin-left: 16px; list-style-type: square;"></ul>
+        </div>
+
+        <!-- Audio Player & Controls -->
+        <audio id="audioElement" preload="metadata"></audio>
+
+        <div class="player-controls-panel">
+          <div class="seek-slider-container">
+            <input type="range" id="seekSlider" class="chunky-slider" min="0" max="100" value="0" step="0.1">
+            <div class="seek-time-row">
+              <span id="currentTimeLabel">00:00</span>
+              <span id="totalDurationLabel">00:00</span>
+            </div>
+          </div>
+
+          <div class="playback-buttons">
+            <button id="btnSeekBack" class="btn-circle" title="Voltar 5 segundos">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/>
+              </svg>
+            </button>
+            <button id="btnPlayPause" class="btn-circle btn-circle-large" title="Reproduzir / Pausar (Espaço)">
+              <svg id="playIcon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+              <svg id="pauseIcon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style="display: none;">
+                <rect x="6" y="4" width="4" height="16"></rect>
+                <rect x="14" y="4" width="4" height="16"></rect>
+              </svg>
+            </button>
+            <button id="btnSeekForward" class="btn-circle" title="Avançar 5 segundos">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M13 17l5-5-5-5M6 17l5-5-5-5"/>
+              </svg>
+            </button>
+          </div>
+
+          <div class="nav-buttons-row">
+            <button id="btnPrevTrack" class="btn-secondary">◀ Faixa Anterior</button>
+            <button id="btnNextTrack" class="btn-secondary">Próxima Faixa ▶</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Coluna Direita: Letra do LRCLIB.net -->
+      <section class="column-panel column-right">
+        <div class="column-header">
+          <h3>
+            <span style="color: var(--accent-lrclib);">●</span>
+            Letra LRCLIB.net
+          </h3>
+          <span id="remoteStatusBadge" class="badge badge-info">...</span>
+        </div>
+
+        <!-- Seletor de Versões Candidatas do LRCLIB -->
+        <div id="candidatesBox" class="candidates-box" style="display: none;">
+          <div class="candidates-toggle" id="candidatesToggle">
+            <span>📚 Outras Versões no LRCLIB (<span id="candidatesCount">0</span>)</span>
+            <span id="candidatesArrow">▼</span>
+          </div>
+          <div id="candidatesList" class="candidates-list" style="display: none;"></div>
+        </div>
+
+        <!-- Offset Toolbar (LRCLIB) -->
+        <div class="offset-toolbar">
+          <span>Ajuste Geral:</span>
+          <div class="offset-btn-group">
+            <button class="btn-offset" onclick="applyGlobalOffset('remote', -1.0)">-1.0s</button>
+            <button class="btn-offset" onclick="applyGlobalOffset('remote', -0.5)">-0.5s</button>
+            <button class="btn-offset" onclick="applyGlobalOffset('remote', 0.5)">+0.5s</button>
+            <button class="btn-offset" onclick="applyGlobalOffset('remote', 1.0)">+1.0s</button>
+            <input type="number" id="remoteOffsetInput" class="offset-input" step="0.1" value="0.5">
+            <button class="btn-offset" onclick="applyCustomOffset('remote')">Aplicar</button>
+          </div>
+          <button class="btn-offset" style="color: #60a5fa;" onclick="addNewLyricLine('remote')">+ Novo Verso</button>
+        </div>
+
+        <div id="remoteLyricsScroller" class="lyrics-container">
+          <p style="text-align: center; color: #64748b; margin-top: 40px;">Buscando letra no LRCLIB...</p>
+        </div>
+
+        <div class="column-footer">
+          <button id="btnSaveLrclib" class="btn-action btn-lrclib" title="Substituir e salvar com a letra do LRCLIB (Atalho: [2])">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+              <polyline points="17 21 17 13 7 13 7 21"></polyline>
+              <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
+            Salvar Letra LRCLIB [2]
+          </button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- =========================================================================
+       MODAL DE EXECUÇÃO DE AÇÕES (OPÇÕES 0 A 7)
+       ========================================================================= -->
+  <div id="actionModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span id="modalActionIcon" class="modal-action-icon">📁</span>
+          <div>
+            <h2 id="modalActionTitle">Título da Operação</h2>
+            <div id="modalActionSubtitle" class="modal-action-subtitle">Opção X</div>
+          </div>
+        </div>
+        <button id="modalCloseBtn" class="btn-close-modal" title="Fechar">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <p id="modalActionDesc" class="modal-desc">Descrição da operação...</p>
+
+        <!-- Formulário de Seleção de Pastas e Parâmetros -->
+        <div id="modalFormSection">
+          <div id="modalInputsContainer"></div>
+          <div id="modalOptionsContainer"></div>
+        </div>
+
+        <!-- Seção de Progresso Ao Vivo -->
+        <div id="modalProgressSection" class="modal-progress-section" style="display: none;">
+          <div class="progress-info-row">
+            <span id="modalProgressTitle" class="progress-title">Executando operação...</span>
+            <span id="modalProgressCount" class="progress-count">0 / 0</span>
+          </div>
+          <div class="progress-bar-wrapper">
+            <div id="modalProgressBar" class="progress-bar-fill" style="width: 0%;"></div>
+          </div>
+          <div id="modalProgressItem" class="progress-current-item">Iniciando análise...</div>
+        </div>
+
+        <!-- Seção de Resultados Concluídos -->
+        <div id="modalResultSection" class="modal-result-section" style="display: none;">
+          <div id="modalResultBanner" class="result-banner success">
+            <span id="modalResultIcon">✅</span>
+            <span id="modalResultSummary">Operação concluída com sucesso!</span>
+          </div>
+
+          <div id="modalResultReportRow" class="result-report-row" style="display: none;">
+            <div>
+              <div style="font-weight: 700; color: #fff;">Relatório de Inconsistências Gerado</div>
+              <div style="color: #94a3b8; font-size: 0.78rem;">Revise cada divergência com áudio sincronizado e LRCLIB.</div>
+            </div>
+            <button id="btnOpenInComparator" class="btn-highlight-action">
+              ⚡ Abrir no Comparador ➔
+            </button>
+          </div>
+
+          <div class="result-details-box">
+            <h4>Registro de Operações & Saída:</h4>
+            <div id="modalResultList" class="result-log-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="modalCancelBtn" class="btn-secondary">Cancelar</button>
+        <button id="modalExecuteBtn" class="btn-action btn-primary">
+          ▶️ Executar Operação
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast">Operação realizada com sucesso!</div>
+
+  <script>
+    // State
+    let currentItems = [];
+    let currentIndex = -1;
+    let currentTrackDetails = null;
+    let activeFilter = 'ALL';
+    let isSeeking = false;
+    let localLinesState = [];
+    let remoteLinesState = [];
+    let currentActionConfig = null;
+    let actionPollInterval = null;
+
+    // Elements
+    const audio = document.getElementById('audioElement');
+    const seekSlider = document.getElementById('seekSlider');
+    const currentTimeLabel = document.getElementById('currentTimeLabel');
+    const totalDurationLabel = document.getElementById('totalDurationLabel');
+    const btnPlayPause = document.getElementById('btnPlayPause');
+    const playIcon = document.getElementById('playIcon');
+    const pauseIcon = document.getElementById('pauseIcon');
+    const trackList = document.getElementById('trackList');
+    const reportSelect = document.getElementById('reportSelect');
+    const headerProgress = document.getElementById('headerProgress');
+    const songTitle = document.getElementById('songTitle');
+    const songArtist = document.getElementById('songArtist');
+    const songAlbum = document.getElementById('songAlbum');
+    const albumArtImg = document.getElementById('albumArtImg');
+    const vinylFallback = document.getElementById('vinylFallback');
+    const issuesBox = document.getElementById('issuesBox');
+    const issuesList = document.getElementById('issuesList');
+    const localLyricsScroller = document.getElementById('localLyricsScroller');
+    const remoteLyricsScroller = document.getElementById('remoteLyricsScroller');
+    const localStatusBadge = document.getElementById('localStatusBadge');
+    const remoteStatusBadge = document.getElementById('remoteStatusBadge');
+    const btnKeepLocal = document.getElementById('btnKeepLocal');
+    const btnSaveLrclib = document.getElementById('btnSaveLrclib');
+    const btnPrevTrack = document.getElementById('btnPrevTrack');
+    const btnNextTrack = document.getElementById('btnNextTrack');
+    const btnSeekBack = document.getElementById('btnSeekBack');
+    const btnSeekForward = document.getElementById('btnSeekForward');
+    const btnToggleSidebar = document.getElementById('btnToggleSidebar');
+    const btnOpenFolder = document.getElementById('btnOpenFolder');
+    const sidebar = document.getElementById('sidebar');
+    const trackSearchInput = document.getElementById('trackSearchInput');
+    const toast = document.getElementById('toast');
+
+    // Candidates elements
+    const candidatesBox = document.getElementById('candidatesBox');
+    const candidatesToggle = document.getElementById('candidatesToggle');
+    const candidatesList = document.getElementById('candidatesList');
+    const candidatesCount = document.getElementById('candidatesCount');
+    const candidatesArrow = document.getElementById('candidatesArrow');
+
+    // Navigation Tabs Elements
+    const tabMenuBtn = document.getElementById('tabMenuBtn');
+    const tabComparatorBtn = document.getElementById('tabComparatorBtn');
+    const viewMenu = document.getElementById('viewMenu');
+    const viewComparator = document.getElementById('viewComparator');
+    const logoBtn = document.getElementById('logoBtn');
+    const optionsGrid = document.getElementById('optionsGrid');
+
+    // Modal elements
+    const actionModal = document.getElementById('actionModal');
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+    const modalCancelBtn = document.getElementById('modalCancelBtn');
+    const modalExecuteBtn = document.getElementById('modalExecuteBtn');
+
+    function switchView(viewName) {
+      if (viewName === 'menu') {
+        tabMenuBtn.classList.add('active');
+        tabComparatorBtn.classList.remove('active');
+        viewMenu.classList.add('active');
+        viewComparator.classList.remove('active');
+      } else {
+        tabComparatorBtn.classList.add('active');
+        tabMenuBtn.classList.remove('active');
+        viewComparator.classList.add('active');
+        viewMenu.classList.remove('active');
+      }
+    }
+
+    tabMenuBtn.addEventListener('click', () => switchView('menu'));
+    tabComparatorBtn.addEventListener('click', () => switchView('comparator'));
+    logoBtn.addEventListener('click', () => switchView('menu'));
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function formatTime(seconds) {
+      if (!seconds || isNaN(seconds)) return '00:00';
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
+    }
+
+    function formatLrcTimestamp(ms) {
+      const totalSeconds = Math.max(0, ms / 1000);
+      const mins = Math.floor(totalSeconds / 60);
+      const secs = Math.floor(totalSeconds % 60);
+      const hundredths = Math.floor((totalSeconds - Math.floor(totalSeconds)) * 100);
+      return (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs + '.' + (hundredths < 10 ? '0' : '') + hundredths;
+    }
+
+    function parseFormattedTimeToMs(timeStr) {
+      const match = timeStr.trim().match(/(\d{1,2}):(\d{2})(?:\.(\d{1,3}))?/);
+      if (!match) return 0;
+      const mins = parseInt(match[1], 10);
+      const secs = parseInt(match[2], 10);
+      const msPart = match[3] ? parseInt(match[3].padEnd(3, '0').slice(0, 3), 10) : 0;
+      return (mins * 60 + secs) * 1000 + msPart;
+    }
+
+    // Toggle Sidebar
+    btnToggleSidebar.addEventListener('click', () => {
+      sidebar.classList.toggle('collapsed');
+    });
+
+    // Open file location button
+    btnOpenFolder.addEventListener('click', async () => {
+      if (!currentTrackDetails) return;
+      const targetPath = currentTrackDetails.audioPath || currentTrackDetails.lyricPath;
+      try {
+        const res = await fetch('/api/open-location?path=' + encodeURIComponent(targetPath));
+        const json = await res.json();
+        if (json.success) {
+          showToast('Pasta aberta no Explorador de Arquivos!');
+        } else {
+          showToast('Não foi possível abrir o local.');
+        }
+      } catch (e) {
+        showToast('Erro ao abrir pasta.');
+      }
+    });
+
+    // Candidates toggle
+    candidatesToggle.addEventListener('click', () => {
+      const isOpen = candidatesList.style.display !== 'none';
+      candidatesList.style.display = isOpen ? 'none' : 'flex';
+      candidatesArrow.textContent = isOpen ? '▼' : '▲';
+    });
+
+    // Audio Playback Events
+    btnPlayPause.addEventListener('click', () => {
+      if (!audio.src || audio.src === window.location.href) {
+        showToast('Nenhum áudio disponível para esta faixa.');
+        return;
+      }
+      if (audio.paused) {
+        audio.play().catch(e => {
+          console.error('Erro ao reproduzir áudio:', e);
+          showToast('Erro ao reproduzir áudio.');
+        });
+      } else {
+        audio.pause();
+      }
+    });
+
+    audio.addEventListener('play', () => {
+      playIcon.style.display = 'none';
+      pauseIcon.style.display = 'block';
+    });
+
+    audio.addEventListener('pause', () => {
+      playIcon.style.display = 'block';
+      pauseIcon.style.display = 'none';
+    });
+
+    audio.addEventListener('ended', () => {
+      playIcon.style.display = 'block';
+      pauseIcon.style.display = 'none';
+      seekSlider.value = 0;
+      currentTimeLabel.textContent = '00:00';
+    });
+
+    audio.addEventListener('error', (e) => {
+      console.error('Audio playback error:', audio.error, e);
+      playIcon.style.display = 'block';
+      pauseIcon.style.display = 'none';
+      if (currentTrackDetails && (currentTrackDetails.audioUrl || currentTrackDetails.audioPath)) {
+        showToast('Não foi possível carregar ou reproduzir o áudio.');
+      }
+    });
+
+    audio.addEventListener('timeupdate', () => {
+      const dur = (audio.duration && isFinite(audio.duration) && audio.duration > 0)
+        ? audio.duration
+        : (currentTrackDetails?.metadata?.durationSeconds || 0);
+
+      if (!isSeeking) {
+        if (dur > 0) {
+          seekSlider.value = (audio.currentTime / dur) * 100;
+        }
+        currentTimeLabel.textContent = formatTime(audio.currentTime);
+        syncLyricsHighlight(audio.currentTime * 1000);
+      }
+    });
+
+    audio.addEventListener('loadedmetadata', () => {
+      const dur = (audio.duration && isFinite(audio.duration) && audio.duration > 0)
+        ? audio.duration
+        : (currentTrackDetails?.metadata?.durationSeconds || 0);
+      totalDurationLabel.textContent = formatTime(dur);
+    });
+
+    seekSlider.addEventListener('input', () => {
+      isSeeking = true;
+      const dur = (audio.duration && isFinite(audio.duration) && audio.duration > 0)
+        ? audio.duration
+        : (currentTrackDetails?.metadata?.durationSeconds || 0);
+      if (dur > 0) {
+        const targetTime = (seekSlider.value / 100) * dur;
+        currentTimeLabel.textContent = formatTime(targetTime);
+        syncLyricsHighlight(targetTime * 1000);
+      }
+    });
+
+    seekSlider.addEventListener('change', () => {
+      const dur = (audio.duration && isFinite(audio.duration) && audio.duration > 0)
+        ? audio.duration
+        : (currentTrackDetails?.metadata?.durationSeconds || 0);
+      if (dur > 0) {
+        const targetTime = (seekSlider.value / 100) * dur;
+        audio.currentTime = targetTime;
+        syncLyricsHighlight(targetTime * 1000);
+      }
+      isSeeking = false;
+    });
+
+    btnSeekBack.addEventListener('click', () => {
+      audio.currentTime = Math.max(0, audio.currentTime - 5);
+    });
+    btnSeekForward.addEventListener('click', () => {
+      const dur = (audio.duration && isFinite(audio.duration) && audio.duration > 0)
+        ? audio.duration
+        : (currentTrackDetails?.metadata?.durationSeconds || 0);
+      audio.currentTime = Math.min(dur || 99999, audio.currentTime + 5);
+    });
+
+    // Sync Lyric Highlighting
+    function syncLyricsHighlight(currentMs) {
+      highlightActiveLine(localLyricsScroller, currentMs);
+      highlightActiveLine(remoteLyricsScroller, currentMs);
+    }
+
+    function highlightActiveLine(container, currentMs) {
+      const lines = container.querySelectorAll('.lyric-line');
+      if (lines.length === 0) return;
+      let activeIndex = -1;
+
+      for (let i = 0; i < lines.length; i++) {
+        const lineMs = parseInt(lines[i].getAttribute('data-ms'), 10);
+        if (!isNaN(lineMs) && lineMs <= currentMs) {
+          activeIndex = i;
+        } else if (!isNaN(lineMs) && lineMs > currentMs) {
+          break;
+        }
+      }
+
+      lines.forEach((line, idx) => {
+        if (idx === activeIndex) {
+          if (!line.classList.contains('active')) {
+            line.classList.add('active');
+            // Smoothly center the line within the scrolling container without disturbing the window
+            const containerRect = container.getBoundingClientRect();
+            const lineRect = line.getBoundingClientRect();
+            const scrollOffset = (lineRect.top - containerRect.top) - (container.clientHeight / 2) + (line.clientHeight / 2);
+            container.scrollBy({ top: scrollOffset, behavior: 'smooth' });
+          }
+        } else {
+          line.classList.remove('active');
+        }
+      });
+    }
+
+    // =========================================================================
+    // MODAL DE AÇÕES (OPÇÕES 0 A 7)
+    // =========================================================================
+    async function openActionModal(actionId) {
+      try {
+        const res = await fetch('/api/action/config?id=' + actionId);
+        currentActionConfig = await res.json();
+        renderActionModal(currentActionConfig);
+      } catch (e) {
+        showToast('Erro ao carregar detalhes da opção.');
+      }
+    }
+
+    function renderActionModal(config) {
+      const icons = ['📁', '🔍', '⏳', '🧹', '📦', '🏷️', '📊', '🛡️', '⚡'];
+      document.getElementById('modalActionIcon').textContent = icons[config.id] || '⚙️';
+      document.getElementById('modalActionTitle').textContent = config.title;
+      document.getElementById('modalActionSubtitle').textContent = `Opção ${config.id}`;
+      document.getElementById('modalActionDesc').textContent = config.description || config.hint;
+
+      // Reset Modal Views
+      document.getElementById('modalFormSection').style.display = 'block';
+      document.getElementById('modalProgressSection').style.display = 'none';
+      document.getElementById('modalResultSection').style.display = 'none';
+      modalExecuteBtn.style.display = 'inline-flex';
+      modalExecuteBtn.disabled = false;
+      modalExecuteBtn.textContent = '▶️ Executar Operação';
+      modalCancelBtn.textContent = 'Cancelar';
+
+      // Render Directories Inputs
+      const inputsContainer = document.getElementById('modalInputsContainer');
+      inputsContainer.innerHTML = '';
+      (config.inputs || []).forEach(inp => {
+        const saved = localStorage.getItem('last_path_' + inp.key) || (inp.key === 'musicDir' ? 'C:\\Users\\xiyun\\Music' : '');
+        const grp = document.createElement('div');
+        grp.className = 'form-group';
+        grp.innerHTML = `
+          <label class="form-label">${inp.label} ${inp.required ? '<span class="text-danger">*</span>' : ''}</label>
+          <div class="input-with-action">
+            <input type="text" id="input_${inp.key}" class="form-input" placeholder="${inp.placeholder || ''}" value="${saved}">
+            <button type="button" class="btn-browse" onclick="browseFolder('input_${inp.key}', '${inp.label}')">
+              📁 Procurar...
+            </button>
+          </div>
+          <div class="quick-paths-row">
+            <button type="button" class="btn-chip-path" onclick="setInputValue('input_${inp.key}', 'C:\\\\Users\\\\xiyun\\\\Music')">C:\\Users\\xiyun\\Music</button>
+            <button type="button" class="btn-chip-path" onclick="setInputValue('input_${inp.key}', '.')">Pasta Atual (.)</button>
+          </div>
+        `;
+        inputsContainer.appendChild(grp);
+      });
+
+      // Render Options (Checkboxes / Selects)
+      const optionsContainer = document.getElementById('modalOptionsContainer');
+      optionsContainer.innerHTML = '';
+      (config.options || []).forEach(opt => {
+        const grp = document.createElement('div');
+        grp.className = 'form-group';
+        if (opt.type === 'checkbox') {
+          grp.innerHTML = `
+            <label class="checkbox-group">
+              <input type="checkbox" id="input_${opt.key}" ${opt.default ? 'checked' : ''}>
+              <span>${opt.label}</span>
+            </label>
+          `;
+        } else if (opt.type === 'select') {
+          const optsHtml = (opt.selectOptions || []).map(o => `<option value="${o.value}">${o.label}</option>`).join('');
+          grp.innerHTML = `
+            <label class="form-label">${opt.label}</label>
+            <select id="input_${opt.key}" class="select-input">${optsHtml}</select>
+          `;
+        }
+        optionsContainer.appendChild(grp);
+      });
+
+      actionModal.style.display = 'flex';
+    }
+
+    function closeActionModal() {
+      if (actionPollInterval) {
+        clearInterval(actionPollInterval);
+        actionPollInterval = null;
+      }
+      actionModal.style.display = 'none';
+    }
+
+    modalCloseBtn.addEventListener('click', closeActionModal);
+    modalCancelBtn.addEventListener('click', closeActionModal);
+
+    function setInputValue(id, val) {
+      const el = document.getElementById(id);
+      if (el) el.value = val;
+    }
+
+    async function browseFolder(inputId, title) {
+      const input = document.getElementById(inputId);
+      showToast('Abrindo seletor de pastas na área de trabalho...');
+      try {
+        const res = await fetch('/api/action/browse-dir?title=' + encodeURIComponent(title));
+        const data = await res.json();
+        if (data.path) {
+          input.value = data.path;
+          showToast('Pasta selecionada!');
+        }
+      } catch (e) {
+        showToast('Não foi possível abrir o seletor.');
+      }
+    }
+
+    modalExecuteBtn.addEventListener('click', async () => {
+      if (!currentActionConfig) return;
+
+      // Validate required inputs
+      for (const inp of (currentActionConfig.inputs || [])) {
+        if (inp.required) {
+          const val = document.getElementById('input_' + inp.key)?.value?.trim();
+          if (!val) {
+            showToast(`Preencha o campo obrigatório: ${inp.label}`);
+            document.getElementById('input_' + inp.key)?.focus();
+            return;
+          }
+          localStorage.setItem('last_path_' + inp.key, val);
+        }
+      }
+
+      const req = {
+        actionId: currentActionConfig.id,
+        musicDir: document.getElementById('input_musicDir')?.value?.trim(),
+        lyricsDir: document.getElementById('input_lyricsDir')?.value?.trim(),
+        outDir: document.getElementById('input_outDir')?.value?.trim(),
+        isFullAnalysis: document.getElementById('input_isFullAnalysis')?.value === 'true',
+        moveFiles: document.getElementById('input_moveFiles')?.checked ?? true,
+        renameFiles: document.getElementById('input_renameFiles')?.checked ?? true
+      };
+
+      document.getElementById('modalFormSection').style.display = 'none';
+      document.getElementById('modalProgressSection').style.display = 'flex';
+      document.getElementById('modalResultSection').style.display = 'none';
+      modalExecuteBtn.disabled = true;
+      modalExecuteBtn.textContent = 'Processando...';
+
+      try {
+        const res = await fetch('/api/action/execute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(req)
+        });
+        const initStatus = await res.json();
+        updateModalProgress(initStatus);
+
+        actionPollInterval = setInterval(pollActionStatus, 400);
+      } catch (e) {
+        showToast('Falha ao iniciar ação.');
+        modalExecuteBtn.disabled = false;
+        modalExecuteBtn.textContent = '▶️ Tentar Novamente';
+      }
+    });
+
+    async function pollActionStatus() {
+      try {
+        const res = await fetch('/api/action/status');
+        const status = await res.json();
+        updateModalProgress(status);
+
+        if (status.isCompleted) {
+          if (actionPollInterval) {
+            clearInterval(actionPollInterval);
+            actionPollInterval = null;
+          }
+          showModalResult(status);
+        }
+      } catch (e) {
+        console.error('Error polling status', e);
+      }
+    }
+
+    function updateModalProgress(status) {
+      document.getElementById('modalProgressTitle').textContent = status.title || 'Processando arquivos...';
+      document.getElementById('modalProgressCount').textContent = `${status.current} / ${status.max}`;
+      const pct = status.max > 0 ? Math.min(100, Math.round((status.current / status.max) * 100)) : (status.isCompleted ? 100 : 15);
+      document.getElementById('modalProgressBar').style.width = pct + '%';
+      document.getElementById('modalProgressItem').textContent = status.currentItem || 'Analisando arquivos...';
+    }
+
+    function showModalResult(status) {
+      document.getElementById('modalProgressSection').style.display = 'none';
+      document.getElementById('modalResultSection').style.display = 'flex';
+      modalExecuteBtn.style.display = 'none';
+      modalCancelBtn.textContent = 'Concluir & Fechar';
+
+      const banner = document.getElementById('modalResultBanner');
+      const icon = document.getElementById('modalResultIcon');
+      const summary = document.getElementById('modalResultSummary');
+
+      if (status.success && (status.errors || []).length === 0) {
+        banner.className = 'result-banner success';
+        icon.textContent = '✅';
+        summary.textContent = `Operação concluída com sucesso! (${(status.changes || []).length} registros processados)`;
+      } else {
+        banner.className = 'result-banner error';
+        icon.textContent = '⚠️';
+        summary.textContent = `Operação finalizada com avisos/erros. (${(status.errors || []).length} erros)`;
+      }
+
+      const reportRow = document.getElementById('modalResultReportRow');
+      if (status.generatedReportPath) {
+        reportRow.style.display = 'flex';
+        document.getElementById('btnOpenInComparator').onclick = async () => {
+          closeActionModal();
+          await init();
+          reportSelect.value = status.generatedReportPath;
+          await loadReportItems(status.generatedReportPath);
+          switchView('comparator');
+        };
+      } else {
+        reportRow.style.display = 'none';
+      }
+
+      const list = document.getElementById('modalResultList');
+      list.innerHTML = '';
+      const allLogs = [
+        ...(status.changes || []).map(c => ({ text: c, type: 'change' })),
+        ...(status.errors || []).map(e => ({ text: e, type: 'error' }))
+      ];
+
+      if (allLogs.length === 0) {
+        list.innerHTML = '<div style="color: #64748b; padding: 6px 0;">Nenhuma alteração ou erro registrado.</div>';
+      } else {
+        allLogs.forEach(log => {
+          const row = document.createElement('div');
+          row.className = 'result-log-item';
+          row.style.color = log.type === 'error' ? '#f87171' : '#34d399';
+          row.textContent = (log.type === 'error' ? '❌ ' : '✔ ') + log.text;
+          list.appendChild(row);
+        });
+      }
+    }
+
+    // =========================================================================
+    // LOAD MENU OPTIONS
+    // =========================================================================
+    async function loadMenuOptions() {
+      try {
+        const res = await fetch('/api/menu-options');
+        const options = await res.json();
+        renderMenuCards(options);
+      } catch (e) {
+        console.error('Failed to load menu options', e);
+      }
+    }
+
+    function renderMenuCards(options) {
+      optionsGrid.innerHTML = '';
+      const icons = ['📁', '🔍', '⏳', '🧹', '📦', '🏷️', '📊', '🛡️', '⚡'];
+
+      options.forEach(opt => {
+        const card = document.createElement('div');
+        card.className = 'option-card' + (opt.isComparator ? ' highlight' : '');
+
+        card.innerHTML = `
+          <div class="option-card-header">
+            <div class="option-card-icon">${icons[opt.id] || '🎵'}</div>
+            <div>
+              <div class="option-card-number">Opção ${opt.id}</div>
+              <div class="option-card-title">${opt.title}</div>
+            </div>
+          </div>
+          <div class="option-card-hint">${opt.hint}</div>
+          <div class="option-card-footer">
+            <span>${opt.isComparator ? 'Abrir Comparador Agora' : 'Configurar & Executar'}</span>
+            <span>➔</span>
+          </div>
+        `;
+
+        card.addEventListener('click', () => {
+          if (opt.isComparator) {
+            switchView('comparator');
+          } else {
+            openActionModal(opt.id);
+          }
+        });
+
+        optionsGrid.appendChild(card);
+      });
+    }
+
+    // =========================================================================
+    // COMPARADOR & TRACK LIST
+    // =========================================================================
+    async function init() {
+      await loadMenuOptions();
+      try {
+        const res = await fetch('/api/reports');
+        const reports = await res.json();
+        reportSelect.innerHTML = '';
+        reports.forEach(r => {
+          const opt = document.createElement('option');
+          opt.value = r;
+          opt.textContent = r.split(/[\\/]/).pop();
+          reportSelect.appendChild(opt);
+        });
+
+        if (reports.length > 0) {
+          loadReportItems(reports[0]);
+        } else {
+          headerProgress.textContent = 'Pronto';
+        }
+      } catch (err) {
+        console.error('Failed to load reports', err);
+      }
+    }
+
+    reportSelect.addEventListener('change', () => {
+      loadReportItems(reportSelect.value);
+    });
+
+    async function loadReportItems(reportPath) {
+      headerProgress.textContent = 'Carregando lista...';
+      try {
+        const res = await fetch('/api/items?report=' + encodeURIComponent(reportPath));
+        currentItems = await res.json();
+        updateFilterCounts();
+        renderTrackList();
+        headerProgress.textContent = `${currentItems.length} faixas para revisar`;
+
+        if (currentItems.length > 0) {
+          selectTrack(0);
+        } else {
+          clearViewer();
+        }
+      } catch (err) {
+        headerProgress.textContent = 'Erro ao carregar';
+        showToast('Falha ao ler itens do relatório.');
+      }
+    }
+
+    function updateFilterCounts() {
+      const allCount = currentItems.length;
+      const pendingCount = currentItems.filter(i => !i.status || i.status === 'PENDING').length;
+      const resolvedCount = allCount - pendingCount;
+
+      document.getElementById('countAll').textContent = allCount;
+      document.getElementById('countPending').textContent = pendingCount;
+      document.getElementById('countResolved').textContent = resolvedCount;
+    }
+
+    function renderTrackList() {
+      trackList.innerHTML = '';
+      const filterText = trackSearchInput.value.toLowerCase().trim();
+
+      currentItems.forEach((item, index) => {
+        const isPending = !item.status || item.status === 'PENDING';
+        if (activeFilter === 'PENDING' && !isPending) return;
+        if (activeFilter === 'RESOLVED' && isPending) return;
+
+        if (filterText && !item.fileName.toLowerCase().includes(filterText)) {
+          return;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'track-item' + (index === currentIndex ? ' active' : '');
+
+        let statusBadge = '';
+        if (item.status === 'KEPT_LOCAL') {
+          statusBadge = '<span class="badge badge-success" style="font-size:0.65rem;">LOCAL</span>';
+        } else if (item.status === 'SAVED_LRCLIB') {
+          statusBadge = '<span class="badge badge-info" style="font-size:0.65rem;">LRCLIB</span>';
+        }
+
+        li.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 6px;">
+            <div class="track-item-title" title="${item.fileName}">
+              ${item.id}. ${item.fileName}
+            </div>
+            ${statusBadge}
+          </div>
+          <div class="track-item-issues">
+            ${item.issues.map(iss => `<span>• ${iss}</span>`).join('')}
+          </div>
+        `;
+
+        li.addEventListener('click', () => selectTrack(index));
+        trackList.appendChild(li);
+      });
+    }
+
+    // Filter Buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeFilter = btn.dataset.filter;
+        renderTrackList();
+      });
+    });
+
+    trackSearchInput.addEventListener('input', () => renderTrackList());
+
+    async function selectTrack(index) {
+      if (index < 0 || index >= currentItems.length) return;
+      currentIndex = index;
+      renderTrackList();
+
+      const item = currentItems[index];
+      headerProgress.textContent = `Carregando ${item.fileName}...`;
+
+      try {
+        const res = await fetch('/api/track?id=' + item.id);
+        const details = await res.json();
+        currentTrackDetails = details;
+        renderTrackDetails(details);
+        headerProgress.textContent = `Revisando [${index + 1}/${currentItems.length}]`;
+      } catch (err) {
+        showToast('Erro ao carregar detalhes da faixa.');
+      }
+    }
+
+    function renderTrackDetails(d) {
+      songTitle.textContent = d.trackName || (d.metadata && d.metadata.title) || d.fileName || d.lyricFile;
+      songArtist.textContent = d.artist || (d.metadata && d.metadata.artist) || 'Artista Desconhecido';
+      songAlbum.textContent = d.album || (d.metadata && d.metadata.album) || '';
+
+      const artUrl = d.artworkUrl || (d.metadata && d.metadata.hasArtwork && d.audioPath ? ('/api/artwork?path=' + encodeURIComponent(d.audioPath)) : null);
+      if (artUrl) {
+        albumArtImg.src = artUrl;
+        albumArtImg.style.display = 'block';
+        vinylFallback.style.display = 'none';
+      } else {
+        albumArtImg.style.display = 'none';
+        vinylFallback.style.display = 'block';
+      }
+
+      if (d.issues && d.issues.length > 0) {
+        issuesList.innerHTML = d.issues.map(i => `<li>${escapeHtml(i)}</li>`).join('');
+        issuesBox.style.display = 'block';
+      } else {
+        issuesBox.style.display = 'none';
+      }
+
+      // Audio Source and player timeline reset
+      audio.pause();
+      currentTimeLabel.textContent = '00:00';
+      seekSlider.value = 0;
+      if (d.metadata && d.metadata.durationSeconds) {
+        totalDurationLabel.textContent = formatTime(d.metadata.durationSeconds);
+      } else {
+        totalDurationLabel.textContent = '00:00';
+      }
+
+      const audioUrl = d.audioUrl || (d.audioPath ? ('/api/audio?path=' + encodeURIComponent(d.audioPath)) : null);
+      if (audioUrl) {
+        audio.src = audioUrl;
+        audio.load();
+      } else {
+        audio.removeAttribute('src');
+      }
+
+      // Render Local Lyrics
+      const localLines = d.localLines || (d.localLyrics && d.localLyrics.lines) || [];
+      localLinesState = JSON.parse(JSON.stringify(localLines));
+      renderLyricLines(localLyricsScroller, localLinesState, 'local');
+      localStatusBadge.textContent = localLinesState.length + ' versos';
+
+      // Render Remote LRCLIB Lyrics
+      const remoteLines = d.remoteLines || (d.lrclibLyrics && d.lrclibLyrics.lines) || [];
+      remoteLinesState = JSON.parse(JSON.stringify(remoteLines));
+      renderLyricLines(remoteLyricsScroller, remoteLinesState, 'remote');
+      remoteStatusBadge.textContent = remoteLinesState.length + ' versos';
+
+      // Immediately sync active line to start of track
+      syncLyricsHighlight(0);
+
+      // Render Alternatives candidates
+      if (d.candidates && d.candidates.length > 1) {
+        candidatesCount.textContent = d.candidates.length;
+        candidatesBox.style.display = 'block';
+        candidatesList.innerHTML = '';
+
+        d.candidates.forEach((cand, idx) => {
+          const chip = document.createElement('div');
+          chip.className = 'candidate-chip' + (idx === 0 ? ' active' : '');
+          chip.innerHTML = `
+            <div class="candidate-info">
+              <span class="candidate-name">${cand.trackName || 'Sem título'}</span>
+              <span class="candidate-meta">${cand.artistName || ''} • ${cand.duration ? Math.round(cand.duration) + 's' : ''} ${cand.syncedLyrics ? '⚡ Sincronizada' : '📄 Pura'}</span>
+            </div>
+            <span class="badge ${cand.syncedLyrics ? 'badge-success' : 'badge-warning'}">#${cand.id}</span>
+          `;
+
+          chip.addEventListener('click', async () => {
+            document.querySelectorAll('.candidate-chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+
+            if (cand.syncedLyrics) {
+              const res = await fetch('/api/parse-lrc', {
+                method: 'POST',
+                body: cand.syncedLyrics
+              });
+              remoteLinesState = await res.json();
+              renderLyricLines(remoteLyricsScroller, remoteLinesState, 'remote');
+              remoteStatusBadge.textContent = remoteLinesState.length + ' versos';
+              syncLyricsHighlight(Math.round((audio.currentTime || 0) * 1000));
+              showToast(`Versão LRCLIB #${cand.id} selecionada!`);
+            } else {
+              showToast('Esta versão não possui letra sincronizada.');
+            }
+          });
+
+          candidatesList.appendChild(chip);
+        });
+      } else {
+        candidatesBox.style.display = 'none';
+      }
+    }
+
+    function renderLyricLines(container, lines, side) {
+      container.innerHTML = '';
+      if (!lines || lines.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: #64748b; margin-top: 40px;">Nenhuma letra sincronizada encontrada.</p>';
+        return;
+      }
+
+      lines.forEach((line, index) => {
+        const ms = (typeof line.timestampMs === 'number')
+          ? line.timestampMs
+          : ((typeof line.timeMs === 'number')
+              ? line.timeMs
+              : parseFormattedTimeToMs(line.formattedTime || '00:00'));
+        line.timestampMs = ms;
+        line.timeMs = ms;
+
+        const displayTime = (line.formattedTime || formatLrcTimestamp(ms)).replace(/[\[\]]/g, '');
+
+        const div = document.createElement('div');
+        div.className = 'lyric-line';
+        div.setAttribute('data-ms', ms);
+        div.setAttribute('data-index', index);
+
+        div.innerHTML = `
+          <span class="timestamp-tag" title="Clique para reproduzir neste momento">[${displayTime}]</span>
+          <span class="lyric-text-span" title="Clique para reproduzir neste momento">${escapeHtml(line.text || '(instrumental)')}</span>
+          <div class="line-actions">
+            <button class="btn-line-action btn-sync-time" title="Ajustar para o segundo atual da música">⏱️ Set</button>
+            <button class="btn-line-action btn-edit-line" title="Editar verso e tempo">✏️</button>
+            <button class="btn-line-action btn-delete-line" title="Excluir verso" style="color: #f87171;">✕</button>
+          </div>
+        `;
+
+        // Click anywhere on line seeks the song to that timestamp!
+        div.addEventListener('click', (e) => {
+          if (e.target.closest('.line-actions') || e.target.tagName === 'INPUT' || div.classList.contains('editing')) {
+            return;
+          }
+          if (!audio.src || audio.src === window.location.href) {
+            showToast('Nenhum áudio disponível para esta faixa.');
+            return;
+          }
+          const targetSec = ms / 1000;
+          audio.currentTime = targetSec;
+          if (audio.paused) {
+            audio.play().catch(err => {
+              console.error(err);
+              showToast('Erro ao reproduzir áudio.');
+            });
+          }
+          // Highlight and center both sides immediately
+          syncLyricsHighlight(ms);
+        });
+
+        // Set to current audio time
+        div.querySelector('.btn-sync-time').addEventListener('click', (e) => {
+          e.stopPropagation();
+          const currentMs = Math.round((audio.currentTime || 0) * 1000);
+          line.timestampMs = currentMs;
+          line.timeMs = currentMs;
+          line.formattedTime = formatLrcTimestamp(currentMs);
+          div.querySelector('.timestamp-tag').textContent = `[${line.formattedTime}]`;
+          div.setAttribute('data-ms', currentMs);
+          showToast(`Tempo atualizado para [${line.formattedTime}]`);
+          syncLyricsHighlight(currentMs);
+        });
+
+        // Edit line text and time
+        div.querySelector('.btn-edit-line').addEventListener('click', (e) => {
+          e.stopPropagation();
+          startEditingLine(div, line, side, index);
+        });
+
+        // Delete line
+        div.querySelector('.btn-delete-line').addEventListener('click', (e) => {
+          e.stopPropagation();
+          lines.splice(index, 1);
+          renderLyricLines(container, lines, side);
+          syncLyricsHighlight(Math.round((audio.currentTime || 0) * 1000));
+        });
+
+        container.appendChild(div);
+      });
+    }
+
+    function startEditingLine(lineDiv, line, side, index) {
+      lineDiv.classList.add('editing');
+      const textSpan = lineDiv.querySelector('.lyric-text-span');
+      const tagSpan = lineDiv.querySelector('.timestamp-tag');
+      const actions = lineDiv.querySelector('.line-actions');
+
+      if (actions) actions.style.display = 'none';
+
+      const timeInput = document.createElement('input');
+      timeInput.type = 'text';
+      timeInput.className = 'line-input-time';
+      const cleanTime = (line.formattedTime || '').replace(/[\[\]]/g, '');
+      timeInput.value = cleanTime;
+
+      const textInput = document.createElement('input');
+      textInput.type = 'text';
+      textInput.className = 'line-input-text';
+      textInput.value = line.text;
+
+      lineDiv.innerHTML = '';
+      lineDiv.appendChild(timeInput);
+      lineDiv.appendChild(textInput);
+
+      const saveBtn = document.createElement('button');
+      saveBtn.className = 'btn-line-action';
+      saveBtn.style.color = '#34d399';
+      saveBtn.textContent = 'Salvar';
+
+      saveBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        line.text = textInput.value.trim();
+        line.formattedTime = timeInput.value.trim().replace(/[\[\]]/g, '');
+        const parsedMs = parseFormattedTimeToMs(line.formattedTime);
+        line.timestampMs = parsedMs;
+        line.timeMs = parsedMs;
+        const container = side === 'local' ? localLyricsScroller : remoteLyricsScroller;
+        const state = side === 'local' ? localLinesState : remoteLinesState;
+        renderLyricLines(container, state, side);
+        syncLyricsHighlight(Math.round((audio.currentTime || 0) * 1000));
+      });
+
+      lineDiv.appendChild(saveBtn);
+      textInput.focus();
+    }
+
+    function addNewLyricLine(side) {
+      const container = side === 'local' ? localLyricsScroller : remoteLyricsScroller;
+      const state = side === 'local' ? localLinesState : remoteLinesState;
+
+      const currentMs = Math.round((audio.currentTime || 0) * 1000);
+      const newLine = {
+        timestampMs: currentMs,
+        timeMs: currentMs,
+        formattedTime: formatLrcTimestamp(currentMs),
+        text: 'Novo verso...'
+      };
+
+      state.push(newLine);
+      state.sort((a, b) => ((a.timestampMs ?? a.timeMs) - (b.timestampMs ?? b.timeMs)));
+      renderLyricLines(container, state, side);
+      syncLyricsHighlight(currentMs);
+      showToast('Novo verso adicionado no tempo atual!');
+    }
+
+    // Global Offset Adjustment
+    function applyGlobalOffset(side, seconds) {
+      const deltaMs = Math.round(seconds * 1000);
+      const state = side === 'local' ? localLinesState : remoteLinesState;
+      const container = side === 'local' ? localLyricsScroller : remoteLyricsScroller;
+
+      state.forEach(l => {
+        const currentMs = (typeof l.timestampMs === 'number')
+          ? l.timestampMs
+          : ((typeof l.timeMs === 'number')
+              ? l.timeMs
+              : parseFormattedTimeToMs(l.formattedTime || '00:00'));
+        const newMs = Math.max(0, currentMs + deltaMs);
+        l.timestampMs = newMs;
+        l.timeMs = newMs;
+        l.formattedTime = formatLrcTimestamp(newMs);
+      });
+
+      renderLyricLines(container, state, side);
+      syncLyricsHighlight(Math.round((audio.currentTime || 0) * 1000));
+      showToast(`Ajuste global de ${seconds > 0 ? '+' : ''}${seconds}s aplicado!`);
+    }
+
+    function applyCustomOffset(side) {
+      const input = document.getElementById(side === 'local' ? 'localOffsetInput' : 'remoteOffsetInput');
+      const val = parseFloat(input.value);
+      if (!isNaN(val) && val !== 0) {
+        applyGlobalOffset(side, val);
+      }
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function serializeLinesToLrc(lines) {
+      return lines.map(l => {
+        const timeStr = (l.formattedTime || '').replace(/[\[\]]/g, '');
+        return `[${timeStr}] ${l.text}`;
+      }).join('\n');
+    }
+
+    // Save and Keep Actions
+    btnKeepLocal.addEventListener('click', () => saveChoice('LOCAL'));
+    btnSaveLrclib.addEventListener('click', () => saveChoice('LRCLIB'));
+
+    async function saveChoice(choice) {
+      if (!currentTrackDetails) return;
+
+      const linesToSave = (choice === 'LRCLIB') ? remoteLinesState : localLinesState;
+      const customLrc = serializeLinesToLrc(linesToSave);
+
+      const payload = {
+        lyricPath: currentTrackDetails.lyricPath || '',
+        content: customLrc,
+        customLrcContent: customLrc,
+        choice: choice
+      };
+
+      try {
+        const res = await fetch('/api/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+
+        if (result.success) {
+          showToast(choice === 'LRCLIB' ? 'Letra LRCLIB salva com sucesso!' : 'Letra local mantida / atualizada!');
+          currentItems[currentIndex].status = (choice === 'LRCLIB') ? 'SAVED_LRCLIB' : 'KEPT_LOCAL';
+          updateFilterCounts();
+          renderTrackList();
+          nextTrack();
+        } else {
+          showToast('Erro ao salvar letra: ' + result.message);
+        }
+      } catch (err) {
+        showToast('Falha na requisição de salvamento.');
+      }
+    }
+
+    function prevTrack() {
+      if (currentIndex > 0) {
+        selectTrack(currentIndex - 1);
+      }
+    }
+
+    function nextTrack() {
+      if (currentIndex < currentItems.length - 1) {
+        selectTrack(currentIndex + 1);
+      }
+    }
+
+    btnPrevTrack.addEventListener('click', prevTrack);
+    btnNextTrack.addEventListener('click', nextTrack);
+
+    // Keyboard Shortcuts
+    window.addEventListener('keydown', (e) => {
+      // Don't trigger shortcuts when typing in inputs or modals
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || actionModal.style.display === 'flex') return;
+
+      switch (e.code) {
+        case 'Space':
+          e.preventDefault();
+          btnPlayPause.click();
+          break;
+        case 'Digit1':
+        case 'Numpad1':
+          e.preventDefault();
+          btnKeepLocal.click();
+          break;
+        case 'Digit2':
+        case 'Numpad2':
+          e.preventDefault();
+          btnSaveLrclib.click();
+          break;
+        case 'ArrowLeft':
+          e.preventDefault();
+          btnSeekBack.click();
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          btnSeekForward.click();
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          prevTrack();
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          nextTrack();
+          break;
+      }
+    });
+
+    function clearViewer() {
+      songTitle.textContent = 'Nenhuma faixa selecionada';
+      songArtist.textContent = '-';
+      songAlbum.textContent = '-';
+      albumArtImg.style.display = 'none';
+      vinylFallback.style.display = 'block';
+      localLyricsScroller.innerHTML = '<p style="text-align: center; color: #64748b; margin-top: 40px;">Nenhuma faixa disponível</p>';
+      remoteLyricsScroller.innerHTML = '<p style="text-align: center; color: #64748b; margin-top: 40px;">Nenhuma faixa disponível</p>';
+    }
+
+    // Start application
+    init();
+  </script>
+</body>
+</html>

@@ -18,6 +18,7 @@ dependencies {
     implementation("net.jthink:jaudiotagger:+")
     implementation("org.jflac:jflac-codec:+")
     implementation("com.github.wendykierp:JTransforms:+")
+    implementation("com.google.code.gson:gson:+")
 }
 
 tasks.test {
