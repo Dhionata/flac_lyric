@@ -87,7 +87,7 @@ class WebReviewRouter(
     }
 
     private fun handleActionConfig(exchange: HttpExchange) {
-        val queryParams = parseQueryParams(exchange.requestURI.query)
+        val queryParams = parseQueryParams(exchange)
         val actionId = queryParams["id"]?.toIntOrNull() ?: 0
 
         val config = when (actionId) {
@@ -209,7 +209,7 @@ class WebReviewRouter(
     }
 
     private fun handleActionBrowseDir(exchange: HttpExchange) {
-        val queryParams = parseQueryParams(exchange.requestURI.query)
+        val queryParams = parseQueryParams(exchange)
         val title = queryParams["title"] ?: "Selecionar Pasta"
         val path = actionRunner.browseDirectory(title)
         sendJsonResponse(exchange, 200, mapOf("path" to path, "success" to (path != null)))
@@ -225,7 +225,7 @@ class WebReviewRouter(
     }
 
     private fun handleGetItems(exchange: HttpExchange) {
-        val queryParams = parseQueryParams(exchange.requestURI.query)
+        val queryParams = parseQueryParams(exchange)
         val reportPath = queryParams["report"]
 
         val reportFile = if (!reportPath.isNullOrBlank()) {
@@ -253,7 +253,7 @@ class WebReviewRouter(
     }
 
     private fun handleGetTrack(exchange: HttpExchange) {
-        val queryParams = parseQueryParams(exchange.requestURI.query)
+        val queryParams = parseQueryParams(exchange)
         val id = queryParams["id"]?.toIntOrNull()
 
         if (id == null || !cachedItems.containsKey(id)) {
@@ -267,7 +267,7 @@ class WebReviewRouter(
     }
 
     private fun handleStreamAudio(exchange: HttpExchange) {
-        val queryParams = parseQueryParams(exchange.requestURI.query)
+        val queryParams = parseQueryParams(exchange)
         val audioPath = queryParams["path"]
         if (audioPath.isNullOrBlank()) {
             sendJsonResponse(exchange, 400, mapOf("error" to "Missing audio path parameter"))
@@ -279,7 +279,7 @@ class WebReviewRouter(
     }
 
     private fun handleGetArtwork(exchange: HttpExchange) {
-        val queryParams = parseQueryParams(exchange.requestURI.query)
+        val queryParams = parseQueryParams(exchange)
         val audioPath = queryParams["path"]
         if (audioPath.isNullOrBlank()) {
             sendJsonResponse(exchange, 400, mapOf("error" to "Missing audio path parameter"))
@@ -313,14 +313,14 @@ class WebReviewRouter(
     }
 
     private fun handleSearchRemote(exchange: HttpExchange) {
-        val queryParams = parseQueryParams(exchange.requestURI.query)
+        val queryParams = parseQueryParams(exchange)
         val query = queryParams["q"].orEmpty()
         val results = fetchLrcLibUseCase.search(query)
         sendJsonResponse(exchange, 200, results)
     }
 
     private fun handleOpenLocation(exchange: HttpExchange) {
-        val queryParams = parseQueryParams(exchange.requestURI.query)
+        val queryParams = parseQueryParams(exchange)
         val filePath = queryParams["path"].orEmpty()
         val opened = openFileLocationUseCase.execute(filePath)
         sendJsonResponse(exchange, 200, mapOf("success" to opened, "path" to filePath))
@@ -339,18 +339,28 @@ class WebReviewRouter(
         exchange.responseBody.use { it.write(jsonBytes) }
     }
 
-    private fun parseQueryParams(query: String?): Map<String, String> {
-        if (query.isNullOrBlank()) return emptyMap()
-        return query.split("&").associate { param ->
-            val parts = param.split("=", limit = 2)
-            val key = try {
-                URLDecoder.decode(parts[0], StandardCharsets.UTF_8.name())
-            } catch (_: Exception) { parts[0] }
-            val rawValue = if (parts.size > 1) parts[1] else ""
-            val value = try {
-                URLDecoder.decode(rawValue, StandardCharsets.UTF_8.name())
-            } catch (_: Exception) { rawValue }
-            key to value
+    private fun parseQueryParams(exchange: HttpExchange): Map<String, String> =
+        parseQueryParams(exchange.requestURI.rawQuery)
+
+    companion object {
+        /**
+         * Parses the raw query string into a map of decoded keys and values.
+         * Note: Uses [HttpExchange.getRequestURI]'s rawQuery to prevent premature decoding
+         * of '&' or '+' characters contained within parameter values (e.g. "Bruno & Marrone").
+         */
+        fun parseQueryParams(rawQuery: String?): Map<String, String> {
+            if (rawQuery.isNullOrBlank()) return emptyMap()
+            return rawQuery.split("&").filter { it.isNotBlank() }.associate { param ->
+                val parts = param.split("=", limit = 2)
+                val key = try {
+                    URLDecoder.decode(parts[0], StandardCharsets.UTF_8.name())
+                } catch (_: Exception) { parts[0] }
+                val rawValue = if (parts.size > 1) parts[1] else ""
+                val value = try {
+                    URLDecoder.decode(rawValue, StandardCharsets.UTF_8.name())
+                } catch (_: Exception) { rawValue }
+                key to value
+            }
         }
     }
 }

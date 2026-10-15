@@ -2,6 +2,7 @@ package comparison.infrastructure.clients
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import comparison.application.usecases.ExtractTrackDetailsUseCase
 import comparison.domain.models.LrcLibLyrics
 import comparison.domain.ports.LrcLibClient
 import java.util.concurrent.TimeUnit
@@ -52,10 +53,9 @@ class LrcLibClientImpl(
                     val bodyString = response.body.string()
                     gson.fromJson(bodyString, LrcLibLyrics::class.java)
                 } else if (response.code == 404) {
-                    // Fallback: search by query
+                    // Fallback: search by query prioritizing synchronized lyrics closest to duration
                     val searchResults = searchLyrics("$artistName $trackName")
-                    searchResults.firstOrNull { it.syncedLyrics != null }
-                        ?: searchResults.firstOrNull()
+                    ExtractTrackDetailsUseCase.selectBestCandidate(searchResults, durationSeconds ?: 0)
                 } else {
                     null
                 }

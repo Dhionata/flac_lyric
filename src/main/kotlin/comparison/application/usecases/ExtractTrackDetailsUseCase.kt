@@ -1,6 +1,7 @@
 package comparison.application.usecases
 
 import comparison.domain.models.ComparisonTrackDetails
+import comparison.domain.models.LrcLibLyrics
 import comparison.domain.models.ReportIssueItem
 import comparison.domain.ports.AudioMetadataExtractor
 import comparison.domain.ports.LyricFileStorage
@@ -37,21 +38,47 @@ class ExtractTrackDetailsUseCase(
         val localRawLyrics = lyricStorage.readText(item.lyricFile)
         val localLines = parseLinesUseCase.execute(localRawLyrics)
 
-        // Query LRCLIB for the best match
-        val remoteRecord = fetchLrcLibUseCase.fetchBestMatch(
+        // 1. Fetch candidates from LRCLIB search
+        val searchQuery = "${metadata.artist} ${metadata.title}".trim()
+        val initialCandidates = if (searchQuery.isNotBlank()) {
+            fetchLrcLibUseCase.search(searchQuery)
+        } else {
+            emptyList()
+        }
+
+        // Fallback search with cleaned title if no candidates were found
+        val candidatesList = if (initialCandidates.isEmpty()) {
+            val cleanTitle = metadata.title.replace(Regex("\\s*\\([^)]*\\)"), "").trim()
+            val fallbackQuery = "${metadata.artist} $cleanTitle".trim()
+            if (fallbackQuery.isNotBlank() && fallbackQuery != searchQuery) {
+                fetchLrcLibUseCase.search(fallbackQuery)
+            } else {
+                initialCandidates
+            }
+        } else {
+            initialCandidates
+        }
+
+        // 2. Also try exact match via /api/get if available
+        val exactRecord = fetchLrcLibUseCase.fetchBestMatch(
             trackName = metadata.title,
             artistName = metadata.artist,
             albumName = metadata.album.takeIf { it.isNotBlank() },
             durationSeconds = metadata.durationSeconds.takeIf { it > 0 }
         )
 
-        // Also fetch candidate alternatives to offer a choice if the first match ends prematurely or diverges
-        val searchQuery = "${metadata.artist} ${metadata.title}".trim()
-        val candidates = if (searchQuery.isNotBlank()) {
-            fetchLrcLibUseCase.search(searchQuery)
+        val combinedCandidates = if (exactRecord != null && candidatesList.none { it.id == exactRecord.id }) {
+            listOf(exactRecord) + candidatesList
         } else {
-            emptyList()
+            candidatesList
         }
+
+        // 3. Automatically select the best candidate:
+        //    - Prioritize synchronized lyrics (syncedLyrics).
+        //    - If multiple exist, pick the one with duration closest to the local audio track.
+        //    - If none synchronized, pick the one with duration closest to the local audio track (or first).
+        val remoteRecord = selectBestCandidate(combinedCandidates, metadata.durationSeconds)
+        val orderedCandidates = orderCandidates(combinedCandidates, remoteRecord, metadata.durationSeconds)
 
         val remoteRawLyrics = remoteRecord?.syncedLyrics ?: remoteRecord?.plainLyrics
         val remoteLines = if (!remoteRecord?.syncedLyrics.isNullOrBlank()) {
@@ -81,7 +108,72 @@ class ExtractTrackDetailsUseCase(
             remoteLines = remoteLines,
             remoteStatus = remoteStatus,
             status = item.status,
-            candidates = candidates
+            candidates = orderedCandidates
         )
+    }
+
+    companion object {
+        /**
+         * Selects the best candidate lyrics record from LRCLIB based on:
+         * 1. Priority to synchronized lyrics (syncedLyrics).
+         * 2. If multiple synchronized lyrics exist, choose the one whose duration is closest to targetDurationSeconds.
+         * 3. If targetDurationSeconds is unavailable (<= 0), choose the first synchronized record found.
+         * 4. If no synchronized lyrics exist, choose the record whose duration is closest to targetDurationSeconds (or the first).
+         */
+        fun selectBestCandidate(
+            candidates: List<LrcLibLyrics>,
+            targetDurationSeconds: Int
+        ): LrcLibLyrics? {
+            if (candidates.isEmpty()) return null
+
+            val syncedCandidates = candidates.filter { !it.syncedLyrics.isNullOrBlank() }
+
+            return if (syncedCandidates.isNotEmpty()) {
+                if (targetDurationSeconds > 0) {
+                    syncedCandidates.minByOrNull { cand ->
+                        val candDuration = cand.duration ?: 0.0
+                        kotlin.math.abs(candDuration - targetDurationSeconds)
+                    } ?: syncedCandidates.first()
+                } else {
+                    syncedCandidates.first()
+                }
+            } else {
+                if (targetDurationSeconds > 0) {
+                    candidates.minByOrNull { cand ->
+                        val candDuration = cand.duration ?: 0.0
+                        kotlin.math.abs(candDuration - targetDurationSeconds)
+                    } ?: candidates.first()
+                } else {
+                    candidates.first()
+                }
+            }
+        }
+
+        /**
+         * Places the selected candidate at index 0 and sorts the remaining candidates
+         * prioritizing synchronized lyrics and proximity to target duration.
+         */
+        fun orderCandidates(
+            candidates: List<LrcLibLyrics>,
+            selectedRecord: LrcLibLyrics?,
+            targetDurationSeconds: Int
+        ): List<LrcLibLyrics> {
+            if (selectedRecord == null || candidates.isEmpty()) return candidates
+
+            val otherCandidates = candidates.filter { it.id != selectedRecord.id }
+            val sortedOthers = otherCandidates.sortedWith(
+                compareBy<LrcLibLyrics> { it.syncedLyrics.isNullOrBlank() }
+                    .thenBy { cand ->
+                        if (targetDurationSeconds > 0) {
+                            val candDuration = cand.duration ?: 0.0
+                            kotlin.math.abs(candDuration - targetDurationSeconds)
+                        } else {
+                            0.0
+                        }
+                    }
+            )
+
+            return listOf(selectedRecord) + sortedOthers
+        }
     }
 }
