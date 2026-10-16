@@ -12,7 +12,7 @@ import comparison.domain.ports.LyricLineParser
 import comparison.domain.ports.LyricsReportParser
 import comparison.domain.ports.WebLyricReviewServer
 import comparison.infrastructure.audio.AudioMetadataExtractorImpl
-import comparison.infrastructure.clients.LrcLibClientImpl
+import comparison.infrastructure.clients.CompositeLyricsClientImpl
 import comparison.infrastructure.io.LyricFileStorageImpl
 import comparison.infrastructure.parsers.LyricLineParserImpl
 import comparison.infrastructure.parsers.LyricsReportParserImpl
@@ -20,7 +20,6 @@ import comparison.infrastructure.services.WebActionRunnerService
 import comparison.infrastructure.web.WebLyricReviewServerImpl
 import comparison.infrastructure.web.WebReviewRouter
 import java.awt.Desktop
-import java.io.File
 import java.net.URI
 
 /**
@@ -30,7 +29,7 @@ import java.net.URI
 class LyricReviewCoordinatorService(
     private val reportParser: LyricsReportParser = LyricsReportParserImpl(),
     private val audioMetadataExtractor: AudioMetadataExtractor = AudioMetadataExtractorImpl(),
-    private val lrcLibClient: LrcLibClient = LrcLibClientImpl(),
+    private val lrcLibClient: LrcLibClient = CompositeLyricsClientImpl(),
     private val lyricStorage: LyricFileStorage = LyricFileStorageImpl(),
     private val lineParser: LyricLineParser = LyricLineParserImpl(),
     private val actionRunner: WebActionRunnerService = WebActionRunnerService()

@@ -45,6 +45,53 @@ class LyricLineParserImplTest {
     }
 
     @Test
+    fun `test ignores NetEase credit-only stub lyrics so they return 0 verses`() {
+        val creditStub = """
+            [00:00.00-1] 作词 : Ana Muller
+            [00:00.00-1] 作曲 : Ana Muller
+        """.trimIndent()
+
+        val lines = parser.parse(creditStub)
+        assertTrue(lines.isEmpty())
+        assertTrue(parser.parsePlain(creditStub).isEmpty())
+    }
+
+    @Test
+    fun `test parsePlain converts unsynchronized lyrics into manual-sync lines at 00_00`() {
+        val plain = """
+            [Verse 1]
+            Eu queria dizer que não ligo
+            Mas eu ligo sim
+            
+            [Chorus]
+            Marceline, volta pra mim
+        """.trimIndent()
+
+        val lines = parser.parsePlain(plain)
+        assertEquals(3, lines.size)
+        assertEquals(0L, lines[0].timestampMs)
+        assertEquals("00:00", lines[0].formattedTime)
+        assertEquals("Eu queria dizer que não ligo", lines[0].text)
+        assertEquals("Marceline, volta pra mim", lines[2].text)
+    }
+
+    @Test
+    fun `test parses extended timestamp formats and strips inline word tags`() {
+        val lrc = """
+            [00:00.00-1] 作词 : Ana Muller
+            [00:12.40-1] <00:12.40>Eu <00:12.80>queria <00:13.20>dizer
+            [00:15:50] Segunda linha
+        """.trimIndent()
+
+        val lines = parser.parse(lrc)
+        assertEquals(2, lines.size)
+        assertEquals(12400L, lines[0].timestampMs)
+        assertEquals("Eu queria dizer", lines[0].text)
+        assertEquals(15500L, lines[1].timestampMs)
+        assertEquals("Segunda linha", lines[1].text)
+    }
+
+    @Test
     fun `test handles multiple timestamps on single line`() {
         val lrc = "[00:10.00][00:20.50] Repeated Chorus"
         val lines = parser.parse(lrc)

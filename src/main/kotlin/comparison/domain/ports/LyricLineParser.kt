@@ -13,4 +13,13 @@ interface LyricLineParser {
      * @return Ordered list of parsed lines.
      */
     fun parse(content: String): List<ParsedLyricLine>
+
+    /**
+     * Parses unsynchronized (plain) lyrics into [ParsedLyricLine] entries at 00:00
+     * so they can be manually synchronized in the web comparator.
+     *
+     * @param content Raw text of plain lyrics.
+     * @return List of parsed plain verse lines.
+     */
+    fun parsePlain(content: String): List<ParsedLyricLine> = emptyList()
 }

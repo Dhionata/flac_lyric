@@ -5,9 +5,14 @@ import comparison.domain.models.LrcLibLyrics
 import comparison.domain.models.ReportIssueItem
 import comparison.domain.ports.AudioMetadataExtractor
 import comparison.domain.ports.LyricFileStorage
+import comparison.domain.ports.LyricLineParser
+import comparison.infrastructure.parsers.LyricLineParserImpl
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 /**
- * Use case to aggregate audio metadata, local lyrics, remote LRCLIB lyrics, and parsed lines
+ * Use case to aggregate audio metadata, local lyrics, remote multi-provider lyrics, and parsed lines
  * into a single comprehensive model for the web player.
  */
 class ExtractTrackDetailsUseCase(
@@ -16,6 +21,129 @@ class ExtractTrackDetailsUseCase(
     private val parseLinesUseCase: ParseLyricLinesUseCase,
     private val fetchLrcLibUseCase: FetchLrcLibLyricsUseCase
 ) {
+    companion object {
+        private val parallelPool = Executors.newCachedThreadPool { r ->
+            Thread(r, "extract-track-details-worker").apply { isDaemon = true }
+        }
+        private val defaultParser: LyricLineParser = LyricLineParserImpl()
+
+        private fun sourcePriority(source: String?): Int = when (source?.uppercase()) {
+            "LRCLIB" -> 0
+            "APPLEMUSIC" -> 1
+            "SPOTIFY" -> 2
+            "YOUTUBE" -> 3
+            "NETEASE" -> 4
+            "QQMUSIC" -> 5
+            "KUGOU" -> 6
+            "MUSIXMATCH" -> 7
+            "DEEZER" -> 8
+            "GENIUS" -> 9
+            "KARALYR" -> 10
+            else -> 11
+        }
+
+        private fun durationDistance(cand: LrcLibLyrics, targetDurationSeconds: Int): Double {
+            if (targetDurationSeconds <= 0) return 0.0
+            val d = cand.duration
+            return if (d != null && d > 0.0) {
+                kotlin.math.abs(d - targetDurationSeconds)
+            } else {
+                Double.MAX_VALUE
+            }
+        }
+
+        /**
+         * Returns true if the candidate has > 0 parsed synchronized verses.
+         */
+        fun hasValidSyncedVerses(
+            cand: LrcLibLyrics,
+            parser: LyricLineParser = defaultParser
+        ): Boolean {
+            val synced = cand.syncedLyrics ?: return false
+            if (synced.isBlank()) return false
+            return parser.parse(synced).isNotEmpty()
+        }
+
+        /**
+         * Returns true if the candidate has > 0 parsed plain verses.
+         */
+        fun hasValidPlainVerses(
+            cand: LrcLibLyrics,
+            parser: LyricLineParser = defaultParser
+        ): Boolean {
+            val plain = cand.plainLyrics ?: return false
+            if (plain.isBlank()) return false
+            return parser.parsePlain(plain).isNotEmpty()
+        }
+
+        /**
+         * Normalizes a candidate so that 0-verse syncedLyrics or 0-verse plainLyrics
+         * (e.g., credit-only stubs like "[00:00.00-1] 作词 : ...") are stripped to null.
+         * Returns null if neither syncedLyrics nor plainLyrics has > 0 verses.
+         */
+        fun normalizeCandidateWithVerses(
+            cand: LrcLibLyrics,
+            parser: LyricLineParser = defaultParser
+        ): LrcLibLyrics? {
+            val validSynced = cand.syncedLyrics?.takeIf { it.isNotBlank() && parser.parse(it).isNotEmpty() }
+            val validPlain = cand.plainLyrics?.takeIf { it.isNotBlank() && parser.parsePlain(it).isNotEmpty() }
+            if (validSynced == null && validPlain == null) return null
+            return cand.copy(
+                syncedLyrics = validSynced,
+                plainLyrics = validPlain ?: validSynced
+            )
+        }
+
+        /**
+         * Filters out any candidate that has 0 parsed verses (both synced and plain)
+         * and normalizes candidates whose syncedLyrics has 0 verses down to plainLyrics (or removes them).
+         */
+        fun filterCandidatesWithVerses(
+            candidates: List<LrcLibLyrics>,
+            parser: LyricLineParser = defaultParser
+        ): List<LrcLibLyrics> = candidates.mapNotNull { normalizeCandidateWithVerses(it, parser) }
+
+        private fun candidateComparator(targetDurationSeconds: Int): Comparator<LrcLibLyrics> =
+            compareBy<LrcLibLyrics> { !hasValidSyncedVerses(it) }
+                .thenBy { !hasValidPlainVerses(it) }
+                .thenBy { cand -> durationDistance(cand, targetDurationSeconds) }
+                .thenBy { cand -> sourcePriority(cand.source) }
+
+        /**
+         * Selects the best candidate lyrics record across all providers based on:
+         * 1. Priority to synchronized lyrics with > 0 parsed verses, then plain lyrics with > 0 verses.
+         * 2. Proximity of candidate duration to targetDurationSeconds (sorting only).
+         * 3. Provider priority tie-breaker.
+         */
+        fun selectBestCandidate(
+            candidates: List<LrcLibLyrics>,
+            targetDurationSeconds: Int
+        ): LrcLibLyrics? {
+            val valid = filterCandidatesWithVerses(candidates)
+            if (valid.isEmpty()) return null
+            return valid.sortedWith(candidateComparator(targetDurationSeconds)).firstOrNull()
+        }
+
+        /**
+         * Places the selected candidate at index 0 and sorts the remaining candidates
+         * prioritizing synchronized lyrics and proximity to target duration in seconds.
+         */
+        fun orderCandidates(
+            candidates: List<LrcLibLyrics>,
+            selectedRecord: LrcLibLyrics?,
+            targetDurationSeconds: Int
+        ): List<LrcLibLyrics> {
+            if (selectedRecord == null || candidates.isEmpty()) return candidates
+
+            val otherCandidates = candidates.filterNot {
+                it === selectedRecord || (it.id != null && it.id == selectedRecord.id && it.source == selectedRecord.source)
+            }
+            val sortedOthers = otherCandidates.sortedWith(candidateComparator(targetDurationSeconds))
+
+            return listOf(selectedRecord) + sortedOthers
+        }
+    }
+
     fun execute(item: ReportIssueItem): ComparisonTrackDetails {
         val audioFile = item.audioFile
         val metadata = if (audioFile != null && audioFile.exists()) {
@@ -38,57 +166,86 @@ class ExtractTrackDetailsUseCase(
         val localRawLyrics = lyricStorage.readText(item.lyricFile)
         val localLines = parseLinesUseCase.execute(localRawLyrics)
 
-        // 1. Fetch candidates from LRCLIB search
-        val searchQuery = "${metadata.artist} ${metadata.title}".trim()
-        val initialCandidates = if (searchQuery.isNotBlank()) {
-            fetchLrcLibUseCase.search(searchQuery)
-        } else {
+        val cleanTitle = metadata.title.replace(Regex("\\s*\\([^)]*\\)"), "").trim()
+        val primaryQuery = "${metadata.artist} ${metadata.title}".trim()
+        val queryWithCleanTitle = "${metadata.artist} $cleanTitle".trim()
+        val titleOnlyQuery = cleanTitle.ifBlank { metadata.title }.trim()
+
+        // Build comprehensive search query variants so covers/remixes without duration match
+        // still bring back all versions of the song across all providers
+        val queryList = linkedSetOf<String>().apply {
+            if (primaryQuery.isNotBlank()) add(primaryQuery)
+            if (queryWithCleanTitle.isNotBlank()) add(queryWithCleanTitle)
+            if (titleOnlyQuery.isNotBlank()) add(titleOnlyQuery)
+        }.toList()
+
+        // Run search queries and exact match in parallel across all providers
+        val searchFuture = CompletableFuture.supplyAsync({
+            val allResults = mutableListOf<LrcLibLyrics>()
+            for (query in queryList) {
+                try {
+                    val batch = fetchLrcLibUseCase.search(query)
+                    val valid = batch.mapNotNull { normalizeCandidateWithVerses(it) }
+                    allResults.addAll(valid)
+                    // If we found synchronized candidates with > 0 verses, we still collect variants
+                    // to give the user all versions for comparison
+                } catch (_: Exception) {}
+            }
+            allResults
+        }, parallelPool)
+
+        // Do NOT pass duration to fetchBestMatch so we don't limit exact lookups by duration
+        val exactFuture = CompletableFuture.supplyAsync({
+            fetchLrcLibUseCase.fetchBestMatch(
+                trackName = metadata.title,
+                artistName = metadata.artist,
+                albumName = metadata.album.takeIf { it.isNotBlank() },
+                durationSeconds = null
+            )
+        }, parallelPool)
+
+        val candidatesList = try {
+            searchFuture.get(10, TimeUnit.SECONDS)
+        } catch (_: Exception) {
             emptyList()
         }
 
-        // Fallback search with cleaned title if no candidates were found
-        val candidatesList = if (initialCandidates.isEmpty()) {
-            val cleanTitle = metadata.title.replace(Regex("\\s*\\([^)]*\\)"), "").trim()
-            val fallbackQuery = "${metadata.artist} $cleanTitle".trim()
-            if (fallbackQuery.isNotBlank() && fallbackQuery != searchQuery) {
-                fetchLrcLibUseCase.search(fallbackQuery)
-            } else {
-                initialCandidates
-            }
-        } else {
-            initialCandidates
+        val exactRecord = try {
+            exactFuture.get(10, TimeUnit.SECONDS)
+        } catch (_: Exception) {
+            null
         }
 
-        // 2. Also try exact match via /api/get if available
-        val exactRecord = fetchLrcLibUseCase.fetchBestMatch(
-            trackName = metadata.title,
-            artistName = metadata.artist,
-            albumName = metadata.album.takeIf { it.isNotBlank() },
-            durationSeconds = metadata.durationSeconds.takeIf { it > 0 }
-        )
-
-        val combinedCandidates = if (exactRecord != null && candidatesList.none { it.id == exactRecord.id }) {
+        val rawCombined = if (exactRecord != null) {
             listOf(exactRecord) + candidatesList
         } else {
             candidatesList
         }
 
-        // 3. Automatically select the best candidate:
-        //    - Prioritize synchronized lyrics (syncedLyrics).
-        //    - If multiple exist, pick the one with duration closest to the local audio track.
-        //    - If none synchronized, pick the one with duration closest to the local audio track (or first).
+        // Deduplicate by (source, id) when id is present, or by content signature,
+        // and strictly enforce > 0 parsed verses (synced or plain) so 0-verse results never appear in alternatives.
+        val combinedCandidates = rawCombined
+            .mapNotNull { normalizeCandidateWithVerses(it) }
+            .distinctBy { cand ->
+                if (cand.id != null) {
+                    "${cand.source}:${cand.id}"
+                } else {
+                    "${cand.source}:${cand.trackName}:${cand.artistName}:${cand.duration}:${(cand.syncedLyrics ?: cand.plainLyrics)?.hashCode()}"
+                }
+            }
+
         val remoteRecord = selectBestCandidate(combinedCandidates, metadata.durationSeconds)
         val orderedCandidates = orderCandidates(combinedCandidates, remoteRecord, metadata.durationSeconds)
 
         val remoteRawLyrics = remoteRecord?.syncedLyrics ?: remoteRecord?.plainLyrics
-        val remoteLines = if (!remoteRecord?.syncedLyrics.isNullOrBlank()) {
-            parseLinesUseCase.execute(remoteRecord.syncedLyrics)
-        } else {
-            emptyList()
+        val remoteLines = when {
+            !remoteRecord?.syncedLyrics.isNullOrBlank() -> parseLinesUseCase.execute(remoteRecord.syncedLyrics)
+            !remoteRecord?.plainLyrics.isNullOrBlank() -> parseLinesUseCase.executePlain(remoteRecord.plainLyrics)
+            else -> emptyList()
         }
 
         val remoteStatus = when {
-            remoteRecord == null -> "NOT_FOUND"
+            remoteRecord == null || remoteLines.isEmpty() -> "NOT_FOUND"
             remoteRecord.instrumental == true -> "INSTRUMENTAL"
             !remoteRecord.syncedLyrics.isNullOrBlank() -> "FOUND_SYNCED"
             !remoteRecord.plainLyrics.isNullOrBlank() -> "FOUND_PLAIN"
@@ -110,70 +267,5 @@ class ExtractTrackDetailsUseCase(
             status = item.status,
             candidates = orderedCandidates
         )
-    }
-
-    companion object {
-        /**
-         * Selects the best candidate lyrics record from LRCLIB based on:
-         * 1. Priority to synchronized lyrics (syncedLyrics).
-         * 2. If multiple synchronized lyrics exist, choose the one whose duration is closest to targetDurationSeconds.
-         * 3. If targetDurationSeconds is unavailable (<= 0), choose the first synchronized record found.
-         * 4. If no synchronized lyrics exist, choose the record whose duration is closest to targetDurationSeconds (or the first).
-         */
-        fun selectBestCandidate(
-            candidates: List<LrcLibLyrics>,
-            targetDurationSeconds: Int
-        ): LrcLibLyrics? {
-            if (candidates.isEmpty()) return null
-
-            val syncedCandidates = candidates.filter { !it.syncedLyrics.isNullOrBlank() }
-
-            return if (syncedCandidates.isNotEmpty()) {
-                if (targetDurationSeconds > 0) {
-                    syncedCandidates.minByOrNull { cand ->
-                        val candDuration = cand.duration ?: 0.0
-                        kotlin.math.abs(candDuration - targetDurationSeconds)
-                    } ?: syncedCandidates.first()
-                } else {
-                    syncedCandidates.first()
-                }
-            } else {
-                if (targetDurationSeconds > 0) {
-                    candidates.minByOrNull { cand ->
-                        val candDuration = cand.duration ?: 0.0
-                        kotlin.math.abs(candDuration - targetDurationSeconds)
-                    } ?: candidates.first()
-                } else {
-                    candidates.first()
-                }
-            }
-        }
-
-        /**
-         * Places the selected candidate at index 0 and sorts the remaining candidates
-         * prioritizing synchronized lyrics and proximity to target duration.
-         */
-        fun orderCandidates(
-            candidates: List<LrcLibLyrics>,
-            selectedRecord: LrcLibLyrics?,
-            targetDurationSeconds: Int
-        ): List<LrcLibLyrics> {
-            if (selectedRecord == null || candidates.isEmpty()) return candidates
-
-            val otherCandidates = candidates.filter { it.id != selectedRecord.id }
-            val sortedOthers = otherCandidates.sortedWith(
-                compareBy<LrcLibLyrics> { it.syncedLyrics.isNullOrBlank() }
-                    .thenBy { cand ->
-                        if (targetDurationSeconds > 0) {
-                            val candDuration = cand.duration ?: 0.0
-                            kotlin.math.abs(candDuration - targetDurationSeconds)
-                        } else {
-                            0.0
-                        }
-                    }
-            )
-
-            return listOf(selectedRecord) + sortedOthers
-        }
     }
 }

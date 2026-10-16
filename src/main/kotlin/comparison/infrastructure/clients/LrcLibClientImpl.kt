@@ -11,15 +11,16 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 
 /**
- * Client implementation for lrclib.net API using OkHttp and Gson.
+ * Client implementation for lrclib.net (and LRCLIB-compatible APIs like karalyr.com) using OkHttp and Gson.
  */
 class LrcLibClientImpl(
     private val httpClient: OkHttpClient = OkHttpClient.Builder()
-        .connectTimeout(10, TimeUnit.SECONDS)
-        .readTimeout(10, TimeUnit.SECONDS)
+        .connectTimeout(6, TimeUnit.SECONDS)
+        .readTimeout(6, TimeUnit.SECONDS)
         .build(),
     private val gson: Gson = Gson(),
     private val baseUrl: String = "https://lrclib.net",
+    private val providerName: String = "LRCLIB"
 ) : LrcLibClient {
 
     private val userAgent = "flac_lyric/1.7.0 (https://github.com/dhionata/flac_lyric)"
@@ -37,9 +38,8 @@ class LrcLibClientImpl(
         if (!albumName.isNullOrBlank()) {
             urlBuilder.addQueryParameter("album_name", albumName)
         }
-        if (durationSeconds != null && durationSeconds > 0) {
-            urlBuilder.addQueryParameter("duration", durationSeconds.toString())
-        }
+        // Do not restrict by duration on /api/get so songs aren't missed when audio duration differs slightly
+        // Duration is used exclusively to sort/order candidates by closest distance
 
         val request = Request.Builder()
             .url(urlBuilder.build())
@@ -51,9 +51,8 @@ class LrcLibClientImpl(
             httpClient.newCall(request).execute().use { response ->
                 if (response.isSuccessful) {
                     val bodyString = response.body.string()
-                    gson.fromJson(bodyString, LrcLibLyrics::class.java)
+                    gson.fromJson(bodyString, LrcLibLyrics::class.java)?.copy(source = providerName)
                 } else if (response.code == 404) {
-                    // Fallback: search by query prioritizing synchronized lyrics closest to duration
                     val searchResults = searchLyrics("$artistName $trackName")
                     ExtractTrackDetailsUseCase.selectBestCandidate(searchResults, durationSeconds ?: 0)
                 } else {
@@ -80,7 +79,8 @@ class LrcLibClientImpl(
                 if (response.isSuccessful) {
                     val bodyString = response.body.string()
                     val type = object : TypeToken<List<LrcLibLyrics>>() {}.type
-                    gson.fromJson<List<LrcLibLyrics>>(bodyString, type) ?: emptyList()
+                    val list = gson.fromJson<List<LrcLibLyrics>>(bodyString, type) ?: emptyList()
+                    list.map { it.copy(source = providerName) }
                 } else {
                     emptyList()
                 }

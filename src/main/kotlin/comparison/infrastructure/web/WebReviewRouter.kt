@@ -328,7 +328,12 @@ class WebReviewRouter(
 
     private fun handleParseLrc(exchange: HttpExchange) {
         val bodyString = exchange.requestBody.reader(StandardCharsets.UTF_8).use { it.readText() }
-        val lines = parseLinesUseCase.execute(bodyString)
+        val syncedLines = parseLinesUseCase.execute(bodyString)
+        val lines = if (syncedLines.isNotEmpty()) {
+            syncedLines
+        } else {
+            parseLinesUseCase.executePlain(bodyString)
+        }
         sendJsonResponse(exchange, 200, lines)
     }
 
