@@ -12,7 +12,7 @@ data class SaveLyricRequest(
     val lyricPath: String? = null,
     val content: String? = null,
     val customLrcContent: String? = null,
-    val choice: String? = "LRCLIB"
+    val choice: String? = "LRCLIB",
 ) {
     /**
      * Resolves the effective content to write to the file.

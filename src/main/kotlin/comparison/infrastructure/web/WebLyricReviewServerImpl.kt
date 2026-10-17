@@ -10,7 +10,7 @@ import java.util.concurrent.Executors
  * Automatically selects a free port if the preferred port is already bound.
  */
 class WebLyricReviewServerImpl(
-    private val router: WebReviewRouter
+    private val router: WebReviewRouter,
 ) : WebLyricReviewServer {
 
     private var server: HttpServer? = null

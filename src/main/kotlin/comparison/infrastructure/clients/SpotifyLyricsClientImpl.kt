@@ -27,7 +27,7 @@ class SpotifyLyricsClientImpl(
     private val gson: Gson = Gson(),
     private val baseUrl: String = "https://lyrics.paxsenix.org",
     private val maxCandidates: Int = 3,
-    private val lyricParser: LyricLineParser = LyricLineParserImpl()
+    private val lyricParser: LyricLineParser = LyricLineParserImpl(),
 ) : LrcLibClient {
 
     private val userAgent = "SongSync/3.5 (Android 14)"
@@ -52,7 +52,7 @@ class SpotifyLyricsClientImpl(
         trackName: String,
         artistName: String,
         albumName: String?,
-        durationSeconds: Int?
+        durationSeconds: Int?,
     ): LrcLibLyrics? {
         val query = "$artistName $trackName".trim()
         if (query.isBlank()) return null
@@ -155,10 +155,10 @@ class SpotifyLyricsClientImpl(
                     rawPlain = text
                 }
 
-                val validSynced = rawSynced?.takeIf { lyricParser.parse(it).isNotEmpty() }
-                val validPlain = (rawPlain ?: rawSynced)?.takeIf { lyricParser.parsePlain(it).isNotEmpty() }
+                val nonBlankSynced = rawSynced?.takeIf { it.isNotBlank() }
+                val nonBlankPlain = (rawPlain ?: rawSynced)?.takeIf { it.isNotBlank() }
 
-                if (validSynced == null && validPlain == null) return null
+                if (nonBlankSynced == null && nonBlankPlain == null) return null
 
                 LrcLibLyrics(
                     id = abs(meta.trackId.hashCode().toLong()),
@@ -167,8 +167,8 @@ class SpotifyLyricsClientImpl(
                     albumName = meta.albumName,
                     duration = meta.durationSeconds,
                     instrumental = false,
-                    plainLyrics = if (validSynced == null) validPlain else null,
-                    syncedLyrics = validSynced,
+                    plainLyrics = nonBlankPlain,
+                    syncedLyrics = nonBlankSynced,
                     source = "Spotify"
                 )
             }
@@ -182,6 +182,6 @@ class SpotifyLyricsClientImpl(
         val trackName: String,
         val artistName: String,
         val albumName: String,
-        val durationSeconds: Double?
+        val durationSeconds: Double?,
     )
 }

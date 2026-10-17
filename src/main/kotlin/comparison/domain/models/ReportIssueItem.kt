@@ -18,5 +18,5 @@ data class ReportIssueItem(
     val lyricFile: File,
     val audioFile: File?,
     val issues: List<String>,
-    var status: String = "PENDING"
+    var status: String = "PENDING",
 )

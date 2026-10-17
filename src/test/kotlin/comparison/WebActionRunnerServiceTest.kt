@@ -4,15 +4,12 @@ import comparison.domain.models.ActionExecutionRequest
 import comparison.infrastructure.services.FixedDirectoryService
 import comparison.infrastructure.services.WebActionRunnerService
 import comparison.infrastructure.services.WebProgressUserInterface
-import exceptions.OperationCancelledException
-import interfaces.DirectoryService
+import java.io.File
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
-import java.io.File
 
 class WebActionRunnerServiceTest {
 
@@ -40,7 +37,7 @@ class WebActionRunnerServiceTest {
 
     @Test
     fun `WebProgressUserInterface should track progress and results`() {
-        val req = ActionExecutionRequest(actionId = 0, moveFiles = true, renameFiles = true)
+        val req = ActionExecutionRequest(actionId = 0)
         val state = comparison.domain.models.ActionProgressUpdate(isRunning = true)
         val ui = WebProgressUserInterface(req, state)
 

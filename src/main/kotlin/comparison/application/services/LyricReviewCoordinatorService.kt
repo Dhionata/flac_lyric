@@ -19,40 +19,36 @@ import comparison.infrastructure.parsers.LyricsReportParserImpl
 import comparison.infrastructure.services.WebActionRunnerService
 import comparison.infrastructure.web.WebLyricReviewServerImpl
 import comparison.infrastructure.web.WebReviewRouter
+import interfaces.LogService
 import java.awt.Desktop
 import java.net.URI
+import services.JdkLogService
+import services.Messages
 
 /**
  * High-level application service that coordinates the launch and lifecycle
  * of the lyric review and comparison web subsystem.
  */
 class LyricReviewCoordinatorService(
-    private val reportParser: LyricsReportParser = LyricsReportParserImpl(),
-    private val audioMetadataExtractor: AudioMetadataExtractor = AudioMetadataExtractorImpl(),
-    private val lrcLibClient: LrcLibClient = CompositeLyricsClientImpl(),
-    private val lyricStorage: LyricFileStorage = LyricFileStorageImpl(),
-    private val lineParser: LyricLineParser = LyricLineParserImpl(),
-    private val actionRunner: WebActionRunnerService = WebActionRunnerService()
+    reportParser: LyricsReportParser = LyricsReportParserImpl(),
+    audioMetadataExtractor: AudioMetadataExtractor = AudioMetadataExtractorImpl(),
+    lrcLibClient: LrcLibClient = CompositeLyricsClientImpl(),
+    lyricStorage: LyricFileStorage = LyricFileStorageImpl(),
+    lineParser: LyricLineParser = LyricLineParserImpl(),
+    private val actionRunner: WebActionRunnerService = WebActionRunnerService(),
+    private val logService: LogService = JdkLogService(LyricReviewCoordinatorService::class.java),
 ) {
 
     private val parseReportUseCase = ParseIssuesReportUseCase(reportParser)
     private val fetchLrcLibUseCase = FetchLrcLibLyricsUseCase(lrcLibClient)
     private val parseLinesUseCase = ParseLyricLinesUseCase(lineParser)
     private val extractDetailsUseCase = ExtractTrackDetailsUseCase(
-        metadataExtractor = audioMetadataExtractor,
-        lyricStorage = lyricStorage,
-        parseLinesUseCase = parseLinesUseCase,
-        fetchLrcLibUseCase = fetchLrcLibUseCase
+        audioMetadataExtractor, lyricStorage, parseLinesUseCase, fetchLrcLibUseCase
     )
     private val saveLyricUseCase = SaveLyricChoiceUseCase(lyricStorage)
 
     private val router = WebReviewRouter(
-        parseReportUseCase = parseReportUseCase,
-        extractDetailsUseCase = extractDetailsUseCase,
-        saveLyricUseCase = saveLyricUseCase,
-        fetchLrcLibUseCase = fetchLrcLibUseCase,
-        audioMetadataExtractor = audioMetadataExtractor,
-        actionRunner = actionRunner
+        parseReportUseCase, extractDetailsUseCase, saveLyricUseCase, fetchLrcLibUseCase, audioMetadataExtractor, actionRunner = actionRunner
     )
 
     private val server: WebLyricReviewServer = WebLyricReviewServerImpl(router)
@@ -72,7 +68,8 @@ class LyricReviewCoordinatorService(
             try {
                 Desktop.getDesktop().browse(URI.create(url))
             } catch (e: Exception) {
-                println("Aviso: Não foi possível abrir o navegador automaticamente: ${e.message}")
+                logService.warning("log.web.browser_open_failed", e.message ?: e.toString())
+                println(Messages.get("log.web.browser_open_failed", e.message ?: e.toString()))
             }
         }
 

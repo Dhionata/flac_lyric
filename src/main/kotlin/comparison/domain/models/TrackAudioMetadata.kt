@@ -14,5 +14,5 @@ data class TrackAudioMetadata(
     val artist: String,
     val album: String,
     val durationSeconds: Int,
-    val hasArtwork: Boolean
+    val hasArtwork: Boolean,
 )

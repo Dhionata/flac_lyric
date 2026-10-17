@@ -12,7 +12,7 @@ class FixedDirectoryService(
     private val musicDir: File? = null,
     private val lyricsDir: File? = null,
     private val outDir: File? = null,
-    private val fallbackDirectoryService: DirectoryService? = null
+    private val fallbackDirectoryService: DirectoryService? = null,
 ) : DirectoryService {
 
     private var directoryRequestIndex = 0
@@ -23,15 +23,19 @@ class FixedDirectoryService(
             lower.contains("música") || lower.contains("music") || lower.contains("base") || lower.contains("espectro") || lower.contains("spectrum") -> {
                 musicDir ?: outDir ?: lyricsDir
             }
+
             lower.contains("letra") || lower.contains("lyric") -> {
                 lyricsDir ?: musicDir ?: outDir
             }
+
             lower.contains("saída") || lower.contains("out") || lower.contains("mover") || lower.contains("move") || lower.contains("destino") -> {
                 outDir ?: lyricsDir ?: musicDir
             }
+
             lower.contains("principal") || lower.contains("main") -> {
                 musicDir ?: lyricsDir ?: outDir
             }
+
             else -> {
                 when (directoryRequestIndex++) {
                     0 -> musicDir ?: lyricsDir ?: outDir

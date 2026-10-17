@@ -49,8 +49,10 @@ class LyricSyncValidatorImpl : LyricSyncValidator {
         var lrcTitle: String? = null
         var lrcLength: Double? = null
         val timestamps = mutableListOf<Double>()
+        var hasMultiTimestampOnSingleLine = false
+        val singleLineTimestamps = mutableListOf<Pair<Int, Double>>()
 
-        for (line in lines) {
+        lines.forEachIndexed { idx, line ->
             val trimmed = line.trim()
             val arMatch = arRegex.find(trimmed)
             if (arMatch != null && lrcArtist == null) {
@@ -69,10 +71,16 @@ class LyricSyncValidatorImpl : LyricSyncValidator {
                 lrcLength = (min * 60 + sec).toDouble()
             }
 
-            timeRegex.findAll(trimmed).forEach { match ->
+            val lineMatches = timeRegex.findAll(trimmed).toList()
+            if (lineMatches.size > 1) {
+                hasMultiTimestampOnSingleLine = true
+            }
+            lineMatches.forEach { match ->
                 val min = match.groupValues[1].toDoubleOrNull() ?: 0.0
                 val sec = match.groupValues[2].toDoubleOrNull() ?: 0.0
-                timestamps.add(min * 60.0 + sec)
+                val ts = min * 60.0 + sec
+                timestamps.add(ts)
+                singleLineTimestamps.add((idx + 1) to ts)
             }
         }
 
@@ -87,6 +95,24 @@ class LyricSyncValidatorImpl : LyricSyncValidator {
                 )
             )
             return issues
+        }
+
+        if (!hasMultiTimestampOnSingleLine && singleLineTimestamps.size > 1) {
+            for (i in 1 until singleLineTimestamps.size) {
+                val (prevLineNum, prevTs) = singleLineTimestamps[i - 1]
+                val (currLineNum, currTs) = singleLineTimestamps[i]
+                if (currTs < prevTs) {
+                    issues.add(
+                        LyricValidationIssue(
+                            lyricFile,
+                            audioFile,
+                            "TIMESTAMPS_FORA_DE_ORDEM",
+                            Messages.get("lyric.issue.out_of_order", currLineNum, formatTime(currTs), formatTime(prevTs))
+                        )
+                    )
+                    break
+                }
+            }
         }
 
         timestamps.sort()
@@ -176,7 +202,7 @@ class LyricSyncValidatorImpl : LyricSyncValidator {
     private data class AudioMeta(
         val duration: Double?,
         val artist: String?,
-        val title: String?
+        val title: String?,
     )
 
     private fun extractAudioMetadata(audioFile: File): AudioMeta {
@@ -236,7 +262,7 @@ class LyricSyncValidatorImpl : LyricSyncValidator {
         lrcTitle: String?,
         audioArtist: String?,
         audioTitle: String?,
-        fallbackFileName: String
+        fallbackFileName: String,
     ): Boolean {
         if (lrcArtist.isNullOrBlank() && lrcTitle.isNullOrBlank()) {
             return false

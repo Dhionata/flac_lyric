@@ -8,7 +8,7 @@ import comparison.domain.ports.LrcLibClient
 import comparison.domain.ports.LyricLineParser
 import comparison.infrastructure.parsers.LyricLineParserImpl
 import java.nio.charset.StandardCharsets
-import java.util.Base64
+import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -31,7 +31,7 @@ class KuGouLyricsClientImpl(
     private val lyricSearchBaseUrl: String = "http://krcs.kugou.com",
     private val lyricDownloadBaseUrl: String = "http://lyrics.kugou.com",
     private val maxCandidates: Int = 3,
-    private val lyricParser: LyricLineParser = LyricLineParserImpl()
+    private val lyricParser: LyricLineParser = LyricLineParserImpl(),
 ) : LrcLibClient {
 
     private val userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
@@ -46,7 +46,7 @@ class KuGouLyricsClientImpl(
         trackName: String,
         artistName: String,
         albumName: String?,
-        durationSeconds: Int?
+        durationSeconds: Int?,
     ): LrcLibLyrics? {
         val query = "$artistName $trackName".trim()
         if (query.isBlank()) return null
@@ -172,8 +172,7 @@ class KuGouLyricsClientImpl(
                 if (decodedLrc.isBlank()) return null
 
                 val hasSyncedVerses = lyricParser.parse(decodedLrc).isNotEmpty()
-                val hasPlainVerses = if (!hasSyncedVerses) lyricParser.parsePlain(decodedLrc).isNotEmpty() else false
-                if (!hasSyncedVerses && !hasPlainVerses) return null
+                val hasTimestampPattern = decodedLrc.contains(Regex("""\[\d{2}:\d{2}"""))
 
                 LrcLibLyrics(
                     id = candidateInfo.first.toLongOrNull() ?: song.hash.hashCode().toLong(),
@@ -183,7 +182,7 @@ class KuGouLyricsClientImpl(
                     duration = song.durationSeconds,
                     instrumental = false,
                     plainLyrics = if (!hasSyncedVerses) decodedLrc else null,
-                    syncedLyrics = if (hasSyncedVerses) decodedLrc else null,
+                    syncedLyrics = if (hasSyncedVerses || hasTimestampPattern) decodedLrc else null,
                     source = "KuGou"
                 )
             }
@@ -197,6 +196,6 @@ class KuGouLyricsClientImpl(
         val trackName: String,
         val artistName: String,
         val albumName: String,
-        val durationSeconds: Double?
+        val durationSeconds: Double?,
     )
 }

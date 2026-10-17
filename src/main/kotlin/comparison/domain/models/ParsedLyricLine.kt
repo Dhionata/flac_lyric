@@ -8,5 +8,5 @@ data class ParsedLyricLine(
     val timestampMs: Long,
     val formattedTime: String,
     val text: String,
-    val timeMs: Long = timestampMs
+    val timeMs: Long = timestampMs,
 )

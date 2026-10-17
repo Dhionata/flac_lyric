@@ -19,7 +19,7 @@ class ExtractTrackDetailsUseCase(
     private val metadataExtractor: AudioMetadataExtractor,
     private val lyricStorage: LyricFileStorage,
     private val parseLinesUseCase: ParseLyricLinesUseCase,
-    private val fetchLrcLibUseCase: FetchLrcLibLyricsUseCase
+    private val fetchLrcLibUseCase: FetchLrcLibLyricsUseCase,
 ) {
     companion object {
         private val parallelPool = Executors.newCachedThreadPool { r ->
@@ -57,11 +57,10 @@ class ExtractTrackDetailsUseCase(
          */
         fun hasValidSyncedVerses(
             cand: LrcLibLyrics,
-            parser: LyricLineParser = defaultParser
+            parser: LyricLineParser = defaultParser,
         ): Boolean {
             val synced = cand.syncedLyrics ?: return false
-            if (synced.isBlank()) return false
-            return parser.parse(synced).isNotEmpty()
+            return synced.isNotBlank() && parser.parse(synced).isNotEmpty()
         }
 
         /**
@@ -69,11 +68,10 @@ class ExtractTrackDetailsUseCase(
          */
         fun hasValidPlainVerses(
             cand: LrcLibLyrics,
-            parser: LyricLineParser = defaultParser
+            parser: LyricLineParser = defaultParser,
         ): Boolean {
             val plain = cand.plainLyrics ?: return false
-            if (plain.isBlank()) return false
-            return parser.parsePlain(plain).isNotEmpty()
+            return plain.isNotBlank() && parser.parsePlain(plain).isNotEmpty()
         }
 
         /**
@@ -83,7 +81,7 @@ class ExtractTrackDetailsUseCase(
          */
         fun normalizeCandidateWithVerses(
             cand: LrcLibLyrics,
-            parser: LyricLineParser = defaultParser
+            parser: LyricLineParser = defaultParser,
         ): LrcLibLyrics? {
             val validSynced = cand.syncedLyrics?.takeIf { it.isNotBlank() && parser.parse(it).isNotEmpty() }
             val validPlain = cand.plainLyrics?.takeIf { it.isNotBlank() && parser.parsePlain(it).isNotEmpty() }
@@ -100,7 +98,7 @@ class ExtractTrackDetailsUseCase(
          */
         fun filterCandidatesWithVerses(
             candidates: List<LrcLibLyrics>,
-            parser: LyricLineParser = defaultParser
+            parser: LyricLineParser = defaultParser,
         ): List<LrcLibLyrics> = candidates.mapNotNull { normalizeCandidateWithVerses(it, parser) }
 
         private fun candidateComparator(targetDurationSeconds: Int): Comparator<LrcLibLyrics> =
@@ -117,7 +115,7 @@ class ExtractTrackDetailsUseCase(
          */
         fun selectBestCandidate(
             candidates: List<LrcLibLyrics>,
-            targetDurationSeconds: Int
+            targetDurationSeconds: Int,
         ): LrcLibLyrics? {
             val valid = filterCandidatesWithVerses(candidates)
             if (valid.isEmpty()) return null
@@ -131,7 +129,7 @@ class ExtractTrackDetailsUseCase(
         fun orderCandidates(
             candidates: List<LrcLibLyrics>,
             selectedRecord: LrcLibLyrics?,
-            targetDurationSeconds: Int
+            targetDurationSeconds: Int,
         ): List<LrcLibLyrics> {
             if (selectedRecord == null || candidates.isEmpty()) return candidates
 
@@ -185,22 +183,19 @@ class ExtractTrackDetailsUseCase(
             for (query in queryList) {
                 try {
                     val batch = fetchLrcLibUseCase.search(query)
-                    val valid = batch.mapNotNull { normalizeCandidateWithVerses(it) }
-                    allResults.addAll(valid)
-                    // If we found synchronized candidates with > 0 verses, we still collect variants
-                    // to give the user all versions for comparison
-                } catch (_: Exception) {}
+                    allResults.addAll(batch)
+                } catch (_: Exception) {
+                }
             }
             allResults
         }, parallelPool)
 
-        // Do NOT pass duration to fetchBestMatch so we don't limit exact lookups by duration
+        // Do NOT pass duration to fetchAllMatches so we don't limit exact lookups by duration
         val exactFuture = CompletableFuture.supplyAsync({
-            fetchLrcLibUseCase.fetchBestMatch(
+            fetchLrcLibUseCase.fetchAllMatches(
                 trackName = metadata.title,
                 artistName = metadata.artist,
-                albumName = metadata.album.takeIf { it.isNotBlank() },
-                durationSeconds = null
+                albumName = metadata.album.takeIf { it.isNotBlank() }
             )
         }, parallelPool)
 
@@ -210,29 +205,26 @@ class ExtractTrackDetailsUseCase(
             emptyList()
         }
 
-        val exactRecord = try {
+        val exactRecords = try {
             exactFuture.get(10, TimeUnit.SECONDS)
         } catch (_: Exception) {
-            null
+            emptyList()
         }
 
-        val rawCombined = if (exactRecord != null) {
-            listOf(exactRecord) + candidatesList
-        } else {
-            candidatesList
+        val rawCombined = exactRecords + candidatesList
+
+        val allSearchResults = rawCombined.distinctBy { cand ->
+            if (cand.id != null) {
+                "${cand.source}:${cand.id}"
+            } else {
+                "${cand.source}:${cand.trackName}:${cand.artistName}:${cand.duration}:${cand.syncedLyrics?.hashCode()}:${cand.plainLyrics?.hashCode()}"
+            }
         }
 
         // Deduplicate by (source, id) when id is present, or by content signature,
-        // and strictly enforce > 0 parsed verses (synced or plain) so 0-verse results never appear in alternatives.
-        val combinedCandidates = rawCombined
+        // and strictly enforce > 0 parsed verses (synced or plain) so 0-verse results never appear in filtered candidates.
+        val combinedCandidates = allSearchResults
             .mapNotNull { normalizeCandidateWithVerses(it) }
-            .distinctBy { cand ->
-                if (cand.id != null) {
-                    "${cand.source}:${cand.id}"
-                } else {
-                    "${cand.source}:${cand.trackName}:${cand.artistName}:${cand.duration}:${(cand.syncedLyrics ?: cand.plainLyrics)?.hashCode()}"
-                }
-            }
 
         val remoteRecord = selectBestCandidate(combinedCandidates, metadata.durationSeconds)
         val orderedCandidates = orderCandidates(combinedCandidates, remoteRecord, metadata.durationSeconds)
@@ -265,7 +257,8 @@ class ExtractTrackDetailsUseCase(
             remoteLines = remoteLines,
             remoteStatus = remoteStatus,
             status = item.status,
-            candidates = orderedCandidates
+            candidates = orderedCandidates,
+            allSearchResults = allSearchResults
         )
     }
 }

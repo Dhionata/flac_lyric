@@ -1,7 +1,7 @@
 package services
 
 import java.io.File
-import java.util.Locale
+import java.util.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -156,5 +156,23 @@ class LyricSyncValidatorImplTest {
             issues[0].description.contains("no [mm:ss] timestamps"),
             "Expected English description, got: ${issues[0].description}"
         )
+    }
+
+    @Test
+    fun testLyricWithOutOfOrderTimestamps() {
+        Messages.setLocale(Locale.forLanguageTag("pt-BR"))
+        val lrc = File(tempDir, "Artist - OutOfOrder.lrc").apply {
+            writeText(
+                """
+                [00:10.00]First line
+                [00:25.00]Second line
+                [00:18.00]Third line with lower timestamp
+                [00:30.00]Fourth line
+                """.trimIndent()
+            )
+        }
+
+        val issues = validator.validate(lrc, null)
+        assertTrue(issues.any { it.issueType == "TIMESTAMPS_FORA_DE_ORDEM" })
     }
 }

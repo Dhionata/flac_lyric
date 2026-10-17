@@ -68,7 +68,7 @@ class MusicLyricsService(
                         if (fileService.moveFile(file, outDirectory)) {
                             movedNames.add(file.name)
                         } else {
-                            errors.add(RuntimeException("Failed to move file: ${file.name}"))
+                            errors.add(RuntimeException(Messages.get("error.move_simple_failed", file.name)))
                         }
                     } catch (e: Exception) {
                         errors.add(e)
@@ -358,7 +358,7 @@ class MusicLyricsService(
                         if (fileService.moveFile(file, outDirectory)) {
                             movedNames.add(file.name)
                         } else {
-                            errors.add(RuntimeException("Failed to move file: ${file.name}"))
+                            errors.add(RuntimeException(Messages.get("error.move_simple_failed", file.name)))
                         }
                     } catch (e: Exception) {
                         errors.add(e)
@@ -483,8 +483,8 @@ class MusicLyricsService(
      * @return The bound web interface URL.
      */
     fun launchLyricComparisonWeb(
-        coordinatorService: LyricReviewCoordinatorService = LyricReviewCoordinatorService()
+        coordinatorService: LyricReviewCoordinatorService = LyricReviewCoordinatorService(),
     ): String {
-        return coordinatorService.startReview(preferredPort = 8080, openBrowser = true)
+        return coordinatorService.startReview()
     }
 }

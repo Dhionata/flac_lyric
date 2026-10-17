@@ -9,19 +9,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-dark: #0b0d13;
-            --bg-card: #151822;
-            --bg-card-hover: #1e2230;
-            --bg-card-border: #282f42;
+            --bg-dark: #0f0f0f;
+            --bg-card: #1c1c1c;
+            --bg-card-hover: #272727;
+            --bg-card-border: #353535;
             --accent-local: #10b981;
             --accent-local-glow: rgba(16, 185, 129, 0.25);
             --accent-lrclib: #3b82f6;
             --accent-lrclib-glow: rgba(59, 130, 246, 0.25);
             --accent-purple: #8b5cf6;
             --accent-cyan: #06b6d4;
-            --text-main: #f3f4f6;
-            --text-muted: #94a3b8;
-            --text-dim: #64748b;
+            --text-main: #f5f5f5;
+            --text-muted: #a6a6a6;
+            --text-dim: #777777;
             --danger: #ef4444;
             --warning: #f59e0b;
             --radius-sm: 6px;
@@ -47,7 +47,7 @@
 
         /* Top Navigation Header */
         header {
-            background: rgba(19, 23, 33, 0.95);
+            background: rgba(26, 26, 26, 0.95);
             backdrop-filter: blur(14px);
             border-bottom: 1px solid var(--bg-card-border);
             padding: 10px 20px;
@@ -82,7 +82,7 @@
         /* Navigation Tabs */
         .nav-tabs {
             display: flex;
-            background: #0f121a;
+            background: #151515;
             padding: 4px;
             border-radius: var(--radius-md);
             border: 1px solid var(--bg-card-border);
@@ -110,7 +110,7 @@
         }
 
         .nav-tab-btn.active {
-            background: #252d3f;
+            background: #323232;
             color: #38bdf8;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
@@ -122,8 +122,8 @@
             border-radius: 9999px;
             font-size: 0.73rem;
             font-weight: 600;
-            background: #272f42;
-            color: #e5e7eb;
+            background: #353535;
+            color: #e6e6e6;
         }
 
         .badge-warning {
@@ -151,7 +151,7 @@
         }
 
         .report-select {
-            background: #10141f;
+            background: #181818;
             border: 1px solid var(--bg-card-border);
             color: var(--text-main);
             padding: 6px 12px;
@@ -201,7 +201,7 @@
             font-size: 2.1rem;
             font-weight: 800;
             margin-bottom: 10px;
-            background: linear-gradient(135deg, #f8fafc, #94a3b8);
+            background: linear-gradient(135deg, #fafafa, #a6a6a6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -240,7 +240,7 @@
         }
 
         .option-card.highlight {
-            background: linear-gradient(145deg, #161b2b, #1e2439);
+            background: linear-gradient(145deg, #212121, #2b2b2b);
             border-color: #38bdf8;
             box-shadow: 0 8px 30px rgba(56, 189, 248, 0.15);
         }
@@ -255,7 +255,7 @@
             width: 44px;
             height: 44px;
             border-radius: 10px;
-            background: #1e2436;
+            background: #2a2a2a;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -272,7 +272,7 @@
         .option-card-number {
             font-size: 0.74rem;
             font-weight: 700;
-            color: #64748b;
+            color: #777777;
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
@@ -280,7 +280,7 @@
         .option-card-title {
             font-size: 1rem;
             font-weight: 700;
-            color: #f8fafc;
+            color: #fafafa;
         }
 
         .option-card-hint {
@@ -315,7 +315,7 @@
         /* Sidebar Drawer */
         .sidebar {
             width: 310px;
-            background: #11141d;
+            background: #171717;
             border-right: 1px solid var(--bg-card-border);
             display: flex;
             flex-direction: column;
@@ -337,7 +337,7 @@
 
         .search-input {
             width: 100%;
-            background: #181d2a;
+            background: #212121;
             border: 1px solid var(--bg-card-border);
             color: var(--text-main);
             padding: 7px 12px;
@@ -362,7 +362,7 @@
         }
 
         .filter-btn.active {
-            background: #232a3d;
+            background: #303030;
             color: var(--text-main);
             border-color: var(--bg-card-border);
             font-weight: 600;
@@ -376,7 +376,7 @@
 
         .track-item {
             padding: 10px 14px;
-            border-bottom: 1px solid rgba(44, 51, 69, 0.4);
+            border-bottom: 1px solid rgba(56, 56, 56, 0.4);
             cursor: pointer;
             display: flex;
             flex-direction: column;
@@ -389,7 +389,7 @@
         }
 
         .track-item.active {
-            background: #1b2130;
+            background: #262626;
             border-left: 3px solid #38bdf8;
         }
 
@@ -423,7 +423,7 @@
             flex-direction: column;
             overflow: hidden;
             border-right: 1px solid var(--bg-card-border);
-            background: #11141d;
+            background: #171717;
         }
 
         .column-panel:last-child {
@@ -432,7 +432,7 @@
 
         .column-header {
             padding: 10px 16px;
-            background: #161a25;
+            background: #1e1e1e;
             border-bottom: 1px solid var(--bg-card-border);
             display: flex;
             align-items: center;
@@ -451,7 +451,7 @@
         /* Offset Toolbars */
         .offset-toolbar {
             padding: 8px 14px;
-            background: #131722;
+            background: #1a1a1a;
             border-bottom: 1px solid var(--bg-card-border);
             display: flex;
             align-items: center;
@@ -467,10 +467,11 @@
             display: flex;
             align-items: center;
             gap: 4px;
+            flex-wrap: wrap;
         }
 
         .btn-offset {
-            background: #1e2434;
+            background: #292929;
             border: 1px solid var(--bg-card-border);
             color: var(--text-main);
             padding: 3px 7px;
@@ -483,13 +484,13 @@
         }
 
         .btn-offset:hover {
-            background: #2b334a;
+            background: #3a3a3a;
             border-color: #38bdf8;
         }
 
         .offset-input {
             width: 52px;
-            background: #181d2a;
+            background: #212121;
             border: 1px solid var(--bg-card-border);
             color: #fff;
             padding: 3px 6px;
@@ -501,7 +502,7 @@
 
         /* Candidate alternatives section */
         .candidates-box {
-            background: #131723;
+            background: #1b1b1b;
             border-bottom: 1px solid var(--bg-card-border);
             padding: 8px 14px;
             display: flex;
@@ -531,7 +532,7 @@
         }
 
         .candidate-chip {
-            background: #1a2030;
+            background: #252525;
             border: 1px solid var(--bg-card-border);
             padding: 6px 10px;
             border-radius: 6px;
@@ -544,13 +545,14 @@
         }
 
         .candidate-chip:hover {
-            background: #232b40;
+            background: #313131;
             border-color: #3b82f6;
         }
 
         .candidate-chip.active {
             border-color: #38bdf8;
-            background: rgba(56, 189, 248, 0.12);
+            background: rgba(56, 189, 248, 0.15);
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
         }
 
         .candidate-info {
@@ -590,7 +592,7 @@
             transition: all 0.18s ease;
             font-size: 0.90rem;
             line-height: 1.45;
-            color: #94a3b8;
+            color: #a6a6a6;
             margin-bottom: 4px;
             position: relative;
             cursor: pointer;
@@ -600,7 +602,7 @@
 
         .lyric-line:hover {
             background: rgba(255, 255, 255, 0.08);
-            color: #f8fafc;
+            color: #fafafa;
             transform: translateX(3px);
         }
 
@@ -625,13 +627,79 @@
             box-shadow: 0 0 18px var(--accent-lrclib-glow);
         }
 
+        /* Red highlight when timestamp is lower than the line above it */
+        .lyric-line.out-of-order {
+            background: rgba(239, 68, 68, 0.20) !important;
+            border-left: 4px solid var(--danger) !important;
+            color: #fca5a5 !important;
+            box-shadow: 0 0 14px rgba(239, 68, 68, 0.28) !important;
+        }
+
+        .lyric-line.out-of-order .timestamp-tag {
+            background: #dc2626 !important;
+            color: #ffffff !important;
+            font-weight: 700;
+        }
+
+        /* Sync Edit Mode: Target Line (Next line to be set via Space/Ctrl) */
+        .lyric-line.sync-target {
+            background: rgba(245, 158, 11, 0.22) !important;
+            border-left: 4px solid #f59e0b !important;
+            color: #fef3c7 !important;
+            box-shadow: 0 0 16px rgba(245, 158, 11, 0.30) !important;
+            font-weight: 600;
+        }
+
+        .lyric-line.sync-target .timestamp-tag {
+            background: #d97706 !important;
+            color: #ffffff !important;
+            font-weight: 700;
+        }
+
+        .sync-target-badge {
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(245, 158, 11, 0.28);
+            border: 1px solid #f59e0b;
+            color: #fde68a;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .sync-edit-banner {
+            padding: 8px 14px;
+            background: rgba(245, 158, 11, 0.14);
+            border-bottom: 1px solid rgba(245, 158, 11, 0.45);
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            flex-wrap: wrap;
+            font-size: 0.76rem;
+            color: #fde68a;
+            flex-shrink: 0;
+        }
+
+        .sync-edit-banner.active {
+            display: flex;
+        }
+
+        .btn-sync-mode-active {
+            background: rgba(245, 158, 11, 0.25) !important;
+            border-color: #f59e0b !important;
+            color: #fde68a !important;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.3) !important;
+        }
+
         .timestamp-tag {
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.76rem;
             padding: 2px 7px;
             border-radius: 5px;
-            background: #1b202e;
-            color: #64748b;
+            background: #252525;
+            color: #777777;
             user-select: none;
             flex-shrink: 0;
             cursor: pointer;
@@ -639,7 +707,7 @@
         }
 
         .lyric-line:hover .timestamp-tag {
-            background: #252e42;
+            background: #333333;
             color: #93c5fd;
         }
 
@@ -667,6 +735,7 @@
             align-items: center;
             gap: 3px;
             flex-shrink: 0;
+            flex-wrap: wrap;
         }
 
         .lyric-line:hover .line-actions,
@@ -675,19 +744,29 @@
         }
 
         .btn-line-action {
-            background: #1e2434;
+            background: #292929;
             border: 1px solid var(--bg-card-border);
             color: var(--text-muted);
             border-radius: 4px;
             padding: 2px 5px;
-            font-size: 0.7rem;
+            font-size: 0.68rem;
+            font-family: 'JetBrains Mono', monospace;
             cursor: pointer;
             transition: all 0.15s;
         }
 
         .btn-line-action:hover {
-            background: #2b334a;
+            background: #3a3a3a;
             color: #fff;
+            border-color: #38bdf8;
+        }
+
+        .btn-line-offset-neg {
+            color: #fca5a5;
+        }
+
+        .btn-line-offset-pos {
+            color: #6ee7b7;
         }
 
         .btn-sync-time {
@@ -704,7 +783,7 @@
         /* Editable line input */
         .line-input-text {
             flex: 1;
-            background: #181d2a;
+            background: #212121;
             border: 1px solid #38bdf8;
             color: #fff;
             padding: 2px 6px;
@@ -714,7 +793,7 @@
 
         .line-input-time {
             width: 72px;
-            background: #181d2a;
+            background: #212121;
             border: 1px solid #38bdf8;
             color: #38bdf8;
             font-family: 'JetBrains Mono', monospace;
@@ -727,7 +806,7 @@
         /* Column Bottom Action Footer */
         .column-footer {
             padding: 12px 16px;
-            background: rgba(20, 24, 34, 0.95);
+            background: rgba(27, 27, 27, 0.95);
             border-top: 1px solid var(--bg-card-border);
             display: flex;
             gap: 8px;
@@ -773,7 +852,7 @@
 
         /* Center Column: Player & Album Art */
         .column-center {
-            background: #0d1017;
+            background: #121212;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -791,7 +870,7 @@
             overflow: hidden;
             box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6), 0 0 20px rgba(59, 130, 246, 0.15);
             border: 1px solid var(--bg-card-border);
-            background: #181d2a;
+            background: #212121;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -826,18 +905,18 @@
         .song-artist {
             font-size: 0.85rem;
             font-weight: 500;
-            color: #94a3b8;
+            color: #a6a6a6;
         }
 
         .song-album {
             font-size: 0.76rem;
-            color: #64748b;
+            color: #777777;
             margin-top: 2px;
         }
 
         /* Open Folder Button */
         .btn-open-folder {
-            background: #181f2f;
+            background: #232323;
             border: 1px solid var(--bg-card-border);
             color: #38bdf8;
             padding: 6px 12px;
@@ -853,7 +932,7 @@
         }
 
         .btn-open-folder:hover {
-            background: #222b40;
+            background: #313131;
             border-color: #38bdf8;
         }
 
@@ -901,7 +980,7 @@
             justify-content: space-between;
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.74rem;
-            color: #94a3b8;
+            color: #a6a6a6;
         }
 
         input[type=range].chunky-slider {
@@ -909,7 +988,7 @@
             width: 100%;
             height: 16px;
             border-radius: 8px;
-            background: #252b3b;
+            background: #303030;
             outline: none;
             cursor: pointer;
             position: relative;
@@ -917,7 +996,7 @@
         }
 
         input[type=range].chunky-slider:hover {
-            background: #2e3649;
+            background: #3b3b3b;
         }
 
         input[type=range].chunky-slider::-webkit-slider-thumb {
@@ -927,7 +1006,7 @@
             height: 24px;
             border-radius: 50%;
             background: #38bdf8;
-            border: 3px solid #0b0d13;
+            border: 3px solid #0f0f0f;
             box-shadow: 0 0 10px rgba(56, 189, 248, 0.7);
             cursor: pointer;
             transition: transform 0.15s, background-color 0.15s;
@@ -943,7 +1022,7 @@
             height: 24px;
             border-radius: 50%;
             background: #38bdf8;
-            border: 3px solid #0b0d13;
+            border: 3px solid #0f0f0f;
             box-shadow: 0 0 10px rgba(56, 189, 248, 0.7);
             cursor: pointer;
         }
@@ -959,7 +1038,7 @@
             width: 42px;
             height: 42px;
             border-radius: 50%;
-            background: #1c212f;
+            background: #262626;
             border: 1px solid var(--bg-card-border);
             color: var(--text-main);
             display: flex;
@@ -970,7 +1049,7 @@
         }
 
         .btn-circle:hover {
-            background: #293144;
+            background: #373737;
             transform: scale(1.05);
         }
 
@@ -997,7 +1076,7 @@
             flex: 1;
             padding: 8px;
             border-radius: 6px;
-            background: #171c28;
+            background: #202020;
             border: 1px solid var(--bg-card-border);
             color: var(--text-main);
             font-size: 0.78rem;
@@ -1007,16 +1086,16 @@
         }
 
         .btn-secondary:hover {
-            background: #232b3d;
+            background: #303030;
         }
 
         /* ==========================================================================
-           ACTION EXECUTION MODAL
+           ACTION EXECUTION MODAL & FULLSCREEN MULTI-API MODAL
            ========================================================================== */
         .modal-backdrop {
             position: fixed;
             inset: 0;
-            background: rgba(8, 10, 16, 0.82);
+            background: rgba(12, 12, 12, 0.82);
             backdrop-filter: blur(8px);
             display: flex;
             align-items: center;
@@ -1025,8 +1104,13 @@
             padding: 20px;
         }
 
+        .modal-backdrop.fullscreen-modal {
+            padding: 0;
+            z-index: 250;
+        }
+
         .modal-card {
-            background: #141824;
+            background: #1c1c1c;
             border: 1px solid var(--bg-card-border);
             border-radius: var(--radius-lg);
             width: 100%;
@@ -1037,6 +1121,15 @@
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75);
             overflow: hidden;
             animation: modalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .modal-card.fullscreen-card {
+            width: 100vw;
+            height: 100vh;
+            max-width: 100vw;
+            max-height: 100vh;
+            border-radius: 0;
+            border: none;
         }
 
         @keyframes modalFadeIn {
@@ -1052,11 +1145,13 @@
 
         .modal-header {
             padding: 16px 22px;
-            background: #181d2c;
+            background: #222222;
             border-bottom: 1px solid var(--bg-card-border);
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
         }
 
         .modal-title-group {
@@ -1069,7 +1164,7 @@
             width: 44px;
             height: 44px;
             border-radius: 10px;
-            background: #232a3d;
+            background: #303030;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1079,7 +1174,7 @@
         .modal-title-group h2 {
             font-size: 1.15rem;
             font-weight: 700;
-            color: #f8fafc;
+            color: #fafafa;
         }
 
         .modal-action-subtitle {
@@ -1130,7 +1225,7 @@
         .form-label {
             font-size: 0.82rem;
             font-weight: 600;
-            color: #cbd5e1;
+            color: #d6d6d6;
         }
 
         .text-danger {
@@ -1145,7 +1240,7 @@
 
         .form-input {
             flex: 1;
-            background: #10131d;
+            background: #171717;
             border: 1px solid var(--bg-card-border);
             color: var(--text-main);
             padding: 9px 12px;
@@ -1161,7 +1256,7 @@
         }
 
         .btn-browse {
-            background: #1e2434;
+            background: #292929;
             border: 1px solid var(--bg-card-border);
             color: #38bdf8;
             padding: 8px 14px;
@@ -1177,7 +1272,7 @@
         }
 
         .btn-browse:hover {
-            background: #2b334a;
+            background: #3a3a3a;
             border-color: #38bdf8;
         }
 
@@ -1190,9 +1285,9 @@
         }
 
         .btn-chip-path {
-            background: #171c29;
+            background: #202020;
             border: 1px solid rgba(255, 255, 255, 0.08);
-            color: #64748b;
+            color: #777777;
             padding: 3px 8px;
             border-radius: 4px;
             font-size: 0.72rem;
@@ -1202,8 +1297,8 @@
         }
 
         .btn-chip-path:hover {
-            background: #20273a;
-            color: #94a3b8;
+            background: #2d2d2d;
+            color: #a6a6a6;
             border-color: #38bdf8;
         }
 
@@ -1212,13 +1307,13 @@
             align-items: center;
             gap: 10px;
             padding: 10px 14px;
-            background: #10131d;
+            background: #171717;
             border: 1px solid var(--bg-card-border);
             border-radius: 6px;
             cursor: pointer;
             user-select: none;
             font-size: 0.84rem;
-            color: #cbd5e1;
+            color: #d6d6d6;
         }
 
         .checkbox-group input[type=checkbox] {
@@ -1229,7 +1324,7 @@
         }
 
         .select-input {
-            background: #10131d;
+            background: #171717;
             border: 1px solid var(--bg-card-border);
             color: var(--text-main);
             padding: 9px 12px;
@@ -1265,7 +1360,7 @@
         .progress-bar-wrapper {
             width: 100%;
             height: 12px;
-            background: #10141f;
+            background: #181818;
             border-radius: 6px;
             overflow: hidden;
             border: 1px solid var(--bg-card-border);
@@ -1317,7 +1412,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: #1a2233;
+            background: #262626;
             border: 1px solid #38bdf8;
             border-radius: 8px;
             padding: 12px 16px;
@@ -1342,7 +1437,7 @@
         }
 
         .result-details-box {
-            background: #0f121b;
+            background: #151515;
             border: 1px solid var(--bg-card-border);
             border-radius: 8px;
             padding: 12px 14px;
@@ -1355,7 +1450,7 @@
 
         .result-details-box h4 {
             font-size: 0.78rem;
-            color: #94a3b8;
+            color: #a6a6a6;
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
@@ -1363,7 +1458,7 @@
         .result-log-list {
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.76rem;
-            color: #cbd5e1;
+            color: #d6d6d6;
             display: flex;
             flex-direction: column;
             gap: 4px;
@@ -1377,7 +1472,7 @@
 
         .modal-footer {
             padding: 14px 24px;
-            background: #181d2c;
+            background: #222222;
             border-top: 1px solid var(--bg-card-border);
             display: flex;
             align-items: center;
@@ -1394,12 +1489,135 @@
             background: #0369a1;
         }
 
+        /* Fullscreen All-API Results Modal Layout */
+        .all-api-toolbar {
+            padding: 12px 22px;
+            background: #181818;
+            border-bottom: 1px solid var(--bg-card-border);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .all-api-search-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .all-api-provider-chips {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .provider-filter-btn {
+            background: #252525;
+            border: 1px solid var(--bg-card-border);
+            color: var(--text-muted);
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.74rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .provider-filter-btn:hover {
+            color: var(--text-main);
+            border-color: #38bdf8;
+        }
+
+        .provider-filter-btn.active {
+            background: rgba(56, 189, 248, 0.18);
+            color: #38bdf8;
+            border-color: #38bdf8;
+        }
+
+        .all-api-split {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 440px 1fr;
+            overflow: hidden;
+        }
+
+        .all-api-list-pane {
+            border-right: 1px solid var(--bg-card-border);
+            overflow-y: auto;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: #141414;
+        }
+
+        .all-api-detail-pane {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: #181818;
+        }
+
+        .all-api-detail-header {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--bg-card-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            background: #1e1e1e;
+        }
+
+        .all-api-detail-meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 8px;
+            padding: 12px 20px;
+            background: #151515;
+            border-bottom: 1px solid var(--bg-card-border);
+            font-size: 0.78rem;
+        }
+
+        .all-api-meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .all-api-meta-label {
+            color: var(--text-dim);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .all-api-meta-value {
+            color: var(--text-main);
+            font-weight: 600;
+            word-break: break-word;
+        }
+
+        .all-api-lyrics-preview {
+            flex: 1;
+            overflow-y: auto;
+            padding: 18px 22px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.84rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            color: var(--text-main);
+        }
+
         /* Toast Notification */
         #toast {
             position: fixed;
             bottom: 24px;
             right: 24px;
-            background: #1b2130;
+            background: #262626;
             border: 1px solid #38bdf8;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
             color: white;
@@ -1430,12 +1648,12 @@
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #262d3e;
+            background: #323232;
             border-radius: 3px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: #37425b;
+            background: #494949;
         }
 
         /* ==========================================================================
@@ -1527,6 +1745,11 @@
         [data-theme="amoled"] .offset-toolbar,
         [data-theme="amoled"] .candidates-box,
         [data-theme="amoled"] .lyrics-container,
+        [data-theme="amoled"] .all-api-toolbar,
+        [data-theme="amoled"] .all-api-list-pane,
+        [data-theme="amoled"] .all-api-detail-pane,
+        [data-theme="amoled"] .all-api-detail-header,
+        [data-theme="amoled"] .all-api-detail-meta-grid,
         [data-theme="amoled"] #viewMenu {
             background: #000000 !important;
         }
@@ -1554,9 +1777,22 @@
         [data-theme="amoled"] .btn-browse,
         [data-theme="amoled"] .btn-chip-path,
         [data-theme="amoled"] .result-details-box,
+        [data-theme="amoled"] .provider-filter-btn,
         [data-theme="amoled"] #toast {
             background: #080808 !important;
             border-color: #222222 !important;
+        }
+
+        [data-theme="amoled"] .candidate-chip:hover {
+            background: #141414 !important;
+            border-color: #3b82f6 !important;
+        }
+
+        [data-theme="amoled"] .candidate-chip.active,
+        [data-theme="amoled"] .provider-filter-btn.active {
+            background: rgba(56, 189, 248, 0.20) !important;
+            border-color: #38bdf8 !important;
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.28) !important;
         }
 
         [data-theme="amoled"] .option-card.highlight {
@@ -1587,7 +1823,10 @@
         [data-theme="light"] body,
         [data-theme="light"] #viewMenu,
         [data-theme="light"] .column-center,
-        [data-theme="light"] .lyrics-container {
+        [data-theme="light"] .lyrics-container,
+        [data-theme="light"] .all-api-list-pane,
+        [data-theme="light"] .all-api-detail-pane,
+        [data-theme="light"] .all-api-detail-meta-grid {
             background: #f8fafc !important;
             color: #0f172a !important;
         }
@@ -1601,7 +1840,9 @@
         [data-theme="light"] .candidates-box,
         [data-theme="light"] .modal-card,
         [data-theme="light"] .modal-header,
-        [data-theme="light"] .modal-footer {
+        [data-theme="light"] .modal-footer,
+        [data-theme="light"] .all-api-toolbar,
+        [data-theme="light"] .all-api-detail-header {
             background: #ffffff !important;
             color: #0f172a !important;
         }
@@ -1618,10 +1859,22 @@
         [data-theme="light"] .timestamp-tag,
         [data-theme="light"] .form-input,
         [data-theme="light"] .select-input,
-        [data-theme="light"] .checkbox-group {
+        [data-theme="light"] .checkbox-group,
+        [data-theme="light"] .provider-filter-btn {
             background: #f1f5f9 !important;
             color: #0f172a !important;
             border-color: #cbd5e1 !important;
+        }
+
+        [data-theme="light"] .candidate-chip:hover {
+            background: #e2e8f0 !important;
+            border-color: #3b82f6 !important;
+        }
+
+        [data-theme="light"] .candidate-chip.active,
+        [data-theme="light"] .provider-filter-btn.active {
+            background: rgba(56, 189, 248, 0.20) !important;
+            border-color: #0284c7 !important;
         }
 
         [data-theme="light"] .option-card-title,
@@ -1629,6 +1882,21 @@
         [data-theme="light"] .candidate-name,
         [data-theme="light"] .lyric-line.active {
             color: #0f172a !important;
+        }
+
+        [data-theme="light"] .lyric-line.out-of-order {
+            background: rgba(239, 68, 68, 0.16) !important;
+            color: #b91c1c !important;
+        }
+
+        [data-theme="light"] .lyric-line.sync-target {
+            background: rgba(245, 158, 11, 0.22) !important;
+            color: #92400e !important;
+        }
+
+        [data-theme="light"] .sync-edit-banner {
+            background: rgba(245, 158, 11, 0.15) !important;
+            color: #92400e !important;
         }
 
         [data-theme="light"] .lyric-line {
@@ -1677,10 +1945,10 @@
         <select class="report-select" id="themeSelect" style="max-width: 175px;" title="Tema visual (Auto detecta o modo do sistema)">
             <option value="auto">🖥️ Sistema (Auto)</option>
             <option value="amoled">🌑 AMOLED (#000000)</option>
-            <option value="dark">🌙 Escuro (Azulado)</option>
+            <option value="dark">🌙 Escuro</option>
             <option value="light">☀️ Claro</option>
         </select>
-        <span class="badge" title="Atalhos: [Espaço] Play/Pause | [1] Manter Local | [2] Salvar Remota | [Setas] -5s / +5s">⌨️ [Espaço] [1] [2]</span>
+        <span class="badge" id="shortcutBadge" title="Atalhos: [Espaço] Play/Pause (ou Set no Modo Edição) | [Ctrl] Set no Modo Edição | [1] Manter Local | [2] Salvar Remota | [Alt+A] Faixa Anterior | [Alt+F] Próxima Faixa">⌨️ [Espaço/Ctrl] [1] [2] [Alt+A/F]</span>
     </div>
 </header>
 
@@ -1718,7 +1986,7 @@
     <!-- 3-Column Comparison Grid -->
     <div class="comparison-grid">
         <!-- Coluna Esquerda: Letra Local -->
-        <section class="column-panel column-left">
+        <section class="column-panel column-left" id="columnLeftPanel">
             <div class="column-header">
                 <h3>
                     <span style="color: var(--accent-local);">●</span>
@@ -1738,11 +2006,30 @@
                     <input class="offset-input" id="localOffsetInput" step="0.1" type="number" value="0.5">
                     <button class="btn-offset" onclick="applyCustomOffset('local')">Aplicar</button>
                 </div>
-                <button class="btn-offset" onclick="addNewLyricLine('local')" style="color: #34d399;">+ Novo Verso</button>
+                <div class="offset-btn-group">
+                    <button class="btn-offset" onclick="openPasteLyricsModal('local')" style="color: #a78bfa;" title="Colar uma letra inteira (ou pressione Ctrl+V com o mouse sobre esta coluna) com minutagens zeradas [00:00.00]">📋 Colar Letra</button>
+                    <button class="btn-offset" id="btnSyncEditModeLocal" onclick="toggleSyncEditMode('local')" style="color: #fbbf24;" title="Ativa o Modo Edição para ir apertando [Espaço] ou [Ctrl] e definir a minutagem da próxima linha no instante exato da música">🎯 Modo Edição (Set)</button>
+                    <button class="btn-offset" id="btnToggleTimestampsLocal" onclick="toggleStripTimestamps('local')" style="color: #f87171;" title="Retira todas as minutagens em memória (com opção de reverter). Só grava no arquivo ao clicar em Salvar [1] ou [2].">🧹 Retirar Minutagens</button>
+                    <button class="btn-offset" onclick="addNewLyricLine('local')" style="color: #34d399;">+ Novo Verso</button>
+                </div>
+            </div>
+
+            <!-- Banner do Modo Edição (Sincronização Rápida Local) -->
+            <div class="sync-edit-banner" id="syncEditBannerLocal">
+                <div>
+                    <strong id="syncEditStatusLocal">🎯 Modo Edição Ativo (Linha 1)</strong>
+                    <div style="font-size: 0.7rem; opacity: 0.9;">Aperte <b>[Espaço]</b> ou <b>[Ctrl]</b> para marcar o tempo exato na linha destacada e avançar • <b>[Backspace]</b> volta 1 linha • <b>[P]</b> Play/Pause</div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
+                    <button class="btn-offset" onclick="stampNextSyncLine()" style="color: #34d399; border-color: #10b981; font-weight: 700;">⏱️ Set Próxima [Espaço/Ctrl]</button>
+                    <button class="btn-offset" onclick="stepSyncCursor(-1)" title="Voltar para a linha anterior (Atalho: Backspace)">↩️ Linha Anterior</button>
+                    <button class="btn-offset" onclick="setSyncCursor(0)" title="Voltar o cursor para a primeira linha">⏮️ Topo</button>
+                    <button class="btn-offset" onclick="toggleSyncEditMode('local')" style="color: #f87171;" title="Sair do Modo Edição">✕ Sair</button>
+                </div>
             </div>
 
             <div class="lyrics-container" id="localLyricsScroller">
-                <p style="text-align: center; color: #64748b; margin-top: 40px;">Selecione uma faixa para visualizar</p>
+                <p style="text-align: center; color: #777777; margin-top: 40px;">Selecione uma faixa para visualizar</p>
             </div>
 
             <div class="column-footer">
@@ -1802,7 +2089,7 @@
                             <path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/>
                         </svg>
                     </button>
-                    <button class="btn-circle btn-circle-large" id="btnPlayPause" title="Reproduzir / Pausar (Espaço)">
+                    <button class="btn-circle btn-circle-large" id="btnPlayPause" title="Reproduzir / Pausar (Espaço ou P)">
                         <svg fill="currentColor" height="24" id="playIcon" viewBox="0 0 24 24" width="24">
                             <polygon points="5 3 19 12 5 21 5 3"></polygon>
                         </svg>
@@ -1819,18 +2106,27 @@
                 </div>
 
                 <div class="nav-buttons-row">
-                    <button class="btn-secondary" id="btnPrevTrack">◀ Faixa Anterior</button>
-                    <button class="btn-secondary" id="btnNextTrack">Próxima Faixa ▶</button>
+                    <button class="btn-secondary" id="btnPrevTrack" title="Faixa Anterior (Atalho: Alt + A)">◀ Faixa <u>A</u>nterior</button>
+                    <button class="btn-secondary" id="btnNextTrack" title="Próxima Faixa (Atalho: Alt + F)">Próxima <u>F</u>aixa ▶</button>
                 </div>
             </div>
         </section>
 
         <!-- Coluna Direita: Letra Remota (LRCLIB + Fallbacks) -->
-        <section class="column-panel column-right">
+        <section class="column-panel column-right" id="columnRightPanel">
             <div class="column-header">
                 <h3>
                     <span style="color: var(--accent-lrclib);">●</span>
-                    Letra Online (Multi-API)
+                    <span>Letra Online (Multi-API)</span>
+                    <button class="btn-offset" id="btnOpenAllApiModal" onclick="openAllApiResultsModal()" style="margin-left: 4px; display: inline-flex; align-items: center; gap: 5px; color: #38bdf8; border-color: rgba(56, 189, 248, 0.45); padding: 3px 8px;" title="Abrir popup em tela cheia com todas as letras encontradas por todas as APIs (incluindo resultados não filtrados)">
+                        <svg fill="none" height="13" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" width="13">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" x2="16.65" y1="21" y2="16.65"></line>
+                            <line x1="11" x2="11" y1="8" y2="14"></line>
+                            <line x1="8" x2="14" y1="11" y2="11"></line>
+                        </svg>
+                        <span id="allApiModalBtnCount">Ver Todas (0)</span>
+                    </button>
                 </h3>
                 <div style="display: flex; align-items: center; gap: 6px;">
                     <span class="badge badge-source-lrclib" id="remoteSourceBadge">LRCLIB</span>
@@ -1858,11 +2154,30 @@
                     <input class="offset-input" id="remoteOffsetInput" step="0.1" type="number" value="0.5">
                     <button class="btn-offset" onclick="applyCustomOffset('remote')">Aplicar</button>
                 </div>
-                <button class="btn-offset" onclick="addNewLyricLine('remote')" style="color: #60a5fa;">+ Novo Verso</button>
+                <div class="offset-btn-group">
+                    <button class="btn-offset" onclick="openPasteLyricsModal('remote')" style="color: #a78bfa;" title="Colar uma letra inteira (ou pressione Ctrl+V com o mouse sobre esta coluna) com minutagens zeradas [00:00.00]">📋 Colar Letra</button>
+                    <button class="btn-offset" id="btnSyncEditModeRemote" onclick="toggleSyncEditMode('remote')" style="color: #fbbf24;" title="Ativa o Modo Edição para ir apertando [Espaço] ou [Ctrl] e definir a minutagem da próxima linha no instante exato da música">🎯 Modo Edição (Set)</button>
+                    <button class="btn-offset" id="btnToggleTimestampsRemote" onclick="toggleStripTimestamps('remote')" style="color: #f87171;" title="Retira todas as minutagens em memória (com opção de reverter). Só grava no arquivo ao clicar em Salvar [1] ou [2].">🧹 Retirar Minutagens</button>
+                    <button class="btn-offset" onclick="addNewLyricLine('remote')" style="color: #60a5fa;">+ Novo Verso</button>
+                </div>
+            </div>
+
+            <!-- Banner do Modo Edição (Sincronização Rápida Online) -->
+            <div class="sync-edit-banner" id="syncEditBannerRemote">
+                <div>
+                    <strong id="syncEditStatusRemote">🎯 Modo Edição Ativo (Linha 1)</strong>
+                    <div style="font-size: 0.7rem; opacity: 0.9;">Aperte <b>[Espaço]</b> ou <b>[Ctrl]</b> para marcar o tempo exato na linha destacada e avançar • <b>[Backspace]</b> volta 1 linha • <b>[P]</b> Play/Pause</div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
+                    <button class="btn-offset" onclick="stampNextSyncLine()" style="color: #34d399; border-color: #10b981; font-weight: 700;">⏱️ Set Próxima [Espaço/Ctrl]</button>
+                    <button class="btn-offset" onclick="stepSyncCursor(-1)" title="Voltar para a linha anterior (Atalho: Backspace)">↩️ Linha Anterior</button>
+                    <button class="btn-offset" onclick="setSyncCursor(0)" title="Voltar o cursor para a primeira linha">⏮️ Topo</button>
+                    <button class="btn-offset" onclick="toggleSyncEditMode('remote')" style="color: #f87171;" title="Sair do Modo Edição">✕ Sair</button>
+                </div>
             </div>
 
             <div class="lyrics-container" id="remoteLyricsScroller">
-                <p style="text-align: center; color: #64748b; margin-top: 40px;">Buscando letra no LRCLIB...</p>
+                <p style="text-align: center; color: #777777; margin-top: 40px;">Buscando letra no LRCLIB...</p>
             </div>
 
             <div class="column-footer">
@@ -1878,6 +2193,96 @@
         </section>
     </div>
 </main>
+
+<!-- =========================================================================
+     MODAL PARA COLAR LETRA COM MINUTAGENS ZERADAS
+     ========================================================================= -->
+<div class="modal-backdrop" id="pasteLyricsModal" style="display: none;">
+    <div class="modal-card" style="max-width: 720px;">
+        <div class="modal-header">
+            <div class="modal-title-group">
+                <span class="modal-action-icon">📋</span>
+                <div>
+                    <h2 id="pasteLyricsModalTitle">Colar Letra com Minutagens Zeradas</h2>
+                    <div class="modal-action-subtitle" id="pasteLyricsModalSubtitle">Cada quebra de linha criará um verso com minutagem [00:00.00]</div>
+                </div>
+            </div>
+            <button class="btn-close-modal" onclick="closePasteLyricsModal()" title="Fechar (Esc)">✕</button>
+        </div>
+        <div class="modal-body">
+            <p class="modal-desc">
+                Cole abaixo a letra completa da música. Linhas em branco entre estrofes serão ignoradas automaticamente e cada verso será criado com a minutagem zerada (<code>[00:00.00]</code>) para você sincronizar facilmente com o <b>Modo Edição (Espaço / Ctrl)</b>.
+            </p>
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="form-label">Aplicar em:</span>
+                    <select class="select-input" id="pasteLyricsTargetSelect" style="padding: 5px 10px;">
+                        <option value="local">● Letra Atual (Local .lrc)</option>
+                        <option value="remote">● Letra Online (Multi-API)</option>
+                    </select>
+                </div>
+                <button class="btn-browse" onclick="readClipboardIntoPasteTextarea()" type="button">📋 Ler da Área de Transferência</button>
+            </div>
+            <textarea class="form-input" id="pasteLyricsTextarea" placeholder="Cole a letra aqui (Ctrl + V)..." rows="13" style="width: 100%; resize: vertical; line-height: 1.5; font-family: 'Inter', sans-serif;"></textarea>
+            <label class="checkbox-group">
+                <input checked id="pasteAutoEnterSyncMode" type="checkbox">
+                <span>Já ativar o <b>🎯 Modo Edição (Set Rápido com Espaço / Ctrl)</b> na linha 1 após aplicar</span>
+            </label>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closePasteLyricsModal()">Cancelar</button>
+            <button class="btn-action btn-primary" onclick="applyPastedLyricsFromModal()">
+                ✅ Criar Linhas Zeradas [00:00.00]
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- =========================================================================
+     POPUP TELA CHEIA: TODAS AS LETRAS ENCONTRADAS EM TODAS AS APIS (SEM FILTRO)
+     ========================================================================= -->
+<div class="modal-backdrop fullscreen-modal" id="allApiResultsModal" style="display: none;">
+    <div class="modal-card fullscreen-card">
+        <div class="modal-header">
+            <div class="modal-title-group">
+                <span class="modal-action-icon">🌐</span>
+                <div>
+                    <h2>Todos os Resultados das APIs (Sem Filtro)</h2>
+                    <div class="modal-action-subtitle" id="allApiModalSubtitle">Resultados completos de LRCLIB, AppleMusic, Spotify, YouTube, NetEase, QQMusic, KuGou, Musixmatch, Deezer, Genius e Karalyr</div>
+                </div>
+            </div>
+            <button class="btn-close-modal" id="btnCloseAllApiModal" onclick="closeAllApiResultsModal()" title="Fechar (Esc)">✕</button>
+        </div>
+
+        <div class="all-api-toolbar">
+            <div class="all-api-search-row">
+                <input class="form-input" id="allApiCustomQueryInput" placeholder="Pesquisar manualmente em todas as APIs (ex: Artista Título)..." style="max-width: 480px;" type="text">
+                <button class="btn-browse" id="btnRunAllApiCustomSearch" onclick="runCustomAllApiSearch()">🔍 Pesquisar em Todas as APIs</button>
+                <input class="form-input" id="allApiLocalFilterInput" oninput="renderAllApiModalList()" placeholder="Filtrar resultados listados abaixo por título, artista, álbum ou letra..." style="max-width: 380px;" type="text">
+                <span class="badge badge-info" id="allApiTotalBadge">0 resultados</span>
+            </div>
+            <div class="all-api-provider-chips" id="allApiProviderChips"></div>
+        </div>
+
+        <div class="all-api-split">
+            <div class="all-api-list-pane" id="allApiResultsList"></div>
+            <div class="all-api-detail-pane" id="allApiDetailPane">
+                <div class="all-api-detail-header">
+                    <div>
+                        <h3 id="allApiDetailTitle" style="font-size: 1.05rem; font-weight: 800;">Selecione um resultado à esquerda</h3>
+                        <div id="allApiDetailSubtitle" style="font-size: 0.82rem; color: var(--text-muted);">-</div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <button class="btn-offset" id="btnUseSelectedApiSynced" onclick="useSelectedAllApiResult('synced')" style="display: none; padding: 7px 12px; color: #34d399; border-color: #10b981;">⚡ Usar Letra Sincronizada no Comparador</button>
+                        <button class="btn-offset" id="btnUseSelectedApiPlain" onclick="useSelectedAllApiResult('plain')" style="display: none; padding: 7px 12px; color: #60a5fa; border-color: #3b82f6;">📄 Usar Letra Pura no Comparador</button>
+                    </div>
+                </div>
+                <div class="all-api-detail-meta-grid" id="allApiDetailMetaGrid" style="display: none;"></div>
+                <div class="all-api-lyrics-preview" id="allApiLyricsPreview">Clique em qualquer item encontrado à esquerda para inspecionar todos os metadados e o conteúdo bruto retornado pela API.</div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- =========================================================================
      MODAL DE EXECUÇÃO DE AÇÕES (OPÇÕES 0 A 7)
@@ -2221,15 +2626,22 @@
             }
         }
 
+        const isSyncEditingThisContainer =
+            (typeof syncEditModeSide !== 'undefined' && syncEditModeSide !== null) &&
+            ((syncEditModeSide === 'local' && container === localLyricsScroller) ||
+             (syncEditModeSide === 'remote' && container === remoteLyricsScroller));
+
         lines.forEach((line, idx) => {
             if (idx === activeIndex) {
                 if (!line.classList.contains('active')) {
                     line.classList.add('active');
-                    // Smoothly center the line within the scrolling container without disturbing the window
-                    const containerRect = container.getBoundingClientRect();
-                    const lineRect = line.getBoundingClientRect();
-                    const scrollOffset = (lineRect.top - containerRect.top) - (container.clientHeight / 2) + (line.clientHeight / 2);
-                    container.scrollBy({top: scrollOffset, behavior: 'smooth'});
+                    if (!isSyncEditingThisContainer) {
+                        // Smoothly center the line within the scrolling container without disturbing the window
+                        const containerRect = container.getBoundingClientRect();
+                        const lineRect = line.getBoundingClientRect();
+                        const scrollOffset = (lineRect.top - containerRect.top) - (container.clientHeight / 2) + (line.clientHeight / 2);
+                        container.scrollBy({top: scrollOffset, behavior: 'smooth'});
+                    }
                 }
             } else {
                 line.classList.remove('active');
@@ -2654,6 +3066,96 @@
         }
     }
 
+    let localTimestampsBackup = null;
+    let remoteTimestampsBackup = null;
+    let allApiResultsState = [];
+    let activeApiProviderFilter = 'ALL';
+    let selectedAllApiItemIndex = -1;
+
+    function getSourceBadgeClass(src) {
+        const s = (src || 'LRCLIB').toUpperCase();
+        if (s === 'NETEASE') return 'badge-source-netease';
+        if (s === 'KUGOU') return 'badge-source-kugou';
+        if (s === 'MUSIXMATCH') return 'badge-source-musixmatch';
+        if (s === 'APPLEMUSIC') return 'badge-source-applemusic';
+        if (s === 'QQMUSIC') return 'badge-source-qqmusic';
+        if (s === 'SPOTIFY') return 'badge-source-spotify';
+        if (s === 'YOUTUBE') return 'badge-source-youtube';
+        if (s === 'DEEZER') return 'badge-source-deezer';
+        if (s === 'GENIUS') return 'badge-source-genius';
+        if (s === 'KARALYR') return 'badge-source-karalyr';
+        return 'badge-source-lrclib';
+    }
+
+    function updateRemoteSourceBadge(src) {
+        const label = src || 'LRCLIB';
+        const el = document.getElementById('remoteSourceBadge');
+        if (el) {
+            el.textContent = label;
+            el.className = 'badge ' + getSourceBadgeClass(label);
+        }
+    }
+
+    function updateToggleTimestampsBtnUI(side, isStripped) {
+        const btn = document.getElementById(side === 'local' ? 'btnToggleTimestampsLocal' : 'btnToggleTimestampsRemote');
+        if (!btn) return;
+        if (isStripped) {
+            btn.textContent = '↩️ Reverter Minutagens';
+            btn.style.color = '#fbbf24';
+            btn.style.borderColor = '#fbbf24';
+        } else {
+            btn.textContent = '🧹 Retirar Minutagens';
+            btn.style.color = '#f87171';
+            btn.style.borderColor = '';
+        }
+    }
+
+    function toggleStripTimestamps(side) {
+        const isLocal = side === 'local';
+        const container = isLocal ? localLyricsScroller : remoteLyricsScroller;
+        let state = isLocal ? localLinesState : remoteLinesState;
+
+        if (!state || state.length === 0) {
+            showToast('Nenhuma letra carregada para alterar as minutagens.');
+            return;
+        }
+
+        const existingBackup = isLocal ? localTimestampsBackup : remoteTimestampsBackup;
+        if (!existingBackup) {
+            const backupCopy = JSON.parse(JSON.stringify(state));
+            if (isLocal) {
+                localTimestampsBackup = backupCopy;
+            } else {
+                remoteTimestampsBackup = backupCopy;
+            }
+
+            state.forEach(l => {
+                l.noTimestamp = true;
+                l.formattedTime = '';
+                l.timestampMs = 0;
+                l.timeMs = 0;
+            });
+
+            updateToggleTimestampsBtnUI(side, true);
+            renderLyricLines(container, state, side);
+            showToast('Minutagens retiradas em memória! Clique em "Reverter Minutagens" para restaurar ou em Salvar [1]/[2] para gravar no arquivo.');
+        } else {
+            const restored = JSON.parse(JSON.stringify(existingBackup));
+            if (isLocal) {
+                localLinesState = restored;
+                localTimestampsBackup = null;
+            } else {
+                remoteLinesState = restored;
+                remoteTimestampsBackup = null;
+            }
+
+            updateToggleTimestampsBtnUI(side, false);
+            renderLyricLines(container, restored, side);
+            syncLyricsHighlight(Math.round((audio.currentTime || 0) * 1000));
+            showToast('Minutagens restauradas da memória!');
+        }
+    }
+
     function renderTrackDetails(d, autoPlay = true) {
         songTitle.textContent = d.trackName || (d.metadata && d.metadata.title) || d.fileName || d.lyricFile;
         songArtist.textContent = d.artist || (d.metadata && d.metadata.artist) || 'Artista Desconhecido';
@@ -2674,6 +3176,15 @@
             issuesBox.style.display = 'block';
         } else {
             issuesBox.style.display = 'none';
+        }
+
+        // Reset in-memory timestamp backups and Sync Edit Mode when switching tracks
+        localTimestampsBackup = null;
+        remoteTimestampsBackup = null;
+        updateToggleTimestampsBtnUI('local', false);
+        updateToggleTimestampsBtnUI('remote', false);
+        if (typeof disableSyncEditMode === 'function') {
+            disableSyncEditMode();
         }
 
         // Audio Source and player timeline reset
@@ -2714,32 +3225,21 @@
         // Immediately sync active line to start of track
         syncLyricsHighlight(0);
 
-        // Helper for provider badge styling
-        const getSourceBadgeClass = (src) => {
-            const s = (src || 'LRCLIB').toUpperCase();
-            if (s === 'NETEASE') return 'badge-source-netease';
-            if (s === 'KUGOU') return 'badge-source-kugou';
-            if (s === 'MUSIXMATCH') return 'badge-source-musixmatch';
-            if (s === 'APPLEMUSIC') return 'badge-source-applemusic';
-            if (s === 'QQMUSIC') return 'badge-source-qqmusic';
-            if (s === 'SPOTIFY') return 'badge-source-spotify';
-            if (s === 'YOUTUBE') return 'badge-source-youtube';
-            if (s === 'DEEZER') return 'badge-source-deezer';
-            if (s === 'GENIUS') return 'badge-source-genius';
-            if (s === 'KARALYR') return 'badge-source-karalyr';
-            return 'badge-source-lrclib';
-        };
-
-        const updateRemoteSourceBadge = (src) => {
-            const label = src || 'LRCLIB';
-            const el = document.getElementById('remoteSourceBadge');
-            if (el) {
-                el.textContent = label;
-                el.className = 'badge ' + getSourceBadgeClass(label);
-            }
-        };
-
         const targetSec = (d.metadata && d.metadata.durationSeconds) ? d.metadata.durationSeconds : 0;
+
+        // Populate unfiltered All-API search results state
+        const rawAll = (d.allSearchResults && d.allSearchResults.length > 0)
+            ? d.allSearchResults
+            : (d.candidates || []);
+        allApiResultsState = JSON.parse(JSON.stringify(rawAll));
+        const allApiBtnCount = document.getElementById('allApiModalBtnCount');
+        if (allApiBtnCount) {
+            allApiBtnCount.textContent = `Ver Todas (${allApiResultsState.length})`;
+        }
+        const customSearchInp = document.getElementById('allApiCustomQueryInput');
+        if (customSearchInp) {
+            customSearchInp.value = `${d.artist || ''} ${d.trackName || ''}`.trim();
+        }
 
         // Render Alternatives candidates
         if (d.candidates && d.candidates.length > 0) {
@@ -2774,9 +3274,11 @@
           `;
 
                 chip.addEventListener('click', async () => {
-                    document.querySelectorAll('.candidate-chip').forEach(c => c.classList.remove('active'));
+                    candidatesList.querySelectorAll('.candidate-chip').forEach(c => c.classList.remove('active'));
                     chip.classList.add('active');
                     updateRemoteSourceBadge(srcName);
+                    remoteTimestampsBackup = null;
+                    updateToggleTimestampsBtnUI('remote', false);
 
                     const rawPayload = cand.syncedLyrics || cand.plainLyrics;
                     if (rawPayload) {
@@ -2806,49 +3308,785 @@
         }
     }
 
+    // =========================================================================
+    // FULL-SCREEN POPUP: ALL API SEARCH RESULTS (INCLUDING UNFILTERED)
+    // =========================================================================
+    const allApiResultsModal = document.getElementById('allApiResultsModal');
+
+    function openAllApiResultsModal() {
+        activeApiProviderFilter = 'ALL';
+        selectedAllApiItemIndex = allApiResultsState.length > 0 ? 0 : -1;
+        renderAllApiProviderChips();
+        renderAllApiModalList();
+        allApiResultsModal.style.display = 'flex';
+    }
+
+    function closeAllApiResultsModal() {
+        allApiResultsModal.style.display = 'none';
+    }
+
+    async function runCustomAllApiSearch() {
+        const inp = document.getElementById('allApiCustomQueryInput');
+        const q = (inp?.value || '').trim();
+        if (!q) {
+            showToast('Digite um termo para pesquisar em todas as APIs.');
+            return;
+        }
+        const btn = document.getElementById('btnRunAllApiCustomSearch');
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = '⏳ Buscando em todas as APIs...';
+        }
+        try {
+            const res = await fetch('/api/search?q=' + encodeURIComponent(q));
+            const batch = await res.json();
+            if (Array.isArray(batch)) {
+                const combined = [...batch, ...allApiResultsState];
+                const seen = new Set();
+                allApiResultsState = combined.filter(c => {
+                    const key = (c.id != null)
+                        ? `${c.source}:${c.id}`
+                        : `${c.source}:${c.trackName}:${c.artistName}:${c.duration}:${(c.syncedLyrics || '').length}:${(c.plainLyrics || '').length}`;
+                    if (seen.has(key)) return false;
+                    seen.add(key);
+                    return true;
+                });
+                const allApiBtnCount = document.getElementById('allApiModalBtnCount');
+                if (allApiBtnCount) {
+                    allApiBtnCount.textContent = `Ver Todas (${allApiResultsState.length})`;
+                }
+                selectedAllApiItemIndex = allApiResultsState.length > 0 ? 0 : -1;
+                renderAllApiProviderChips();
+                renderAllApiModalList();
+                showToast(`${batch.length} resultados retornados pelas APIs!`);
+            }
+        } catch (err) {
+            showToast('Erro ao consultar as APIs.');
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = '🔍 Pesquisar em Todas as APIs';
+            }
+        }
+    }
+
+    document.getElementById('allApiCustomQueryInput')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            runCustomAllApiSearch();
+        }
+    });
+
+    function renderAllApiProviderChips() {
+        const container = document.getElementById('allApiProviderChips');
+        if (!container) return;
+        container.innerHTML = '';
+
+        const countsBySource = {};
+        allApiResultsState.forEach(item => {
+            const src = (item.source || 'LRCLIB').toUpperCase();
+            countsBySource[src] = (countsBySource[src] || 0) + 1;
+        });
+
+        const allProviders = [
+            {key: 'ALL', label: `Todas (${allApiResultsState.length})`},
+            ...Object.keys(countsBySource).sort().map(src => ({
+                key: src,
+                label: `${src} (${countsBySource[src]})`
+            }))
+        ];
+
+        allProviders.forEach(p => {
+            const btn = document.createElement('button');
+            btn.className = 'provider-filter-btn' + (activeApiProviderFilter === p.key ? ' active' : '');
+            btn.textContent = p.label;
+            btn.addEventListener('click', () => {
+                activeApiProviderFilter = p.key;
+                renderAllApiProviderChips();
+                renderAllApiModalList();
+            });
+            container.appendChild(btn);
+        });
+    }
+
+    function isCandidateInFilteredList(cand) {
+        if (!currentTrackDetails || !currentTrackDetails.candidates) return false;
+        return currentTrackDetails.candidates.some(c =>
+            (c.id != null && cand.id != null && c.id === cand.id && c.source === cand.source) ||
+            (c.source === cand.source && c.trackName === cand.trackName && c.artistName === cand.artistName && c.duration === cand.duration)
+        );
+    }
+
+    function renderAllApiModalList() {
+        const listEl = document.getElementById('allApiResultsList');
+        const totalBadge = document.getElementById('allApiTotalBadge');
+        const filterText = (document.getElementById('allApiLocalFilterInput')?.value || '').toLowerCase().trim();
+        if (!listEl) return;
+        listEl.innerHTML = '';
+
+        const targetSec = (currentTrackDetails && currentTrackDetails.metadata && currentTrackDetails.metadata.durationSeconds)
+            ? currentTrackDetails.metadata.durationSeconds
+            : 0;
+
+        const filteredIndices = [];
+        allApiResultsState.forEach((cand, idx) => {
+            const srcUpper = (cand.source || 'LRCLIB').toUpperCase();
+            if (activeApiProviderFilter !== 'ALL' && srcUpper !== activeApiProviderFilter) return;
+
+            if (filterText) {
+                const hay = `${cand.trackName || ''} ${cand.artistName || ''} ${cand.albumName || ''} ${cand.source || ''} ${cand.syncedLyrics || ''} ${cand.plainLyrics || ''}`.toLowerCase();
+                if (!hay.includes(filterText)) return;
+            }
+            filteredIndices.push(idx);
+        });
+
+        if (totalBadge) {
+            totalBadge.textContent = `${filteredIndices.length} de ${allApiResultsState.length} resultados`;
+        }
+
+        if (filteredIndices.length === 0) {
+            listEl.innerHTML = '<div style="padding: 30px; text-align: center; color: var(--text-muted);">Nenhum resultado encontrado para este filtro. Use a barra de pesquisa acima para buscar em todas as APIs.</div>';
+            renderAllApiDetailPane(-1);
+            return;
+        }
+
+        if (!filteredIndices.includes(selectedAllApiItemIndex)) {
+            selectedAllApiItemIndex = filteredIndices[0];
+        }
+
+        filteredIndices.forEach(idx => {
+            const cand = allApiResultsState[idx];
+            const srcName = cand.source || 'LRCLIB';
+            const srcClass = getSourceBadgeClass(srcName);
+            const candSec = cand.duration ? Math.round(cand.duration) : null;
+            let diffLabel = '';
+            if (candSec && targetSec > 0) {
+                const diff = candSec - targetSec;
+                const sign = diff > 0 ? '+' : '';
+                diffLabel = ` (Δ ${sign}${diff}s)`;
+            }
+            const durText = candSec ? `${formatTime(candSec)} (${candSec}s)${diffLabel}` : 'Duração N/D';
+            const inFiltered = isCandidateInFilteredList(cand);
+            const hasSynced = !!(cand.syncedLyrics && cand.syncedLyrics.trim());
+            const hasPlain = !!(cand.plainLyrics && cand.plainLyrics.trim());
+
+            let statusTag = '';
+            if (cand.instrumental) {
+                statusTag = '🎵 Instrumental';
+            } else if (hasSynced && hasPlain) {
+                statusTag = '⚡ Sincronizada + 📄 Pura';
+            } else if (hasSynced) {
+                statusTag = '⚡ Sincronizada';
+            } else if (hasPlain) {
+                statusTag = '📄 Letra Pura';
+            } else {
+                statusTag = '⚠️ Sem Letra';
+            }
+
+            const filterBadge = inFiltered
+                ? '<span class="badge badge-success" title="Incluída nas versões filtradas">Filtrada ✓</span>'
+                : '<span class="badge badge-warning" title="Ocultada pelo filtro automático (ex: 0 versos / créditos / duplicada)">Não Filtrada</span>';
+
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'candidate-chip' + (idx === selectedAllApiItemIndex ? ' active' : '');
+            itemDiv.innerHTML = `
+                <div class="candidate-info">
+                    <span class="candidate-name">${escapeHtml(cand.trackName || 'Sem título')}</span>
+                    <span class="candidate-meta">${escapeHtml(cand.artistName || 'Artista N/D')} ${cand.albumName ? '• 💿 ' + escapeHtml(cand.albumName) : ''}</span>
+                    <span class="candidate-meta">⏱️ ${durText} • ${statusTag}</span>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;">
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                        <span class="badge ${srcClass}">${escapeHtml(srcName)}</span>
+                        <span class="badge">#${cand.id ?? (idx + 1)}</span>
+                    </div>
+                    ${filterBadge}
+                </div>
+            `;
+
+            itemDiv.addEventListener('click', () => {
+                selectedAllApiItemIndex = idx;
+                renderAllApiModalList();
+            });
+
+            listEl.appendChild(itemDiv);
+        });
+
+        renderAllApiDetailPane(selectedAllApiItemIndex);
+    }
+
+    function renderAllApiDetailPane(idx) {
+        const titleEl = document.getElementById('allApiDetailTitle');
+        const subtitleEl = document.getElementById('allApiDetailSubtitle');
+        const metaGrid = document.getElementById('allApiDetailMetaGrid');
+        const previewEl = document.getElementById('allApiLyricsPreview');
+        const btnSynced = document.getElementById('btnUseSelectedApiSynced');
+        const btnPlain = document.getElementById('btnUseSelectedApiPlain');
+
+        if (idx < 0 || idx >= allApiResultsState.length) {
+            if (titleEl) titleEl.textContent = 'Selecione um resultado à esquerda';
+            if (subtitleEl) subtitleEl.textContent = '-';
+            if (metaGrid) metaGrid.style.display = 'none';
+            if (previewEl) previewEl.textContent = 'Nenhum resultado selecionado.';
+            if (btnSynced) btnSynced.style.display = 'none';
+            if (btnPlain) btnPlain.style.display = 'none';
+            return;
+        }
+
+        const cand = allApiResultsState[idx];
+        const srcName = cand.source || 'LRCLIB';
+        const candSec = cand.duration ? Math.round(cand.duration) : null;
+        const targetSec = (currentTrackDetails && currentTrackDetails.metadata && currentTrackDetails.metadata.durationSeconds)
+            ? currentTrackDetails.metadata.durationSeconds
+            : 0;
+        let diffStr = 'N/D';
+        if (candSec && targetSec > 0) {
+            const diff = candSec - targetSec;
+            diffStr = `${diff > 0 ? '+' : ''}${diff}s (Áudio local: ${formatTime(targetSec)})`;
+        }
+
+        const hasSynced = !!(cand.syncedLyrics && cand.syncedLyrics.trim());
+        const hasPlain = !!(cand.plainLyrics && cand.plainLyrics.trim());
+        const inFiltered = isCandidateInFilteredList(cand);
+
+        if (titleEl) titleEl.textContent = `${cand.trackName || 'Sem título'} — ${cand.artistName || 'Artista Desconhecido'}`;
+        if (subtitleEl) subtitleEl.textContent = `Provedor: ${srcName} • ID: ${cand.id ?? 'N/D'} • ${inFiltered ? 'Incluída na lista filtrada' : 'Resultado bruto (não filtrado)'}`;
+
+        if (btnSynced) btnSynced.style.display = hasSynced ? 'inline-flex' : 'none';
+        if (btnPlain) btnPlain.style.display = hasPlain ? 'inline-flex' : 'none';
+
+        if (metaGrid) {
+            metaGrid.style.display = 'grid';
+            metaGrid.innerHTML = `
+                <div class="all-api-meta-item">
+                    <span class="all-api-meta-label">API / Fonte</span>
+                    <span class="all-api-meta-value">${escapeHtml(srcName)} (ID: ${escapeHtml(String(cand.id ?? 'N/D'))})</span>
+                </div>
+                <div class="all-api-meta-item">
+                    <span class="all-api-meta-label">Título da Faixa</span>
+                    <span class="all-api-meta-value">${escapeHtml(cand.trackName || '-')}</span>
+                </div>
+                <div class="all-api-meta-item">
+                    <span class="all-api-meta-label">Artista</span>
+                    <span class="all-api-meta-value">${escapeHtml(cand.artistName || '-')}</span>
+                </div>
+                <div class="all-api-meta-item">
+                    <span class="all-api-meta-label">Álbum</span>
+                    <span class="all-api-meta-value">${escapeHtml(cand.albumName || '-')}</span>
+                </div>
+                <div class="all-api-meta-item">
+                    <span class="all-api-meta-label">Duração na API</span>
+                    <span class="all-api-meta-value">${candSec ? `${formatTime(candSec)} (${candSec}s)` : 'N/D'}</span>
+                </div>
+                <div class="all-api-meta-item">
+                    <span class="all-api-meta-label">Diferença p/ Áudio Local</span>
+                    <span class="all-api-meta-value">${escapeHtml(diffStr)}</span>
+                </div>
+                <div class="all-api-meta-item">
+                    <span class="all-api-meta-label">Status / Filtro</span>
+                    <span class="all-api-meta-value">${inFiltered ? '✅ Passou no filtro de versos' : '⚠️ Retida pelo filtro (exibida aqui sem filtro)'}</span>
+                </div>
+            `;
+        }
+
+        if (previewEl) {
+            const parts = [];
+            if (hasSynced) {
+                parts.push(`=== LETRA SINCRONIZADA (${cand.syncedLyrics.split('\n').length} linhas) ===\n${cand.syncedLyrics}`);
+            }
+            if (hasPlain && cand.plainLyrics !== cand.syncedLyrics) {
+                parts.push(`=== LETRA PURA / SEM MINUTAGEM (${cand.plainLyrics.split('\n').length} linhas) ===\n${cand.plainLyrics}`);
+            }
+            if (parts.length === 0) {
+                parts.push(cand.instrumental ? '(Faixa marcada como Instrumental pela API)' : '(Nenhum conteúdo de letra retornado por esta entrada)');
+            }
+            previewEl.textContent = parts.join('\n\n' + '='.repeat(60) + '\n\n');
+        }
+    }
+
+    async function useSelectedAllApiResult(mode) {
+        if (selectedAllApiItemIndex < 0 || selectedAllApiItemIndex >= allApiResultsState.length) return;
+        const cand = allApiResultsState[selectedAllApiItemIndex];
+        const srcName = cand.source || 'LRCLIB';
+        const rawPayload = (mode === 'plain') ? (cand.plainLyrics || cand.syncedLyrics) : (cand.syncedLyrics || cand.plainLyrics);
+
+        if (!rawPayload) {
+            showToast('Este resultado não possui conteúdo de letra para carregar.');
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/parse-lrc', {
+                method: 'POST',
+                body: rawPayload
+            });
+            let parsedLines = await res.json();
+            if (!Array.isArray(parsedLines) || parsedLines.length === 0) {
+                // Fallback for raw lines that were filtered out by standard parser (e.g., credit-only lines)
+                parsedLines = rawPayload.split(/\r?\n/).filter(l => l.trim().length > 0).map(rawLine => {
+                    const m = rawLine.match(/^\[(\d{1,2}:\d{2}(?:\.\d{1,3})?[^[\]]*)\](.*)$/);
+                    if (m && mode !== 'plain') {
+                        const ms = parseFormattedTimeToMs(m[1]);
+                        return {
+                            timestampMs: ms,
+                            timeMs: ms,
+                            formattedTime: formatLrcTimestamp(ms),
+                            text: m[2].trim() || rawLine.trim()
+                        };
+                    }
+                    return {
+                        timestampMs: 0,
+                        timeMs: 0,
+                        formattedTime: '00:00.00',
+                        text: rawLine.replace(/^\[[^\]]*\]\s*/, '').trim() || rawLine.trim()
+                    };
+                });
+            }
+
+            if (mode === 'plain') {
+                parsedLines.forEach(l => {
+                    l.timestampMs = 0;
+                    l.timeMs = 0;
+                    l.formattedTime = '00:00.00';
+                });
+            }
+
+            remoteTimestampsBackup = null;
+            updateToggleTimestampsBtnUI('remote', false);
+            remoteLinesState = parsedLines;
+            updateRemoteSourceBadge(srcName);
+            renderLyricLines(remoteLyricsScroller, remoteLinesState, 'remote');
+            remoteStatusBadge.textContent = remoteLinesState.length + ' versos';
+            syncLyricsHighlight(Math.round((audio.currentTime || 0) * 1000));
+            closeAllApiResultsModal();
+            showToast(`Letra de ${srcName} (${cand.trackName || 'Sem título'}) carregada no comparador!`);
+        } catch (err) {
+            showToast('Erro ao carregar letra selecionada.');
+        }
+    }
+
+    // =========================================================================
+    // PASTE LYRICS (WITH ZEROED TIMESTAMPS) & SYNC EDIT MODE (SPACE / CTRL)
+    // =========================================================================
+    const pasteLyricsModal = document.getElementById('pasteLyricsModal');
+    const pasteLyricsTextarea = document.getElementById('pasteLyricsTextarea');
+    const pasteLyricsTargetSelect = document.getElementById('pasteLyricsTargetSelect');
+    const pasteAutoEnterSyncMode = document.getElementById('pasteAutoEnterSyncMode');
+
+    let syncEditModeSide = null; // 'local' | 'remote' | null
+    let syncEditCursorIndex = 0;
+    let hoveredColumnSide = 'local';
+
+    document.getElementById('columnLeftPanel')?.addEventListener('mouseenter', () => {
+        hoveredColumnSide = 'local';
+    });
+    document.getElementById('columnRightPanel')?.addEventListener('mouseenter', () => {
+        hoveredColumnSide = 'remote';
+    });
+
+    function parseRawTextIntoZeroedLyricLines(rawText) {
+        if (!rawText) return [];
+        const rawLines = rawText.split(/\r?\n/);
+        const parsed = [];
+
+        rawLines.forEach(rawLine => {
+            const trimmed = rawLine.trim();
+            if (!trimmed) return; // Ignore blank lines between stanzas
+
+            // Skip pure LRC metadata tags like [ar:...], [ti:...], [al:...], [by:...], [offset:...]
+            if (/^\[(ar|ti|al|by|offset|re|ve|length):.*\]$/i.test(trimmed)) {
+                return;
+            }
+
+            // Skip section headers like [Verse 1], [Chorus], [Refrão] if they have no timestamp digits
+            if (/^\[[^\d\[\]]+\]$/.test(trimmed)) {
+                return;
+            }
+
+            // Strip any existing [mm:ss.xx] or inline <mm:ss.xx> tags so the verse text is clean
+            const cleanText = trimmed
+                .replace(/^(\[\d{1,2}:\d{2}(?:[.:]\d{1,3})?(?:-\d+)?\])+\s*/, '')
+                .replace(/<\d{1,2}:\d{2}(?:[.:]\d{1,3})?>/g, '')
+                .trim();
+
+            if (!cleanText) return;
+
+            parsed.push({
+                noTimestamp: false,
+                timestampMs: 0,
+                timeMs: 0,
+                formattedTime: '00:00.00',
+                text: cleanText
+            });
+        });
+
+        return parsed;
+    }
+
+    function applyPastedLyrics(side, rawText, autoEnterSyncMode = true) {
+        const newLines = parseRawTextIntoZeroedLyricLines(rawText);
+        if (newLines.length === 0) {
+            showToast('Nenhum verso válido encontrado no texto colado.');
+            return false;
+        }
+
+        const isLocal = side === 'local';
+        if (isLocal) {
+            localTimestampsBackup = null;
+            updateToggleTimestampsBtnUI('local', false);
+            localLinesState = newLines;
+            localStatusBadge.textContent = localLinesState.length + ' versos';
+            renderLyricLines(localLyricsScroller, localLinesState, 'local');
+            localLyricsScroller.scrollTop = 0;
+        } else {
+            remoteTimestampsBackup = null;
+            updateToggleTimestampsBtnUI('remote', false);
+            remoteLinesState = newLines;
+            updateRemoteSourceBadge('Colada');
+            remoteStatusBadge.textContent = remoteLinesState.length + ' versos';
+            renderLyricLines(remoteLyricsScroller, remoteLinesState, 'remote');
+            remoteLyricsScroller.scrollTop = 0;
+        }
+
+        if (autoEnterSyncMode) {
+            enableSyncEditMode(side, 0);
+            showToast(`📋 ${newLines.length} linhas criadas com [00:00.00]! Modo Edição ativo: aperte [Espaço] ou [Ctrl] para sincronizar.`);
+        } else {
+            showToast(`📋 ${newLines.length} linhas criadas com [00:00.00] na letra ${isLocal ? 'Local' : 'Online'}!`);
+        }
+        return true;
+    }
+
+    async function openPasteLyricsModal(side) {
+        if (pasteLyricsTargetSelect) {
+            pasteLyricsTargetSelect.value = side || 'local';
+        }
+        if (pasteLyricsTextarea) {
+            pasteLyricsTextarea.value = '';
+            // Try reading clipboard automatically for convenience
+            if (navigator.clipboard && navigator.clipboard.readText) {
+                try {
+                    const clipText = await navigator.clipboard.readText();
+                    if (clipText && clipText.trim()) {
+                        pasteLyricsTextarea.value = clipText;
+                    }
+                } catch (_e) {
+                    // User can press Ctrl+V directly inside the focused textarea
+                }
+            }
+        }
+        if (pasteLyricsModal) {
+            pasteLyricsModal.style.display = 'flex';
+            setTimeout(() => {
+                pasteLyricsTextarea?.focus();
+                pasteLyricsTextarea?.select();
+            }, 50);
+        }
+    }
+
+    function closePasteLyricsModal() {
+        if (pasteLyricsModal) {
+            pasteLyricsModal.style.display = 'none';
+        }
+    }
+
+    async function readClipboardIntoPasteTextarea() {
+        if (!navigator.clipboard || !navigator.clipboard.readText) {
+            showToast('Use Ctrl + V dentro da caixa de texto para colar.');
+            pasteLyricsTextarea?.focus();
+            return;
+        }
+        try {
+            const clipText = await navigator.clipboard.readText();
+            if (clipText && clipText.trim()) {
+                pasteLyricsTextarea.value = clipText;
+                pasteLyricsTextarea.focus();
+                showToast('Texto lido da área de transferência!');
+            } else {
+                showToast('A área de transferência está vazia.');
+            }
+        } catch (_e) {
+            showToast('Use Ctrl + V dentro da caixa de texto para colar.');
+            pasteLyricsTextarea?.focus();
+        }
+    }
+
+    function applyPastedLyricsFromModal() {
+        const side = pasteLyricsTargetSelect?.value || 'local';
+        const rawText = pasteLyricsTextarea?.value || '';
+        const autoSync = pasteAutoEnterSyncMode ? pasteAutoEnterSyncMode.checked : true;
+        if (applyPastedLyrics(side, rawText, autoSync)) {
+            closePasteLyricsModal();
+        }
+    }
+
+    // Direct Ctrl+V paste support when hovering over Local or Online panel in Comparator view
+    window.addEventListener('paste', (e) => {
+        if (
+            e.target.tagName === 'INPUT' ||
+            e.target.tagName === 'TEXTAREA' ||
+            !viewComparator.classList.contains('active') ||
+            actionModal.style.display === 'flex' ||
+            (allApiResultsModal && allApiResultsModal.style.display === 'flex') ||
+            (pasteLyricsModal && pasteLyricsModal.style.display === 'flex')
+        ) {
+            return;
+        }
+        const clipText = e.clipboardData ? e.clipboardData.getData('text/plain') : '';
+        if (!clipText || !clipText.trim()) return;
+
+        e.preventDefault();
+        const targetSide = syncEditModeSide || hoveredColumnSide || 'local';
+        applyPastedLyrics(targetSide, clipText, true);
+    });
+
+    function enableSyncEditMode(side, startIndex = 0) {
+        const lines = side === 'local' ? localLinesState : remoteLinesState;
+        if (!lines || lines.length === 0) {
+            showToast('Cole ou carregue uma letra primeiro para ativar o Modo Edição.');
+            return;
+        }
+        syncEditModeSide = side;
+        syncEditCursorIndex = Math.max(0, Math.min(startIndex, lines.length - 1));
+        updateSyncEditModeUI();
+    }
+
+    function disableSyncEditMode() {
+        syncEditModeSide = null;
+        syncEditCursorIndex = 0;
+        updateSyncEditModeUI();
+    }
+
+    function toggleSyncEditMode(side) {
+        if (syncEditModeSide === side) {
+            disableSyncEditMode();
+            showToast('Modo Edição desativado.');
+        } else {
+            enableSyncEditMode(side, 0);
+            showToast(`🎯 Modo Edição ativado na letra ${side === 'local' ? 'Local' : 'Online'}! Aperte [Espaço] ou [Ctrl] para marcar cada linha.`);
+        }
+    }
+
+    function setSyncCursor(index) {
+        if (!syncEditModeSide) return;
+        const lines = syncEditModeSide === 'local' ? localLinesState : remoteLinesState;
+        if (!lines || lines.length === 0) return;
+        syncEditCursorIndex = Math.max(0, Math.min(index, lines.length - 1));
+        updateSyncEditModeUI();
+    }
+
+    function stepSyncCursor(delta) {
+        if (!syncEditModeSide) return;
+        const lines = syncEditModeSide === 'local' ? localLinesState : remoteLinesState;
+        if (!lines || lines.length === 0) return;
+        syncEditCursorIndex = Math.max(0, Math.min(syncEditCursorIndex + delta, lines.length - 1));
+        updateSyncEditModeUI();
+        showToast(`🎯 Cursor movido para a linha ${syncEditCursorIndex + 1} de ${lines.length}`);
+    }
+
+    function updateSyncEditModeUI() {
+        const btnLocal = document.getElementById('btnSyncEditModeLocal');
+        const btnRemote = document.getElementById('btnSyncEditModeRemote');
+        const bannerLocal = document.getElementById('syncEditBannerLocal');
+        const bannerRemote = document.getElementById('syncEditBannerRemote');
+        const statusLocal = document.getElementById('syncEditStatusLocal');
+        const statusRemote = document.getElementById('syncEditStatusRemote');
+
+        if (btnLocal) {
+            const isLocalActive = syncEditModeSide === 'local';
+            btnLocal.classList.toggle('btn-sync-mode-active', isLocalActive);
+            btnLocal.textContent = isLocalActive ? '🎯 Modo Edição: ATIVO' : '🎯 Modo Edição (Set)';
+        }
+        if (btnRemote) {
+            const isRemoteActive = syncEditModeSide === 'remote';
+            btnRemote.classList.toggle('btn-sync-mode-active', isRemoteActive);
+            btnRemote.textContent = isRemoteActive ? '🎯 Modo Edição: ATIVO' : '🎯 Modo Edição (Set)';
+        }
+        if (bannerLocal) {
+            bannerLocal.classList.toggle('active', syncEditModeSide === 'local');
+            if (syncEditModeSide === 'local' && statusLocal) {
+                const total = localLinesState.length;
+                const pos = Math.min(syncEditCursorIndex + 1, total);
+                statusLocal.textContent = `🎯 Modo Edição Ativo — Próxima Linha: #${pos} de ${total}`;
+            }
+        }
+        if (bannerRemote) {
+            bannerRemote.classList.toggle('active', syncEditModeSide === 'remote');
+            if (syncEditModeSide === 'remote' && statusRemote) {
+                const total = remoteLinesState.length;
+                const pos = Math.min(syncEditCursorIndex + 1, total);
+                statusRemote.textContent = `🎯 Modo Edição Ativo — Próxima Linha: #${pos} de ${total}`;
+            }
+        }
+
+        // Update .sync-target classes and badges in both containers
+        [
+            {side: 'local', container: localLyricsScroller, lines: localLinesState},
+            {side: 'remote', container: remoteLyricsScroller, lines: remoteLinesState}
+        ].forEach(({side, container}) => {
+            const lineDivs = container.querySelectorAll('.lyric-line');
+            lineDivs.forEach((div, idx) => {
+                const isTarget = (syncEditModeSide === side && idx === syncEditCursorIndex);
+                div.classList.toggle('sync-target', isTarget);
+                const existingBadge = div.querySelector('.sync-target-badge');
+                if (isTarget) {
+                    if (!existingBadge) {
+                        const badge = document.createElement('span');
+                        badge.className = 'sync-target-badge';
+                        badge.textContent = '🎯 PRÓXIMA';
+                        const tagEl = div.querySelector('.timestamp-tag');
+                        if (tagEl && tagEl.nextSibling) {
+                            div.insertBefore(badge, tagEl.nextSibling);
+                        } else {
+                            div.prepend(badge);
+                        }
+                    }
+                    // Smoothly keep target line centered in the scroller
+                    const containerRect = container.getBoundingClientRect();
+                    const lineRect = div.getBoundingClientRect();
+                    const scrollOffset = (lineRect.top - containerRect.top) - (container.clientHeight / 2) + (div.clientHeight / 2);
+                    container.scrollBy({top: scrollOffset, behavior: 'smooth'});
+                } else if (existingBadge) {
+                    existingBadge.remove();
+                }
+            });
+        });
+    }
+
+    function stampNextSyncLine(explicitTimestampMs = null) {
+        if (!syncEditModeSide) return;
+        const isLocal = syncEditModeSide === 'local';
+        const lines = isLocal ? localLinesState : remoteLinesState;
+        const container = isLocal ? localLyricsScroller : remoteLyricsScroller;
+
+        if (!lines || lines.length === 0) return;
+
+        // If audio is paused at the very beginning (0s) and user presses Space/Ctrl, start playing automatically
+        if (audio.paused && audio.src && audio.src !== window.location.href && (audio.currentTime || 0) === 0) {
+            audio.play().catch(() => {});
+        }
+
+        const idx = Math.max(0, Math.min(syncEditCursorIndex, lines.length - 1));
+        const line = lines[idx];
+        const currentMs = explicitTimestampMs !== null
+            ? explicitTimestampMs
+            : Math.round((audio.currentTime || 0) * 1000);
+
+        line.noTimestamp = false;
+        line.timestampMs = currentMs;
+        line.timeMs = currentMs;
+        line.formattedTime = formatLrcTimestamp(currentMs);
+
+        const lineDivs = container.querySelectorAll('.lyric-line');
+        const div = lineDivs[idx];
+        if (div) {
+            const tagEl = div.querySelector('.timestamp-tag');
+            if (tagEl) {
+                tagEl.textContent = `[${line.formattedTime}]`;
+                tagEl.style.opacity = '1';
+            }
+            div.setAttribute('data-ms', currentMs);
+        }
+
+        updateOutOfOrderLines(container, lines);
+
+        if (idx < lines.length - 1) {
+            syncEditCursorIndex = idx + 1;
+            updateSyncEditModeUI();
+            showToast(`✓ Linha ${idx + 1} marcada em [${line.formattedTime}] → Próxima: #${syncEditCursorIndex + 1}`);
+        } else {
+            updateSyncEditModeUI();
+            showToast(`🎉 Última linha (#${idx + 1}) marcada em [${line.formattedTime}]! Sincronização concluída!`);
+        }
+    }
+
+    // Evaluates and marks in red any lyric line whose timestamp is lower than the line immediately above it
+    function updateOutOfOrderLines(container, lines) {
+        const lineDivs = container.querySelectorAll('.lyric-line');
+        lineDivs.forEach((div, idx) => {
+            if (idx === 0 || !lines[idx] || !lines[idx - 1]) {
+                div.classList.remove('out-of-order');
+                return;
+            }
+            const curr = lines[idx];
+            const prev = lines[idx - 1];
+            if (curr.noTimestamp || prev.noTimestamp) {
+                div.classList.remove('out-of-order');
+                return;
+            }
+            const currMs = typeof curr.timestampMs === 'number' ? curr.timestampMs : (curr.timeMs || 0);
+            const prevMs = typeof prev.timestampMs === 'number' ? prev.timestampMs : (prev.timeMs || 0);
+
+            if (currMs < prevMs) {
+                div.classList.add('out-of-order');
+                div.title = `⚠️ Problemas de sincronismo: minutagem [${curr.formattedTime || formatLrcTimestamp(currMs)}] é inferior à linha de cima [${prev.formattedTime || formatLrcTimestamp(prevMs)}]!`;
+            } else {
+                div.classList.remove('out-of-order');
+                div.removeAttribute('title');
+            }
+        });
+    }
+
     function renderLyricLines(container, lines, side) {
         container.innerHTML = '';
         if (!lines || lines.length === 0) {
-            container.innerHTML = '<p style="text-align: center; color: #64748b; margin-top: 40px;">Nenhuma letra sincronizada encontrada.</p>';
+            container.innerHTML = '<p style="text-align: center; color: #777777; margin-top: 40px;">Nenhuma letra sincronizada encontrada.</p>';
             return;
         }
 
         lines.forEach((line, index) => {
-            const ms = (typeof line.timestampMs === 'number')
-                ? line.timestampMs
-                : ((typeof line.timeMs === 'number')
-                    ? line.timeMs
-                    : parseFormattedTimeToMs(line.formattedTime || '00:00'));
+            const ms = line.noTimestamp
+                ? 0
+                : ((typeof line.timestampMs === 'number')
+                    ? line.timestampMs
+                    : ((typeof line.timeMs === 'number')
+                        ? line.timeMs
+                        : parseFormattedTimeToMs(line.formattedTime || '00:00')));
             line.timestampMs = ms;
             line.timeMs = ms;
 
-            const displayTime = (line.formattedTime || formatLrcTimestamp(ms)).replace(/[\[\]]/g, '');
+            const displayTime = line.noTimestamp
+                ? '--:--.--'
+                : (line.formattedTime || formatLrcTimestamp(ms)).replace(/[\[\]]/g, '');
 
+            const isTarget = (syncEditModeSide === side && index === syncEditCursorIndex);
             const div = document.createElement('div');
-            div.className = 'lyric-line';
+            div.className = 'lyric-line' + (isTarget ? ' sync-target' : '');
             div.setAttribute('data-ms', ms);
             div.setAttribute('data-index', index);
 
             div.innerHTML = `
-          <span class="timestamp-tag" title="Clique para reproduzir neste momento">[${displayTime}]</span>
-          <span class="lyric-text-span" title="Clique para reproduzir neste momento">${escapeHtml(line.text || '(instrumental)')}</span>
+          <span class="timestamp-tag" style="${line.noTimestamp ? 'opacity: 0.45;' : ''}" title="${line.noTimestamp ? 'Minutagem removida em memória' : 'Clique para reproduzir neste momento'}">[${displayTime}]</span>
+          ${isTarget ? '<span class="sync-target-badge">🎯 PRÓXIMA</span>' : ''}
+          <span class="lyric-text-span" title="${syncEditModeSide === side ? 'Clique para definir esta linha como a próxima a sincronizar' : 'Clique para reproduzir neste momento'}">${escapeHtml(line.text || '(instrumental)')}</span>
           <div class="line-actions">
+            <button class="btn-line-action btn-line-offset btn-line-offset-neg" data-delta="-500" title="Retirar 0.5s apenas desta linha">-0.5s</button>
+            <button class="btn-line-action btn-line-offset btn-line-offset-neg" data-delta="-100" title="Retirar 0.1s apenas desta linha">-0.1s</button>
+            <button class="btn-line-action btn-line-offset btn-line-offset-pos" data-delta="100" title="Adicionar 0.1s apenas desta linha">+0.1s</button>
+            <button class="btn-line-action btn-line-offset btn-line-offset-pos" data-delta="500" title="Adicionar 0.5s apenas desta linha">+0.5s</button>
             <button class="btn-line-action btn-sync-time" title="Ajustar para o segundo atual da música">⏱️ Set</button>
             <button class="btn-line-action btn-edit-line" title="Editar verso e tempo">✏️</button>
             <button class="btn-line-action btn-delete-line" title="Excluir verso" style="color: #f87171;">✕</button>
           </div>
         `;
 
-            // Click anywhere on line seeks the song to that timestamp!
+            // Clicking on line: in Sync Edit Mode (when clicking text, not timestamp), moves the sync target cursor to this line; otherwise seeks audio
             div.addEventListener('click', (e) => {
                 if (e.target.closest('.line-actions') || e.target.tagName === 'INPUT' || div.classList.contains('editing')) {
+                    return;
+                }
+                const clickedTimestampTag = e.target.closest('.timestamp-tag');
+                if (syncEditModeSide === side && !clickedTimestampTag) {
+                    setSyncCursor(index);
+                    showToast(`🎯 Linha #${index + 1} selecionada como próxima para o Set [Espaço / Ctrl]`);
                     return;
                 }
                 if (!audio.src || audio.src === window.location.href) {
                     showToast('Nenhum áudio disponível para esta faixa.');
                     return;
                 }
-                const targetSec = ms / 1000;
+                const currentLineMs = typeof line.timestampMs === 'number' ? line.timestampMs : ms;
+                const targetSec = currentLineMs / 1000;
                 audio.currentTime = targetSec;
                 if (audio.paused) {
                     audio.play().catch(err => {
@@ -2857,18 +4095,51 @@
                     });
                 }
                 // Highlight and center both sides immediately
-                syncLyricsHighlight(ms);
+                syncLyricsHighlight(currentLineMs);
+            });
+
+            // Per-line offset buttons (-0.5s, -0.1s, +0.1s, +0.5s)
+            div.querySelectorAll('.btn-line-offset').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const deltaMs = parseInt(btn.getAttribute('data-delta'), 10) || 0;
+                    const baseMs = typeof line.timestampMs === 'number' ? line.timestampMs : 0;
+                    const newMs = Math.max(0, baseMs + deltaMs);
+                    line.noTimestamp = false;
+                    line.timestampMs = newMs;
+                    line.timeMs = newMs;
+                    line.formattedTime = formatLrcTimestamp(newMs);
+                    const tagEl = div.querySelector('.timestamp-tag');
+                    if (tagEl) {
+                        tagEl.textContent = `[${line.formattedTime}]`;
+                        tagEl.style.opacity = '1';
+                    }
+                    div.setAttribute('data-ms', newMs);
+                    updateOutOfOrderLines(container, lines);
+                    const secLabel = (deltaMs > 0 ? '+' : '') + (deltaMs / 1000).toFixed(1) + 's';
+                    showToast(`Linha ${index + 1}: ${secLabel} → [${line.formattedTime}]`);
+                });
             });
 
             // Set to current audio time
             div.querySelector('.btn-sync-time').addEventListener('click', (e) => {
                 e.stopPropagation();
                 const currentMs = Math.round((audio.currentTime || 0) * 1000);
+                line.noTimestamp = false;
                 line.timestampMs = currentMs;
                 line.timeMs = currentMs;
                 line.formattedTime = formatLrcTimestamp(currentMs);
-                div.querySelector('.timestamp-tag').textContent = `[${line.formattedTime}]`;
+                const tagEl = div.querySelector('.timestamp-tag');
+                if (tagEl) {
+                    tagEl.textContent = `[${line.formattedTime}]`;
+                    tagEl.style.opacity = '1';
+                }
                 div.setAttribute('data-ms', currentMs);
+                updateOutOfOrderLines(container, lines);
+                if (syncEditModeSide === side && index < lines.length - 1) {
+                    syncEditCursorIndex = index + 1;
+                    updateSyncEditModeUI();
+                }
                 showToast(`Tempo atualizado para [${line.formattedTime}]`);
                 syncLyricsHighlight(currentMs);
             });
@@ -2883,18 +4154,21 @@
             div.querySelector('.btn-delete-line').addEventListener('click', (e) => {
                 e.stopPropagation();
                 lines.splice(index, 1);
+                if (syncEditModeSide === side && syncEditCursorIndex >= lines.length) {
+                    syncEditCursorIndex = Math.max(0, lines.length - 1);
+                }
                 renderLyricLines(container, lines, side);
                 syncLyricsHighlight(Math.round((audio.currentTime || 0) * 1000));
             });
 
             container.appendChild(div);
         });
+
+        updateOutOfOrderLines(container, lines);
     }
 
     function startEditingLine(lineDiv, line, side, index) {
         lineDiv.classList.add('editing');
-        const textSpan = lineDiv.querySelector('.lyric-text-span');
-        const tagSpan = lineDiv.querySelector('.timestamp-tag');
         const actions = lineDiv.querySelector('.line-actions');
 
         if (actions) actions.style.display = 'none';
@@ -2902,8 +4176,9 @@
         const timeInput = document.createElement('input');
         timeInput.type = 'text';
         timeInput.className = 'line-input-time';
-        const cleanTime = (line.formattedTime || '').replace(/[\[\]]/g, '');
+        const cleanTime = line.noTimestamp ? '' : (line.formattedTime || '').replace(/[\[\]]/g, '');
         timeInput.value = cleanTime;
+        timeInput.placeholder = 'mm:ss.xx';
 
         const textInput = document.createElement('input');
         textInput.type = 'text';
@@ -2922,10 +4197,19 @@
         saveBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             line.text = textInput.value.trim();
-            line.formattedTime = timeInput.value.trim().replace(/[\[\]]/g, '');
-            const parsedMs = parseFormattedTimeToMs(line.formattedTime);
-            line.timestampMs = parsedMs;
-            line.timeMs = parsedMs;
+            const rawTimeVal = timeInput.value.trim().replace(/[\[\]]/g, '');
+            if (!rawTimeVal) {
+                line.noTimestamp = true;
+                line.formattedTime = '';
+                line.timestampMs = 0;
+                line.timeMs = 0;
+            } else {
+                line.noTimestamp = false;
+                line.formattedTime = rawTimeVal;
+                const parsedMs = parseFormattedTimeToMs(line.formattedTime);
+                line.timestampMs = parsedMs;
+                line.timeMs = parsedMs;
+            }
             const container = side === 'local' ? localLyricsScroller : remoteLyricsScroller;
             const state = side === 'local' ? localLinesState : remoteLinesState;
             renderLyricLines(container, state, side);
@@ -2942,6 +4226,7 @@
 
         const currentMs = Math.round((audio.currentTime || 0) * 1000);
         const newLine = {
+            noTimestamp: false,
             timestampMs: currentMs,
             timeMs: currentMs,
             formattedTime: formatLrcTimestamp(currentMs),
@@ -2949,7 +4234,6 @@
         };
 
         state.push(newLine);
-        state.sort((a, b) => ((a.timestampMs ?? a.timeMs) - (b.timestampMs ?? b.timeMs)));
         renderLyricLines(container, state, side);
         syncLyricsHighlight(currentMs);
         showToast('Novo verso adicionado no tempo atual!');
@@ -2962,6 +4246,7 @@
         const container = side === 'local' ? localLyricsScroller : remoteLyricsScroller;
 
         state.forEach(l => {
+            if (l.noTimestamp) return;
             const currentMs = (typeof l.timestampMs === 'number')
                 ? l.timestampMs
                 : ((typeof l.timeMs === 'number')
@@ -2993,7 +4278,13 @@
 
     function serializeLinesToLrc(lines) {
         return lines.map(l => {
-            const timeStr = (l.formattedTime || '').replace(/[\[\]]/g, '');
+            if (l.noTimestamp) {
+                return l.text || '';
+            }
+            const timeStr = (l.formattedTime || '').replace(/[\[\]]/g, '').trim();
+            if (!timeStr) {
+                return l.text || '';
+            }
             return `[${timeStr}] ${l.text}`;
         }).join('\n');
     }
@@ -3024,7 +4315,7 @@
             const result = await res.json();
 
             if (result.success) {
-                showToast(choice === 'LRCLIB' ? 'Letra LRCLIB salva com sucesso!' : 'Letra local mantida / atualizada!');
+                showToast(result.message || (choice === 'LRCLIB' ? 'Letra LRCLIB salva com sucesso!' : 'Letra local mantida / atualizada!'));
                 currentItems[currentIndex].status = (choice === 'LRCLIB') ? 'SAVED_LRCLIB' : 'KEPT_LOCAL';
                 updateFilterCounts();
                 renderTrackList();
@@ -3054,11 +4345,96 @@
 
     // Keyboard Shortcuts
     window.addEventListener('keydown', (e) => {
-        // Don't trigger shortcuts when typing in inputs or modals
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || actionModal.style.display === 'flex') return;
+        if (e.key === 'Escape') {
+            if (pasteLyricsModal && pasteLyricsModal.style.display === 'flex') {
+                closePasteLyricsModal();
+                return;
+            }
+            if (allApiResultsModal && allApiResultsModal.style.display === 'flex') {
+                closeAllApiResultsModal();
+                return;
+            }
+            if (actionModal && actionModal.style.display === 'flex') {
+                closeActionModal();
+                return;
+            }
+            if (syncEditModeSide !== null) {
+                disableSyncEditMode();
+                showToast('Modo Edição desativado.');
+                return;
+            }
+        }
+
+        // Alt + A (Faixa Anterior) and Alt + F (Próxima Faixa)
+        if (e.altKey && !e.ctrlKey && !e.metaKey) {
+            if (e.code === 'KeyA' || e.key === 'a' || e.key === 'A') {
+                e.preventDefault();
+                prevTrack();
+                return;
+            }
+            if (e.code === 'KeyF' || e.key === 'f' || e.key === 'F') {
+                e.preventDefault();
+                nextTrack();
+                return;
+            }
+        }
+
+        // Don't trigger standard single-key shortcuts when typing in inputs or modals
+        if (
+            e.target.tagName === 'INPUT' ||
+            e.target.tagName === 'TEXTAREA' ||
+            actionModal.style.display === 'flex' ||
+            (allApiResultsModal && allApiResultsModal.style.display === 'flex') ||
+            (pasteLyricsModal && pasteLyricsModal.style.display === 'flex')
+        ) return;
+
+        // When Sync Edit Mode is active:
+        // - [Space] or [Ctrl] sets the timestamp of the current target line at the exact instant of the music and advances to the next line
+        // - [Backspace] moves the cursor back 1 line
+        // - [P] toggles Play/Pause
+        if (syncEditModeSide !== null) {
+            if (e.code === 'Space' && !e.altKey && !e.metaKey) {
+                e.preventDefault();
+                if (!e.repeat) {
+                    stampNextSyncLine();
+                }
+                return;
+            }
+            if ((e.key === 'Control' || e.code === 'ControlLeft' || e.code === 'ControlRight') && !e.altKey && !e.metaKey && !e.shiftKey) {
+                e.preventDefault();
+                if (!e.repeat) {
+                    stampNextSyncLine();
+                }
+                return;
+            }
+            if (e.code === 'Backspace') {
+                e.preventDefault();
+                stepSyncCursor(-1);
+                return;
+            }
+            if (e.code === 'KeyP') {
+                e.preventDefault();
+                btnPlayPause.click();
+                return;
+            }
+            if (e.code === 'ArrowUp') {
+                e.preventDefault();
+                stepSyncCursor(-1);
+                return;
+            }
+            if (e.code === 'ArrowDown') {
+                e.preventDefault();
+                stepSyncCursor(1);
+                return;
+            }
+        }
 
         switch (e.code) {
             case 'Space':
+                e.preventDefault();
+                btnPlayPause.click();
+                break;
+            case 'KeyP':
                 e.preventDefault();
                 btnPlayPause.click();
                 break;
@@ -3097,11 +4473,11 @@
         songAlbum.textContent = '-';
         albumArtImg.style.display = 'none';
         vinylFallback.style.display = 'block';
-        localLyricsScroller.innerHTML = '<p style="text-align: center; color: #64748b; margin-top: 40px;">Nenhuma faixa disponível</p>';
-        remoteLyricsScroller.innerHTML = '<p style="text-align: center; color: #64748b; margin-top: 40px;">Nenhuma faixa disponível</p>';
+        localLyricsScroller.innerHTML = '<p style="text-align: center; color: #777777; margin-top: 40px;">Nenhuma faixa disponível</p>';
+        remoteLyricsScroller.innerHTML = '<p style="text-align: center; color: #777777; margin-top: 40px;">Nenhuma faixa disponível</p>';
     }
 
-    // Theme management (System Auto + AMOLED #000000 + Dark Slate + Light)
+    // Theme management (System Auto + AMOLED #000000 + Neutral 0-Saturation Dark + Light)
     const themeSelect = document.getElementById('themeSelect');
     const systemDarkMedia = window.matchMedia('(prefers-color-scheme: dark)');
 
@@ -3137,7 +4513,20 @@
         }
     });
 
+    // Adapt UI language based on system locale from backend
+    async function syncSystemLocale() {
+        try {
+            const res = await fetch('/api/locale');
+            const data = await res.json();
+            if (data && data.locale) {
+                document.documentElement.lang = data.locale;
+            }
+        } catch (_e) {
+        }
+    }
+
     // Start application
+    syncSystemLocale();
     init();
 </script>
 </body>

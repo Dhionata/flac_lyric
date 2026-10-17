@@ -7,15 +7,16 @@ import handlers.AudioFileHandlerImpl
 import handlers.LyricFileHandlerImpl
 import interfaces.DirectoryService
 import interfaces.FileService
+import java.io.File
+import java.util.concurrent.Executors
 import services.AudioAnalysisServiceImpl
 import services.CleanTitleNomenclatureValidator
 import services.DirectoryServiceImpl
 import services.FileServiceImpl
 import services.LyricSyncValidatorImpl
 import services.MatchServiceImpl
+import services.Messages
 import services.MusicLyricsService
-import java.io.File
-import java.util.concurrent.Executors
 
 /**
  * Service that coordinates asynchronous execution of actions 0-7, monitoring progress
@@ -23,7 +24,7 @@ import java.util.concurrent.Executors
  */
 class WebActionRunnerService(
     private val fileService: FileService = FileServiceImpl(),
-    private val desktopDirectoryService: DirectoryService = DirectoryServiceImpl(fileService)
+    private val desktopDirectoryService: DirectoryService = DirectoryServiceImpl(fileService),
 ) {
 
     private val executor = Executors.newSingleThreadExecutor()
@@ -66,7 +67,7 @@ class WebActionRunnerService(
             currentProgress = ActionProgressUpdate(
                 isRunning = true,
                 actionId = request.actionId,
-                title = "Iniciando operação ${request.actionId}..."
+                title = Messages.get("action.progress.starting", request.actionId)
             )
         }
 
@@ -108,7 +109,7 @@ class WebActionRunnerService(
                     5 -> service.verifyAdvancedNomenclature()
                     6 -> service.verifyFakeFlacFiles()
                     7 -> service.verifyLyricsSyncAndCompatibility()
-                    else -> progressUi.showError("Opção desconhecida: ${request.actionId}")
+                    else -> progressUi.showError(Messages.get("error.unknown_option", request.actionId))
                 }
             } catch (_: OperationCancelledException) {
                 // Silently handle user cancellation

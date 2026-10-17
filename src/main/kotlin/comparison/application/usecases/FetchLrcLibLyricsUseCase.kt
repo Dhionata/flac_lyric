@@ -7,15 +7,24 @@ import comparison.domain.ports.LrcLibClient
  * Use case to fetch or search lyrics from LRCLIB.
  */
 class FetchLrcLibLyricsUseCase(
-    private val lrcLibClient: LrcLibClient
+    private val lrcLibClient: LrcLibClient,
 ) {
     fun fetchBestMatch(
         trackName: String,
         artistName: String,
         albumName: String? = null,
-        durationSeconds: Int? = null
+        durationSeconds: Int? = null,
     ): LrcLibLyrics? {
         return lrcLibClient.getLyrics(trackName, artistName, albumName, durationSeconds)
+    }
+
+    fun fetchAllMatches(
+        trackName: String,
+        artistName: String,
+        albumName: String? = null,
+        durationSeconds: Int? = null,
+    ): List<LrcLibLyrics> {
+        return lrcLibClient.getAllLyrics(trackName, artistName, albumName, durationSeconds)
     }
 
     fun search(query: String): List<LrcLibLyrics> {

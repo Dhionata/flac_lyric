@@ -20,7 +20,7 @@ class LrcLibClientImpl(
         .build(),
     private val gson: Gson = Gson(),
     private val baseUrl: String = "https://lrclib.net",
-    private val providerName: String = "LRCLIB"
+    private val providerName: String = "LRCLIB",
 ) : LrcLibClient {
 
     private val userAgent = "flac_lyric/1.7.0 (https://github.com/dhionata/flac_lyric)"

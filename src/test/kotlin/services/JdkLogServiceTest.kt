@@ -1,7 +1,7 @@
 package services
 
 import java.io.ByteArrayOutputStream
-import java.util.Locale
+import java.util.*
 import java.util.logging.Logger
 import java.util.logging.SimpleFormatter
 import java.util.logging.StreamHandler

@@ -15,5 +15,5 @@ data class ActionProgressUpdate(
     var errorMessage: String? = null,
     val changes: MutableList<String> = mutableListOf(),
     val errors: MutableList<String> = mutableListOf(),
-    var generatedReportPath: String? = null
+    var generatedReportPath: String? = null,
 )

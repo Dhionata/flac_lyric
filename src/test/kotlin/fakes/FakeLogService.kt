@@ -11,7 +11,7 @@ class FakeLogService : LogService {
     data class LogEntry(
         val level: String,
         val key: String,
-        val args: List<Any>
+        val args: List<Any>,
     )
 
     override fun info(key: String, vararg args: Any) {

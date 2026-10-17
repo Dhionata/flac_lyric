@@ -28,7 +28,7 @@ class AppleMusicLyricsClientImpl(
     private val appleCatalogBaseUrl: String = "https://amp-api.music.apple.com/v1/catalog/us",
     private val paxLyricsBaseUrl: String = "https://lyrics.paxsenix.org",
     private val maxCandidates: Int = 3,
-    private val lineParser: LyricLineParser = LyricLineParserImpl()
+    private val lineParser: LyricLineParser = LyricLineParserImpl(),
 ) : LrcLibClient {
 
     private val appleWebUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/119.0"
@@ -52,7 +52,7 @@ class AppleMusicLyricsClientImpl(
         trackName: String,
         artistName: String,
         albumName: String?,
-        durationSeconds: Int?
+        durationSeconds: Int?,
     ): LrcLibLyrics? {
         val query = "$artistName $trackName".trim()
         if (query.isBlank()) return null
@@ -157,9 +157,9 @@ class AppleMusicLyricsClientImpl(
                     if (bodyStr.isBlank()) return null
 
                     val (syncedLrc, plainText) = convertPaxJsonToLyrics(bodyStr)
-                    val validSynced = syncedLrc?.takeIf { lineParser.parse(it).isNotEmpty() }
-                    val validPlain = plainText?.takeIf { lineParser.parsePlain(it).isNotEmpty() }
-                    if (validSynced == null && validPlain == null) return null
+                    val rawSynced = syncedLrc?.takeIf { it.isNotBlank() }
+                    val rawPlain = plainText?.takeIf { it.isNotBlank() }
+                    if (rawSynced == null && rawPlain == null) return null
 
                     return LrcLibLyrics(
                         id = song.id,
@@ -168,8 +168,8 @@ class AppleMusicLyricsClientImpl(
                         albumName = song.albumName,
                         duration = song.durationSeconds,
                         instrumental = false,
-                        plainLyrics = if (validSynced == null) validPlain else null,
-                        syncedLyrics = validSynced,
+                        plainLyrics = rawPlain,
+                        syncedLyrics = rawSynced,
                         source = "AppleMusic"
                     )
                 }
@@ -196,6 +196,7 @@ class AppleMusicLyricsClientImpl(
                     rawPlain = obj.get("plain")?.takeIf { !it.isJsonNull }?.asString?.trim()
                     obj.getAsJsonArray("content")
                 }
+
                 rootElement.isJsonArray -> rootElement.asJsonArray
                 else -> null
             }
@@ -289,6 +290,6 @@ class AppleMusicLyricsClientImpl(
         val trackName: String,
         val artistName: String,
         val albumName: String,
-        val durationSeconds: Double?
+        val durationSeconds: Double?,
     )
 }

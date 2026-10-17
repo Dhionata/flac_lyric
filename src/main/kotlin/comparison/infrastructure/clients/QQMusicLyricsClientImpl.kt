@@ -28,7 +28,7 @@ class QQMusicLyricsClientImpl(
     private val searchBaseUrl: String = "https://c.y.qq.com/soso/fcgi-bin/client_search_cp",
     private val lyricBaseUrl: String = "https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg",
     private val maxCandidates: Int = 3,
-    private val lineParser: LyricLineParser = LyricLineParserImpl()
+    private val lineParser: LyricLineParser = LyricLineParserImpl(),
 ) : LrcLibClient {
 
     private val userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
@@ -44,7 +44,7 @@ class QQMusicLyricsClientImpl(
         trackName: String,
         artistName: String,
         albumName: String?,
-        durationSeconds: Int?
+        durationSeconds: Int?,
     ): LrcLibLyrics? {
         val query = "$artistName $trackName".trim()
         if (query.isBlank()) return null
@@ -152,8 +152,7 @@ class QQMusicLyricsClientImpl(
                 if (rawLyric.isNullOrBlank()) return null
 
                 val hasSyncedVerses = lineParser.parse(rawLyric).isNotEmpty()
-                val hasPlainVerses = if (!hasSyncedVerses) lineParser.parsePlain(rawLyric).isNotEmpty() else false
-                if (!hasSyncedVerses && !hasPlainVerses) return null
+                val hasTimestampPattern = rawLyric.contains(Regex("""\[\d{2}:\d{2}"""))
 
                 LrcLibLyrics(
                     id = song.id,
@@ -163,7 +162,7 @@ class QQMusicLyricsClientImpl(
                     duration = song.durationSeconds,
                     instrumental = false,
                     plainLyrics = if (!hasSyncedVerses) rawLyric else null,
-                    syncedLyrics = if (hasSyncedVerses) rawLyric else null,
+                    syncedLyrics = if (hasSyncedVerses || hasTimestampPattern) rawLyric else null,
                     source = "QQMusic"
                 )
             }
@@ -178,6 +177,6 @@ class QQMusicLyricsClientImpl(
         val trackName: String,
         val artistName: String,
         val albumName: String,
-        val durationSeconds: Double?
+        val durationSeconds: Double?,
     )
 }

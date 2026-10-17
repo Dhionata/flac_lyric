@@ -12,7 +12,7 @@ import models.OperationResult
  * moves, and renaming of physical files, managing and reporting successes and errors.
  */
 class FileServiceImpl(
-    private val logService: LogService = JdkLogService(FileServiceImpl::class.java)
+    private val logService: LogService = JdkLogService(FileServiceImpl::class.java),
 ) : FileService {
 
     override fun printFilePermissions(file: File) {

@@ -4,19 +4,20 @@ import comparison.domain.models.SaveLyricRequest
 import comparison.domain.models.SaveLyricResult
 import comparison.domain.ports.LyricFileStorage
 import java.io.File
+import services.Messages
 
 /**
  * Use case to persist the user's chosen lyrics to the local .lrc file.
  */
 class SaveLyricChoiceUseCase(
-    private val lyricStorage: LyricFileStorage
+    private val lyricStorage: LyricFileStorage,
 ) {
     fun execute(request: SaveLyricRequest): SaveLyricResult {
         val path = request.lyricPath.orEmpty()
         if (path.isBlank()) {
             return SaveLyricResult(
                 success = false,
-                message = "Caminho do arquivo .lrc não fornecido.",
+                message = Messages.get("save.error.missing_path"),
                 targetPath = ""
             )
         }
@@ -31,30 +32,30 @@ class SaveLyricChoiceUseCase(
                 if (effectiveContent.isBlank()) {
                     return SaveLyricResult(
                         success = false,
-                        message = "O conteúdo da letra do LRCLIB está vazio.",
+                        message = Messages.get("save.error.empty_content"),
                         targetPath = path
                     )
                 }
                 lyricStorage.writeText(targetFile, effectiveContent)
                 SaveLyricResult(
                     success = true,
-                    message = "Letra do LRCLIB salva com sucesso em '${targetFile.name}'.",
+                    message = Messages.get("save.success.lrclib", targetFile.name),
                     targetPath = targetFile.absolutePath
                 )
             } else {
                 // If user customized/adjusted the local lines, save the adjustments!
-                if (!request.customLrcContent.isNullOrBlank()) {
+                if (request.customLrcContent != null && request.customLrcContent.isNotBlank()) {
                     lyricStorage.writeText(targetFile, request.customLrcContent)
                     SaveLyricResult(
                         success = true,
-                        message = "Letra local atualizada e salva com sucesso em '${targetFile.name}'.",
+                        message = Messages.get("save.success.local_updated", targetFile.name),
                         targetPath = targetFile.absolutePath
                     )
                 } else {
                     // Kept existing local version without changes
                     SaveLyricResult(
                         success = true,
-                        message = "Letra local mantida para '${targetFile.name}'.",
+                        message = Messages.get("save.success.local_kept", targetFile.name),
                         targetPath = targetFile.absolutePath
                     )
                 }
@@ -62,7 +63,7 @@ class SaveLyricChoiceUseCase(
         } catch (e: Exception) {
             SaveLyricResult(
                 success = false,
-                message = "Falha ao salvar a letra: ${e.message ?: e.toString()}",
+                message = Messages.get("save.error.failed", e.message ?: e.toString()),
                 targetPath = targetFile.absolutePath
             )
         }

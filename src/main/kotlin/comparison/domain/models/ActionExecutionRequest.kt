@@ -11,5 +11,5 @@ data class ActionExecutionRequest(
     val outDir: String? = null,
     val isFullAnalysis: Boolean = false,
     val moveFiles: Boolean = true,
-    val renameFiles: Boolean = true
+    val renameFiles: Boolean = true,
 )

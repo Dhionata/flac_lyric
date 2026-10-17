@@ -23,7 +23,7 @@ class MusixmatchLyricsClientImpl(
         .build(),
     private val gson: Gson = Gson(),
     private val baseUrl: String = "https://apic-desktop.musixmatch.com/ws/1.1",
-    private val lyricParser: LyricLineParser = LyricLineParserImpl()
+    private val lyricParser: LyricLineParser = LyricLineParserImpl(),
 ) : LrcLibClient {
 
     private val userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
@@ -38,7 +38,7 @@ class MusixmatchLyricsClientImpl(
         trackName: String,
         artistName: String,
         albumName: String?,
-        durationSeconds: Int?
+        durationSeconds: Int?,
     ): LrcLibLyrics? {
         if (trackName.isBlank() && artistName.isBlank()) return null
         val token = getValidToken() ?: return null
@@ -150,7 +150,7 @@ class MusixmatchLyricsClientImpl(
                 "" to query.trim()
             }
         }
-        val single = getLyrics(trackName = track, artistName = artist, albumName = null, durationSeconds = null)
+        val single = getLyrics(trackName = track, artistName = artist)
         return if (single != null) listOf(single) else emptyList()
     }
 

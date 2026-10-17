@@ -41,7 +41,7 @@ class AudioAnalysisServiceImpl : AudioAnalysisService {
      */
     override fun analyzeCutoff(file: File, fullAnalysis: Boolean): AudioAnalysisService.AnalysisResult {
         if (!file.exists() || file.extension.lowercase() != "flac") {
-            return AudioAnalysisService.AnalysisResult(false, 0, "Invalid or unsupported file.")
+            return AudioAnalysisService.AnalysisResult(false, 0, Messages.get("spectrum.error.invalid_file"))
         }
 
         var streamInfo: StreamInfo? = null
@@ -125,14 +125,14 @@ class AudioAnalysisServiceImpl : AudioAnalysisService {
 
                 streamInfo = decoder.readStreamInfo()
                 val currentInfo = streamInfo
-                    ?: return AudioAnalysisService.AnalysisResult(false, 0, "Could not read FLAC info.")
+                    ?: return AudioAnalysisService.AnalysisResult(false, 0, Messages.get("spectrum.error.read_info"))
 
                 val bits = currentInfo.bitsPerSample
                 normFactor = if (bits in 1..31) (1L shl (bits - 1)).toDouble() else 32768.0
 
                 val sampleRate = currentInfo.sampleRate
                 if (sampleRate <= 0) {
-                    return AudioAnalysisService.AnalysisResult(false, 0, "Invalid sample rate in FLAC.")
+                    return AudioAnalysisService.AnalysisResult(false, 0, Messages.get("spectrum.error.sample_rate"))
                 }
 
                 if (!fullAnalysis) {
@@ -159,7 +159,7 @@ class AudioAnalysisServiceImpl : AudioAnalysisService {
                 }
             }
         } catch (e: Exception) {
-            return AudioAnalysisService.AnalysisResult(false, 0, "Error decoding: ${e.message}")
+            return AudioAnalysisService.AnalysisResult(false, 0, Messages.get("spectrum.error.decoding", e.message ?: ""))
         }
 
         // Process any remaining partial window if we haven't captured a full window yet
@@ -179,7 +179,7 @@ class AudioAnalysisServiceImpl : AudioAnalysisService {
         }
 
         if (windowsCount == 0) {
-            return AudioAnalysisService.AnalysisResult(false, 0, "Could not extract samples.")
+            return AudioAnalysisService.AnalysisResult(false, 0, Messages.get("spectrum.error.no_samples"))
         }
 
         val coherentGain = windowSize / 2.0
@@ -213,7 +213,7 @@ class AudioAnalysisServiceImpl : AudioAnalysisService {
         // Check overall signal level in the mid-range (2 kHz - 6 kHz)
         val energyMid = getBandEnergy(2000.0, 6000.0)
         if (energyMid < -75.0) {
-            return AudioAnalysisService.AnalysisResult(false, 0, "Audio level is too low for reliable analysis.")
+            return AudioAnalysisService.AnalysisResult(false, 0, Messages.get("spectrum.result.too_low"))
         }
 
         // 1. Check ~16 kHz cutoff (typical 128 kbps MP3)
@@ -225,7 +225,7 @@ class AudioAnalysisServiceImpl : AudioAnalysisService {
                 return AudioAnalysisService.AnalysisResult(
                     true,
                     16000,
-                    "Cutoff detected at ~16kHz (Possible upscale of 128kbps MP3)",
+                    Messages.get("spectrum.result.cutoff_16k"),
                 )
             }
         }
@@ -239,7 +239,7 @@ class AudioAnalysisServiceImpl : AudioAnalysisService {
                 return AudioAnalysisService.AnalysisResult(
                     true,
                     18000,
-                    "Cutoff detected at ~18kHz (Possible upscale of 160-192kbps lossy audio)",
+                    Messages.get("spectrum.result.cutoff_18k"),
                 )
             }
         }
@@ -252,7 +252,7 @@ class AudioAnalysisServiceImpl : AudioAnalysisService {
                 return AudioAnalysisService.AnalysisResult(
                     true,
                     20000,
-                    "Cutoff detected at ~20kHz (Possible upscale of 320kbps MP3)",
+                    Messages.get("spectrum.result.cutoff_20k"),
                 )
             }
         }
@@ -268,7 +268,7 @@ class AudioAnalysisServiceImpl : AudioAnalysisService {
                 return AudioAnalysisService.AnalysisResult(
                     true,
                     22050,
-                    "Cutoff detected at ~22kHz (Possible upscale of 44.1kHz audio into Hi-Res)",
+                    Messages.get("spectrum.result.cutoff_22k"),
                 )
             }
         }
@@ -282,7 +282,7 @@ class AudioAnalysisServiceImpl : AudioAnalysisService {
                 return AudioAnalysisService.AnalysisResult(
                     true,
                     24000,
-                    "Cutoff detected at ~24kHz (Possible upscale of 48kHz audio into Hi-Res)",
+                    Messages.get("spectrum.result.cutoff_24k"),
                 )
             }
         }
@@ -316,13 +316,13 @@ class AudioAnalysisServiceImpl : AudioAnalysisService {
         if (bestCutoffFreq > 0.0) {
             val detectedHz = ((bestCutoffFreq / 500.0).roundToInt() * 500)
             val message = if (detectedHz >= 21000) {
-                "Cutoff detected at ~${detectedHz / 1000}kHz (Possible upscale into Hi-Res)"
+                Messages.get("spectrum.result.cutoff_dynamic_hires", detectedHz / 1000)
             } else {
-                "Cutoff detected at ~${detectedHz / 1000}kHz (Possible upscale of lossy audio)"
+                Messages.get("spectrum.result.cutoff_dynamic_lossy", detectedHz / 1000)
             }
             return AudioAnalysisService.AnalysisResult(true, detectedHz, message)
         }
 
-        return AudioAnalysisService.AnalysisResult(false, 0, "Spectrum seems healthy.")
+        return AudioAnalysisService.AnalysisResult(false, 0, Messages.get("spectrum.result.healthy"))
     }
 }

@@ -2,9 +2,9 @@ package comparison.infrastructure.audio
 
 import comparison.domain.models.TrackAudioMetadata
 import comparison.domain.ports.AudioMetadataExtractor
+import java.io.File
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.tag.FieldKey
-import java.io.File
 
 /**
  * Extracts metadata and embedded cover art from audio files using Jaudiotagger.

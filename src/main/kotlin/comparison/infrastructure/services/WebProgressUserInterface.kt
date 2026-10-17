@@ -3,8 +3,8 @@ package comparison.infrastructure.services
 import comparison.domain.models.ActionExecutionRequest
 import comparison.domain.models.ActionProgressUpdate
 import interfaces.UserInterface
-import models.FilePair
 import java.io.File
+import models.FilePair
 
 /**
  * Implementation of [UserInterface] that captures operations progress, messages, and results
@@ -12,7 +12,7 @@ import java.io.File
  */
 class WebProgressUserInterface(
     private val request: ActionExecutionRequest,
-    val state: ActionProgressUpdate
+    val state: ActionProgressUpdate,
 ) : UserInterface {
 
     override fun showError(message: String) {
@@ -78,7 +78,7 @@ class WebProgressUserInterface(
         state.current = state.max
     }
 
-    override fun option(): Int? {
+    override fun option(): Int {
         return request.actionId
     }
 }

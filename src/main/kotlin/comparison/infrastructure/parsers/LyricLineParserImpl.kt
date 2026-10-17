@@ -24,6 +24,7 @@ class LyricLineParserImpl : LyricLineParser {
         if (content.isBlank()) return emptyList()
 
         val parsedLines = mutableListOf<ParsedLyricLine>()
+        var hasMultiTimestampLine = false
 
         content.lineSequence().forEach { rawLine ->
             val trimmed = rawLine.trim()
@@ -34,6 +35,9 @@ class LyricLineParserImpl : LyricLineParser {
 
             val matches = timestampRegex.findAll(trimmed).toList()
             if (matches.isEmpty()) return@forEach
+            if (matches.size > 1) {
+                hasMultiTimestampLine = true
+            }
 
             // Extract the text after all timestamp tags and remove inline <mm:ss.xx> tags
             val text = trimmed
@@ -67,7 +71,7 @@ class LyricLineParserImpl : LyricLineParser {
             return emptyList()
         }
 
-        return parsedLines.sortedBy { it.timestampMs }
+        return if (hasMultiTimestampLine) parsedLines.sortedBy { it.timestampMs } else parsedLines
     }
 
     override fun parsePlain(content: String): List<ParsedLyricLine> {

@@ -10,5 +10,5 @@ package comparison.domain.models
 data class SaveLyricResult(
     val success: Boolean,
     val message: String,
-    val targetPath: String
+    val targetPath: String,
 )

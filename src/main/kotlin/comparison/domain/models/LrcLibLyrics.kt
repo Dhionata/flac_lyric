@@ -22,5 +22,5 @@ data class LrcLibLyrics(
     val instrumental: Boolean? = null,
     val plainLyrics: String? = null,
     val syncedLyrics: String? = null,
-    val source: String = "LRCLIB"
+    val source: String = "LRCLIB",
 )

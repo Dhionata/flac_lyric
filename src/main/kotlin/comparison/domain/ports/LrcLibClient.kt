@@ -19,8 +19,18 @@ interface LrcLibClient {
         trackName: String,
         artistName: String,
         albumName: String? = null,
-        durationSeconds: Int? = null
+        durationSeconds: Int? = null,
     ): LrcLibLyrics?
+
+    /**
+     * Fetches matching lyric records across all underlying providers for the given track details.
+     */
+    fun getAllLyrics(
+        trackName: String,
+        artistName: String,
+        albumName: String? = null,
+        durationSeconds: Int? = null,
+    ): List<LrcLibLyrics> = listOfNotNull(getLyrics(trackName, artistName, albumName, durationSeconds))
 
     /**
      * Searches for lyrics using a query string.

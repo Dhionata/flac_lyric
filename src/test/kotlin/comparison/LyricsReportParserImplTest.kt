@@ -1,10 +1,10 @@
 package comparison
 
 import comparison.infrastructure.parsers.LyricsReportParserImpl
+import java.io.File
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
-import java.io.File
 
 class LyricsReportParserImplTest {
 

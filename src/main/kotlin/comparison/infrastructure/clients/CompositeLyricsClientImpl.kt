@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit
  */
 class CompositeLyricsClientImpl(
     private val providers: List<LrcLibClient> = listOf(
-        LrcLibClientImpl(baseUrl = "https://lrclib.net", providerName = "LRCLIB"),
+        LrcLibClientImpl(),
         AppleMusicLyricsClientImpl(),
         SpotifyLyricsClientImpl(),
         YouTubeLyricsClientImpl(),
@@ -26,7 +26,7 @@ class CompositeLyricsClientImpl(
         GeniusLyricsClientImpl(),
         LrcLibClientImpl(baseUrl = "https://karalyr.com", providerName = "Karalyr")
     ),
-    private val timeoutSeconds: Long = 8L
+    private val timeoutSeconds: Long = 8L,
 ) : LrcLibClient {
 
     companion object {
@@ -39,27 +39,35 @@ class CompositeLyricsClientImpl(
         trackName: String,
         artistName: String,
         albumName: String?,
-        durationSeconds: Int?
+        durationSeconds: Int?,
     ): LrcLibLyrics? {
+        val results = getAllLyrics(trackName, artistName, albumName, durationSeconds)
+        return ExtractTrackDetailsUseCase.selectBestCandidate(results, durationSeconds ?: 0)
+    }
+
+    override fun getAllLyrics(
+        trackName: String,
+        artistName: String,
+        albumName: String?,
+        durationSeconds: Int?,
+    ): List<LrcLibLyrics> {
         val futures = providers.map { provider ->
             CompletableFuture.supplyAsync({
                 try {
-                    provider.getLyrics(trackName, artistName, albumName, durationSeconds)
+                    provider.getAllLyrics(trackName, artistName, albumName, durationSeconds)
                 } catch (_: Exception) {
-                    null
+                    emptyList()
                 }
             }, executor)
         }
 
-        val results = futures.mapNotNull { future ->
+        return futures.flatMap { future ->
             try {
                 future.get(timeoutSeconds, TimeUnit.SECONDS)
             } catch (_: Exception) {
-                null
+                emptyList()
             }
         }
-
-        return ExtractTrackDetailsUseCase.selectBestCandidate(results, durationSeconds ?: 0)
     }
 
     override fun searchLyrics(query: String): List<LrcLibLyrics> {

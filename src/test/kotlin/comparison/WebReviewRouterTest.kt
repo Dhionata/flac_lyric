@@ -1,10 +1,10 @@
 package comparison
 
 import comparison.infrastructure.web.WebReviewRouter
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Test
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 
 class WebReviewRouterTest {
 

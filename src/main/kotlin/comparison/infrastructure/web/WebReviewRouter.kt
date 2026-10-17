@@ -16,10 +16,10 @@ import comparison.domain.ports.AudioMetadataExtractor
 import comparison.infrastructure.io.SystemFileOpenerImpl
 import comparison.infrastructure.parsers.LyricLineParserImpl
 import comparison.infrastructure.services.WebActionRunnerService
-import services.Messages
 import java.io.File
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
+import services.Messages
 
 /**
  * HTTP Router and request dispatcher for the lyric comparison and web application interface.
@@ -34,7 +34,7 @@ class WebReviewRouter(
     private val parseLinesUseCase: ParseLyricLinesUseCase = ParseLyricLinesUseCase(LyricLineParserImpl()),
     private val audioStreamer: HttpAudioStreamer = HttpAudioStreamer(),
     private val actionRunner: WebActionRunnerService = WebActionRunnerService(),
-    private val gson: Gson = Gson()
+    private val gson: Gson = Gson(),
 ) : HttpHandler {
 
     private val cachedItems = mutableMapOf<Int, ReportIssueItem>()
@@ -60,11 +60,17 @@ class WebReviewRouter(
                 path == "/api/action/status" && method == "GET" -> handleActionStatus(exchange)
                 path == "/api/action/browse-dir" && method == "GET" -> handleActionBrowseDir(exchange)
                 path == "/api/action/config" && method == "GET" -> handleActionConfig(exchange)
-                else -> sendJsonResponse(exchange, 404, mapOf("error" to "Endpoint not found: $path"))
+                path == "/api/locale" && method == "GET" -> handleLocale(exchange)
+                else -> sendJsonResponse(exchange, 404, mapOf("error" to Messages.get("error.endpoint_not_found", path)))
             }
         } catch (e: Exception) {
             sendJsonResponse(exchange, 500, mapOf("error" to (e.message ?: e.toString())))
         }
+    }
+
+    private fun handleLocale(exchange: HttpExchange) {
+        val lang = Messages.getLocale().toLanguageTag()
+        sendJsonResponse(exchange, 200, mapOf("locale" to lang, "isPortuguese" to lang.lowercase().startsWith("pt")))
     }
 
     private fun handleIndex(exchange: HttpExchange) {
@@ -95,102 +101,122 @@ class WebReviewRouter(
                 "id" to 0,
                 "title" to Messages.get("menu.option.0.title"),
                 "hint" to Messages.get("menu.option.0.hint"),
-                "description" to "Emparelha arquivos de áudio (.flac) com suas letras (.lrc), renomeando e organizando na pasta das músicas.",
+                "description" to Messages.get("action.0.description"),
                 "inputs" to listOf(
                     mapOf("key" to "musicDir", "label" to Messages.get("prompt.select.music_dir"), "required" to true, "placeholder" to "Ex: C:\\Musicas"),
                     mapOf("key" to "lyricsDir", "label" to Messages.get("prompt.select.lyrics_dir"), "required" to true, "placeholder" to "Ex: C:\\Letras")
                 ),
                 "options" to listOf(
-                    mapOf("key" to "moveFiles", "label" to "Mover letras para a pasta das músicas correspondentes", "type" to "checkbox", "default" to true),
-                    mapOf("key" to "renameFiles", "label" to "Renomear letras para ficarem com o mesmo nome do áudio", "type" to "checkbox", "default" to true)
+                    mapOf("key" to "moveFiles", "label" to Messages.get("action.0.opt.move_files"), "type" to "checkbox", "default" to true),
+                    mapOf("key" to "renameFiles", "label" to Messages.get("action.0.opt.rename_files"), "type" to "checkbox", "default" to true)
                 )
             )
+
             1 -> mapOf(
                 "id" to 1,
                 "title" to Messages.get("menu.option.1.title"),
                 "hint" to Messages.get("menu.option.1.hint"),
-                "description" to "Examina sua biblioteca e lista todas as músicas que ainda não possuem arquivo .lrc correspondente.",
+                "description" to Messages.get("action.1.description"),
                 "inputs" to listOf(
                     mapOf("key" to "musicDir", "label" to Messages.get("prompt.select.music_dir"), "required" to true, "placeholder" to "Ex: C:\\Musicas")
                 ),
                 "options" to emptyList<Any>()
             )
+
             2 -> mapOf(
                 "id" to 2,
                 "title" to Messages.get("menu.option.2.title"),
                 "hint" to Messages.get("menu.option.2.hint"),
-                "description" to "Varre a pasta de letras identificando arquivos sem tags de timestamp ([mm:ss]) e move para a pasta de saída.",
+                "description" to Messages.get("action.2.description"),
                 "inputs" to listOf(
                     mapOf("key" to "lyricsDir", "label" to Messages.get("prompt.select.lyrics_dir"), "required" to true, "placeholder" to "Ex: C:\\Letras"),
                     mapOf("key" to "outDir", "label" to Messages.get("prompt.select.out_dir"), "required" to true, "placeholder" to "Ex: C:\\NaoSincronizadas")
                 ),
                 "options" to emptyList<Any>()
             )
+
             3 -> mapOf(
                 "id" to 3,
                 "title" to Messages.get("menu.option.3.title"),
                 "hint" to Messages.get("menu.option.3.hint"),
-                "description" to "Remove marcações de versão em massa (como 'v1:') dos arquivos .lrc selecionados.",
+                "description" to Messages.get("action.3.description"),
                 "inputs" to listOf(
                     mapOf("key" to "lyricsDir", "label" to Messages.get("prompt.select.lyrics_dir"), "required" to true, "placeholder" to "Ex: C:\\Letras")
                 ),
                 "options" to emptyList<Any>()
             )
+
             4 -> mapOf(
                 "id" to 4,
                 "title" to Messages.get("menu.option.4.title"),
                 "hint" to Messages.get("menu.option.4.hint"),
-                "description" to "Identifica letras (.lrc) que estão sozinhas (sem áudio na mesma pasta ou biblioteca) e as move para uma pasta de destino.",
+                "description" to Messages.get("action.4.description"),
                 "inputs" to listOf(
                     mapOf("key" to "musicDir", "label" to Messages.get("prompt.select.main_dir"), "required" to true, "placeholder" to "Ex: C:\\Musicas"),
                     mapOf("key" to "outDir", "label" to Messages.get("prompt.select.move_alone_lyrics"), "required" to true, "placeholder" to "Ex: C:\\LetrasIsoladas")
                 ),
                 "options" to emptyList<Any>()
             )
+
             5 -> mapOf(
                 "id" to 5,
                 "title" to Messages.get("menu.option.5.title"),
                 "hint" to Messages.get("menu.option.5.hint"),
-                "description" to "Valida se os arquivos de áudio seguem rigorosamente a nomenclatura 'Artista - Título.flac' e sem caracteres inválidos.",
+                "description" to Messages.get("action.5.description"),
                 "inputs" to listOf(
                     mapOf("key" to "musicDir", "label" to Messages.get("prompt.select.music_base_dir"), "required" to true, "placeholder" to "Ex: C:\\Musicas"),
-                    mapOf("key" to "outDir", "label" to Messages.get("prompt.select.move_incorrect"), "required" to false, "placeholder" to "Ex: C:\\NomesIncorretos (opcional)")
+                    mapOf(
+                        "key" to "outDir",
+                        "label" to Messages.get("prompt.select.move_incorrect"),
+                        "required" to false,
+                        "placeholder" to "Ex: C:\\NomesIncorretos (opcional)"
+                    )
                 ),
                 "options" to listOf(
-                    mapOf("key" to "moveFiles", "label" to "Mover arquivos fora do padrão para a pasta de destino", "type" to "checkbox", "default" to false)
+                    mapOf("key" to "moveFiles", "label" to Messages.get("action.5.opt.move_files"), "type" to "checkbox", "default" to false)
                 )
             )
+
             6 -> mapOf(
                 "id" to 6,
                 "title" to Messages.get("menu.option.6.title"),
                 "hint" to Messages.get("menu.option.6.hint"),
-                "description" to "Calcula a transformada rápida de Fourier (FFT) para verificar frequências de corte e identificar arquivos 'falsos FLAC' (upscaled de MP3).",
+                "description" to Messages.get("action.6.description"),
                 "inputs" to listOf(
                     mapOf("key" to "musicDir", "label" to Messages.get("prompt.select.spectrum_dir"), "required" to true, "placeholder" to "Ex: C:\\Musicas"),
                     mapOf("key" to "outDir", "label" to Messages.get("prompt.select.move_fake"), "required" to false, "placeholder" to "Ex: C:\\FalsosFlac (opcional)")
                 ),
                 "options" to listOf(
-                    mapOf("key" to "isFullAnalysis", "label" to "Modo de Análise Espectral", "type" to "select", "selectOptions" to listOf(
-                        mapOf("value" to false, "label" to Messages.get("dialog.confirm.analysis_type_option_quick")),
-                        mapOf("value" to true, "label" to Messages.get("dialog.confirm.analysis_type_option_full"))
-                    ), "default" to false),
-                    mapOf("key" to "moveFiles", "label" to "Mover falsos FLACs identificados para a pasta de destino", "type" to "checkbox", "default" to false)
+                    mapOf(
+                        "key" to "isFullAnalysis", "label" to Messages.get("action.6.opt.analysis_mode"), "type" to "select", "selectOptions" to listOf(
+                            mapOf("value" to false, "label" to Messages.get("dialog.confirm.analysis_type_option_quick")),
+                            mapOf("value" to true, "label" to Messages.get("dialog.confirm.analysis_type_option_full"))
+                        ), "default" to false
+                    ),
+                    mapOf("key" to "moveFiles", "label" to Messages.get("action.6.opt.move_files"), "type" to "checkbox", "default" to false)
                 )
             )
+
             7 -> mapOf(
                 "id" to 7,
                 "title" to Messages.get("menu.option.7.title"),
                 "hint" to Messages.get("menu.option.7.hint"),
-                "description" to "Analisa versos fora de ordem, timestamps além do fim da música e gera o relatório para revisão no Comparador LRCLIB.",
+                "description" to Messages.get("action.7.description"),
                 "inputs" to listOf(
                     mapOf("key" to "musicDir", "label" to Messages.get("prompt.select.music_lyrics_dir"), "required" to true, "placeholder" to "Ex: C:\\Musicas"),
-                    mapOf("key" to "outDir", "label" to Messages.get("prompt.select.move_problematic_lyrics"), "required" to false, "placeholder" to "Ex: C:\\LetrasComProblemas (opcional)")
+                    mapOf(
+                        "key" to "outDir",
+                        "label" to Messages.get("prompt.select.move_problematic_lyrics"),
+                        "required" to false,
+                        "placeholder" to "Ex: C:\\LetrasComProblemas (opcional)"
+                    )
                 ),
                 "options" to listOf(
-                    mapOf("key" to "moveFiles", "label" to "Mover letras problemáticas para a pasta de destino", "type" to "checkbox", "default" to false)
+                    mapOf("key" to "moveFiles", "label" to Messages.get("action.7.opt.move_files"), "type" to "checkbox", "default" to false)
                 )
             )
-            else -> mapOf("error" to "Ação inválida: $actionId")
+
+            else -> mapOf("error" to Messages.get("error.invalid_action", actionId))
         }
 
         sendJsonResponse(exchange, 200, config)
@@ -210,7 +236,7 @@ class WebReviewRouter(
 
     private fun handleActionBrowseDir(exchange: HttpExchange) {
         val queryParams = parseQueryParams(exchange)
-        val title = queryParams["title"] ?: "Selecionar Pasta"
+        val title = queryParams["title"] ?: Messages.get("prompt.select.folder_default")
         val path = actionRunner.browseDirectory(title)
         sendJsonResponse(exchange, 200, mapOf("path" to path, "success" to (path != null)))
     }
@@ -257,7 +283,7 @@ class WebReviewRouter(
         val id = queryParams["id"]?.toIntOrNull()
 
         if (id == null || !cachedItems.containsKey(id)) {
-            sendJsonResponse(exchange, 404, mapOf("error" to "Track not found with id: $id"))
+            sendJsonResponse(exchange, 404, mapOf("error" to Messages.get("error.track_not_found", id.toString())))
             return
         }
 
@@ -270,7 +296,7 @@ class WebReviewRouter(
         val queryParams = parseQueryParams(exchange)
         val audioPath = queryParams["path"]
         if (audioPath.isNullOrBlank()) {
-            sendJsonResponse(exchange, 400, mapOf("error" to "Missing audio path parameter"))
+            sendJsonResponse(exchange, 400, mapOf("error" to Messages.get("error.missing_audio_path")))
             return
         }
 
@@ -282,7 +308,7 @@ class WebReviewRouter(
         val queryParams = parseQueryParams(exchange)
         val audioPath = queryParams["path"]
         if (audioPath.isNullOrBlank()) {
-            sendJsonResponse(exchange, 400, mapOf("error" to "Missing audio path parameter"))
+            sendJsonResponse(exchange, 400, mapOf("error" to Messages.get("error.missing_audio_path")))
             return
         }
 
@@ -359,11 +385,15 @@ class WebReviewRouter(
                 val parts = param.split("=", limit = 2)
                 val key = try {
                     URLDecoder.decode(parts[0], StandardCharsets.UTF_8.name())
-                } catch (_: Exception) { parts[0] }
+                } catch (_: Exception) {
+                    parts[0]
+                }
                 val rawValue = if (parts.size > 1) parts[1] else ""
                 val value = try {
                     URLDecoder.decode(rawValue, StandardCharsets.UTF_8.name())
-                } catch (_: Exception) { rawValue }
+                } catch (_: Exception) {
+                    rawValue
+                }
                 key to value
             }
         }

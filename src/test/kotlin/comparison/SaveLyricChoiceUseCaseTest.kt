@@ -3,11 +3,11 @@ package comparison
 import comparison.application.usecases.SaveLyricChoiceUseCase
 import comparison.domain.models.SaveLyricRequest
 import comparison.infrastructure.io.LyricFileStorageImpl
+import java.io.File
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
-import java.io.File
 
 class SaveLyricChoiceUseCaseTest {
 
@@ -25,8 +25,7 @@ class SaveLyricChoiceUseCaseTest {
         val newContent = "[00:05.00]New from LRCLIB"
         val request = SaveLyricRequest(
             lyricPath = lrcFile.absolutePath,
-            content = newContent,
-            choice = "LRCLIB"
+            content = newContent
         )
 
         val result = useCase.execute(request)
@@ -73,16 +72,24 @@ class SaveLyricChoiceUseCaseTest {
 
     @Test
     fun `test save with null content does not throw and handles gracefully`() {
-        val lrcFile = File(tempDir, "Song.lrc")
-        val request = SaveLyricRequest(
-            lyricPath = lrcFile.absolutePath,
-            content = null,
-            customLrcContent = null,
-            choice = "LRCLIB"
-        )
+        val originalLocale = services.Messages.getLocale()
+        try {
+            val lrcFile = File(tempDir, "Song.lrc")
+            val request = SaveLyricRequest(
+                lyricPath = lrcFile.absolutePath
+            )
 
-        val result = useCase.execute(request)
-        org.junit.jupiter.api.Assertions.assertFalse(result.success)
-        assertEquals("O conteúdo da letra do LRCLIB está vazio.", result.message)
+            services.Messages.setLocale(java.util.Locale.forLanguageTag("pt-BR"))
+            val resultPt = useCase.execute(request)
+            org.junit.jupiter.api.Assertions.assertFalse(resultPt.success)
+            assertEquals("O conteúdo da letra do LRCLIB está vazio.", resultPt.message)
+
+            services.Messages.setLocale(java.util.Locale.ENGLISH)
+            val resultEn = useCase.execute(request)
+            org.junit.jupiter.api.Assertions.assertFalse(resultEn.success)
+            assertEquals("LRCLIB lyric content is empty.", resultEn.message)
+        } finally {
+            services.Messages.setLocale(originalLocale)
+        }
     }
 }

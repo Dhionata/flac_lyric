@@ -1,16 +1,25 @@
 package services
 
-import java.util.Locale
-import java.util.MissingResourceException
-import java.util.ResourceBundle
+import java.util.*
 
 /**
  * Service providing internationalized strings from resource bundles (`messages.properties`),
  * based on the current locale.
  */
 object Messages {
-    private var currentLocale: Locale = Locale.getDefault()
-    private var bundle: ResourceBundle = ResourceBundle.getBundle("messages", currentLocale)
+    private val control: ResourceBundle.Control =
+        ResourceBundle.Control.getNoFallbackControl(ResourceBundle.Control.FORMAT_PROPERTIES)
+
+    private var currentLocale: Locale = normalizeLocale(Locale.getDefault())
+    private var bundle: ResourceBundle = ResourceBundle.getBundle("messages", currentLocale, control)
+
+    private fun normalizeLocale(locale: Locale): Locale {
+        return if (locale.language.equals("pt", ignoreCase = true)) {
+            Locale.forLanguageTag("pt-BR")
+        } else {
+            locale
+        }
+    }
 
     /**
      * Retrieves the localized string for [key].
@@ -42,8 +51,8 @@ object Messages {
      * Useful for user configuration or automated testing across multiple languages.
      */
     fun setLocale(locale: Locale) {
-        currentLocale = locale
-        bundle = ResourceBundle.getBundle("messages", currentLocale)
+        currentLocale = normalizeLocale(locale)
+        bundle = ResourceBundle.getBundle("messages", currentLocale, control)
     }
 
     /**

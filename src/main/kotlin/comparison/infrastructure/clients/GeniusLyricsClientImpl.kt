@@ -24,7 +24,7 @@ class GeniusLyricsClientImpl(
         .build(),
     private val gson: Gson = Gson(),
     private val baseUrl: String = "https://lyrics.paxsenix.org",
-    private val lyricParser: LyricLineParser = LyricLineParserImpl()
+    private val lyricParser: LyricLineParser = LyricLineParserImpl(),
 ) : LrcLibClient {
 
     private val userAgent = "SongSync/3.5 (Android 14)"
@@ -33,7 +33,7 @@ class GeniusLyricsClientImpl(
         trackName: String,
         artistName: String,
         albumName: String?,
-        durationSeconds: Int?
+        durationSeconds: Int?,
     ): LrcLibLyrics? {
         if (trackName.isBlank() || artistName.isBlank()) return null
         val geniusSongUrl = buildGeniusUrl(artistName, trackName) ?: return null
@@ -75,7 +75,6 @@ class GeniusLyricsClientImpl(
                     duration = durationSeconds?.takeIf { it > 0 }?.toDouble(),
                     instrumental = false,
                     plainLyrics = plain,
-                    syncedLyrics = null,
                     source = "Genius"
                 )
             }
@@ -97,7 +96,7 @@ class GeniusLyricsClientImpl(
                 return emptyList()
             }
         }
-        val single = getLyrics(trackName = track, artistName = artist, albumName = null, durationSeconds = null)
+        val single = getLyrics(trackName = track, artistName = artist)
         return if (single != null) listOf(single) else emptyList()
     }
 

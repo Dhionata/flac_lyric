@@ -1,6 +1,5 @@
 import comparison.application.services.LyricReviewCoordinatorService
 import comparison.infrastructure.services.WebActionRunnerService
-import exceptions.OperationCancelledException
 import handlers.AudioFileHandlerImpl
 import handlers.LyricFileHandlerImpl
 import interfaces.UserInterface
@@ -45,14 +44,17 @@ fun main() {
         lyricSyncValidator
     )
 
+    val logService = services.JdkLogService(object {}.javaClass)
     val webActionRunner = WebActionRunnerService(fileService, directoryService)
-    val coordinatorService = LyricReviewCoordinatorService(actionRunner = webActionRunner)
+    val coordinatorService = LyricReviewCoordinatorService(actionRunner = webActionRunner, logService = logService)
 
     // Default startup: Launch modern Web Interface directly and open user's default browser
-    val webUrl = coordinatorService.startReview(preferredPort = 8080, openBrowser = true)
+    val webUrl = coordinatorService.startReview()
+    logService.info("log.web.started", webUrl)
+    logService.info("log.web.press_ctrl_c")
     println("=================================================================")
-    println("FLAC Lyric - Interface Web iniciada por padrão em: $webUrl")
-    println("Pressione Ctrl+C para encerrar o servidor web.")
+    println(services.Messages.get("log.web.started", webUrl))
+    println(services.Messages.get("log.web.press_ctrl_c"))
     println("=================================================================")
 
     // Keep server running

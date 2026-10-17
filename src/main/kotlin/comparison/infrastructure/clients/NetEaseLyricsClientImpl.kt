@@ -29,7 +29,7 @@ class NetEaseLyricsClientImpl(
     private val gson: Gson = Gson(),
     private val baseUrl: String = "https://music.163.com",
     private val maxCandidates: Int = 4,
-    private val lyricParser: LyricLineParser = LyricLineParserImpl()
+    private val lyricParser: LyricLineParser = LyricLineParserImpl(),
 ) : LrcLibClient {
 
     private val userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
@@ -45,7 +45,7 @@ class NetEaseLyricsClientImpl(
         trackName: String,
         artistName: String,
         albumName: String?,
-        durationSeconds: Int?
+        durationSeconds: Int?,
     ): LrcLibLyrics? {
         val query = "$artistName $trackName".trim()
         if (query.isBlank()) return null
@@ -137,10 +137,8 @@ class NetEaseLyricsClientImpl(
                 val rawLyric = json.getAsJsonObject("lrc")?.get("lyric")?.takeIf { !it.isJsonNull }?.asString?.trim()
                 if (rawLyric.isNullOrBlank()) return null
 
-                // Require > 0 actual parsed verses (filters out credit-only stubs like "[00:00.00-1] 作词 : ...")
                 val hasSyncedVerses = lyricParser.parse(rawLyric).isNotEmpty()
-                val hasPlainVerses = if (!hasSyncedVerses) lyricParser.parsePlain(rawLyric).isNotEmpty() else false
-                if (!hasSyncedVerses && !hasPlainVerses) return null
+                val hasTimestampPattern = rawLyric.contains(Regex("""\[\d{2}:\d{2}"""))
 
                 LrcLibLyrics(
                     id = meta.id,
@@ -150,7 +148,7 @@ class NetEaseLyricsClientImpl(
                     duration = meta.durationSeconds,
                     instrumental = false,
                     plainLyrics = if (!hasSyncedVerses) rawLyric else null,
-                    syncedLyrics = if (hasSyncedVerses) rawLyric else null,
+                    syncedLyrics = if (hasSyncedVerses || hasTimestampPattern) rawLyric else null,
                     source = "NetEase"
                 )
             }
@@ -164,6 +162,6 @@ class NetEaseLyricsClientImpl(
         val trackName: String,
         val artistName: String,
         val albumName: String,
-        val durationSeconds: Double?
+        val durationSeconds: Double?,
     )
 }

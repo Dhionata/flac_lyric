@@ -8,7 +8,7 @@ import comparison.domain.ports.LyricLineParser
  * with fallback support for unsynchronized plain lyrics.
  */
 class ParseLyricLinesUseCase(
-    private val lineParser: LyricLineParser
+    private val lineParser: LyricLineParser,
 ) {
     fun execute(content: String): List<ParsedLyricLine> {
         return lineParser.parse(content)

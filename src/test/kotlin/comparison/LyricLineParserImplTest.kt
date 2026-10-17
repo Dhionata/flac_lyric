@@ -102,4 +102,22 @@ class LyricLineParserImplTest {
         assertEquals(20500L, lines[1].timestampMs)
         assertEquals("Repeated Chorus", lines[1].text)
     }
+
+    @Test
+    fun `test preserves original order of out-of-order single-timestamp lines for sync warning detection`() {
+        val lrc = """
+            [00:10.00] First line
+            [00:25.00] Second line
+            [00:18.50] Out of order line
+            [00:30.00] Fourth line
+        """.trimIndent()
+
+        val lines = parser.parse(lrc)
+        assertEquals(4, lines.size)
+        assertEquals(10000L, lines[0].timestampMs)
+        assertEquals(25000L, lines[1].timestampMs)
+        assertEquals(18500L, lines[2].timestampMs)
+        assertEquals("Out of order line", lines[2].text)
+        assertEquals(30000L, lines[3].timestampMs)
+    }
 }

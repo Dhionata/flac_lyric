@@ -39,9 +39,10 @@ data class ComparisonTrackDetails(
     val remoteStatus: String,
     val status: String,
     val candidates: List<LrcLibLyrics> = emptyList(),
+    val allSearchResults: List<LrcLibLyrics> = emptyList(),
     val audioUrl: String? = audioPath?.let { "/api/audio?path=" + URLEncoder.encode(it, StandardCharsets.UTF_8.name()) },
     val artworkUrl: String? = if (metadata.hasArtwork && audioPath != null) "/api/artwork?path=" + URLEncoder.encode(audioPath, StandardCharsets.UTF_8.name()) else null,
     val trackName: String = metadata.title.ifBlank { fileName },
     val artist: String = metadata.artist,
-    val album: String = metadata.album
+    val album: String = metadata.album,
 )

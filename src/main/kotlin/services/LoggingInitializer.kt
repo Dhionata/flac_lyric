@@ -21,7 +21,7 @@ object LoggingInitializer {
     fun init(
         logDir: File = File("logs"),
         maxSizeBytes: Int = 5 * 1024 * 1024,
-        fileCount: Int = 3
+        fileCount: Int = 3,
     ) {
         if (initialized) return
         initialized = true
@@ -38,7 +38,7 @@ object LoggingInitializer {
             val rootLogger = Logger.getLogger("")
             rootLogger.addHandler(fileHandler)
         } catch (e: Exception) {
-            System.err.println("Could not initialize file logger: ${e.message}")
+            System.err.println(Messages.get("log.init.error", e.message ?: e.toString()))
         }
     }
 }

@@ -3,6 +3,7 @@ package comparison.infrastructure.web
 import com.sun.net.httpserver.HttpExchange
 import java.io.File
 import java.io.RandomAccessFile
+import services.Messages
 
 /**
  * Handles HTTP partial-content (Range requests) streaming for audio files.
@@ -12,7 +13,7 @@ class HttpAudioStreamer {
 
     fun streamAudio(exchange: HttpExchange, file: File) {
         if (!file.exists() || !file.isFile) {
-            val response = "Audio file not found: ${file.name}".toByteArray()
+            val response = Messages.get("error.audio_not_found", file.name).toByteArray()
             exchange.sendResponseHeaders(404, response.size.toLong())
             exchange.responseBody.use { it.write(response) }
             return

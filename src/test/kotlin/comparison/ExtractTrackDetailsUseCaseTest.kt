@@ -14,7 +14,7 @@ class ExtractTrackDetailsUseCaseTest {
 
     @Test
     fun `test selectBestCandidate with multiple synced lyrics picks the closest duration`() {
-        val cand1 = LrcLibLyrics(id = 1, trackName = "Song A", duration = 240.0, syncedLyrics = "[00:01.00] Line 1", source = "LRCLIB")
+        val cand1 = LrcLibLyrics(id = 1, trackName = "Song A", duration = 240.0, syncedLyrics = "[00:01.00] Line 1")
         val cand2 = LrcLibLyrics(id = 2, trackName = "Song B", duration = 202.0, syncedLyrics = "[00:01.00] Line 2", source = "NetEase")
         val cand3 = LrcLibLyrics(id = 3, trackName = "Song C", duration = 190.0, syncedLyrics = "[00:01.00] Line 3", source = "KuGou")
 
@@ -65,7 +65,6 @@ class ExtractTrackDetailsUseCaseTest {
             artistName = "Lil God Dan",
             duration = 113.0,
             plainLyrics = "Plain lyrics without timestamps\nSecond plain verse",
-            syncedLyrics = null,
             source = "Genius"
         )
         val validSpotify = LrcLibLyrics(
@@ -135,30 +134,33 @@ class ExtractTrackDetailsUseCaseTest {
     @Test
     fun `test CompositeLyricsClientImpl queries providers in parallel and preserves source badges`() {
         val providerA = object : LrcLibClient {
-            override fun getLyrics(trackName: String, artistName: String, albumName: String?, durationSeconds: Int?): LrcLibLyrics? {
+            override fun getLyrics(trackName: String, artistName: String, albumName: String?, durationSeconds: Int?): LrcLibLyrics {
                 Thread.sleep(250)
-                return LrcLibLyrics(id = 10, trackName = trackName, artistName = artistName, duration = 215.0, syncedLyrics = "[00:01.00] A", source = "LRCLIB")
+                return LrcLibLyrics(id = 10, trackName = trackName, artistName = artistName, duration = 215.0, syncedLyrics = "[00:01.00] A")
             }
+
             override fun searchLyrics(query: String): List<LrcLibLyrics> {
                 Thread.sleep(250)
-                return listOf(LrcLibLyrics(id = 10, trackName = query, duration = 215.0, syncedLyrics = "[00:01.00] A", source = "LRCLIB"))
+                return listOf(LrcLibLyrics(id = 10, trackName = query, duration = 215.0, syncedLyrics = "[00:01.00] A"))
             }
         }
         val providerB = object : LrcLibClient {
-            override fun getLyrics(trackName: String, artistName: String, albumName: String?, durationSeconds: Int?): LrcLibLyrics? {
+            override fun getLyrics(trackName: String, artistName: String, albumName: String?, durationSeconds: Int?): LrcLibLyrics {
                 Thread.sleep(250)
                 return LrcLibLyrics(id = 20, trackName = trackName, artistName = artistName, duration = 200.0, syncedLyrics = "[00:01.00] B", source = "Spotify")
             }
+
             override fun searchLyrics(query: String): List<LrcLibLyrics> {
                 Thread.sleep(250)
                 return listOf(LrcLibLyrics(id = 20, trackName = query, duration = 200.0, syncedLyrics = "[00:01.00] B", source = "Spotify"))
             }
         }
         val providerC = object : LrcLibClient {
-            override fun getLyrics(trackName: String, artistName: String, albumName: String?, durationSeconds: Int?): LrcLibLyrics? {
+            override fun getLyrics(trackName: String, artistName: String, albumName: String?, durationSeconds: Int?): LrcLibLyrics {
                 Thread.sleep(250)
                 return LrcLibLyrics(id = 30, trackName = trackName, artistName = artistName, duration = 198.0, syncedLyrics = "[00:01.00] C", source = "YouTube")
             }
+
             override fun searchLyrics(query: String): List<LrcLibLyrics> {
                 Thread.sleep(250)
                 return listOf(LrcLibLyrics(id = 30, trackName = query, duration = 198.0, syncedLyrics = "[00:01.00] C", source = "YouTube"))
@@ -175,7 +177,7 @@ class ExtractTrackDetailsUseCaseTest {
         // 3 providers sleeping 250ms each sequentially would take >= 750ms; parallel takes ~260-500ms
         assertTrue(elapsedMs < 700, "Expected parallel execution (< 700ms), but took ${elapsedMs}ms")
 
-        val best = composite.getLyrics("Numb", "Linkin Park", null, 200)
+        val best = composite.getLyrics("Numb", "Linkin Park", durationSeconds = 200)
         assertNotNull(best)
         assertEquals("Spotify", best?.source)
         assertEquals(200.0, best?.duration)
