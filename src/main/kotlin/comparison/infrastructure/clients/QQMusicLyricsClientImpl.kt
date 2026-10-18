@@ -20,14 +20,11 @@ import okhttp3.Request
  * Only returns candidates that have > 0 valid verses (synced or plain).
  */
 class QQMusicLyricsClientImpl(
-    private val httpClient: OkHttpClient = OkHttpClient.Builder()
-        .connectTimeout(6, TimeUnit.SECONDS)
-        .readTimeout(6, TimeUnit.SECONDS)
-        .build(),
+    private val httpClient: OkHttpClient = HttpRateLimitInterceptor.createDefaultHttpClient(),
     private val gson: Gson = Gson(),
     private val searchBaseUrl: String = "https://c.y.qq.com/soso/fcgi-bin/client_search_cp",
     private val lyricBaseUrl: String = "https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg",
-    private val maxCandidates: Int = 3,
+    private val maxCandidates: Int = 4,
     private val lineParser: LyricLineParser = LyricLineParserImpl(),
 ) : LrcLibClient {
 
@@ -112,7 +109,7 @@ class QQMusicLyricsClientImpl(
 
         return futures.mapNotNull { future ->
             try {
-                future.get(6, TimeUnit.SECONDS)
+                future.get(12, TimeUnit.SECONDS)
             } catch (_: Exception) {
                 null
             }

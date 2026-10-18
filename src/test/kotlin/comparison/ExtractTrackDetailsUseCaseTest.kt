@@ -4,6 +4,7 @@ import comparison.application.usecases.ExtractTrackDetailsUseCase
 import comparison.domain.models.LrcLibLyrics
 import comparison.domain.ports.LrcLibClient
 import comparison.infrastructure.clients.CompositeLyricsClientImpl
+import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -117,11 +118,10 @@ class ExtractTrackDetailsUseCaseTest {
         val cand3 = LrcLibLyrics(id = 3, trackName = "Plain", duration = 200.0, plainLyrics = "Verso 3", source = "Genius")
 
         val targetDuration = 200
-        val selected = cand2
 
         val ordered = ExtractTrackDetailsUseCase.orderCandidates(
             listOf(cand1, cand2, cand3),
-            selected,
+            cand2,
             targetDuration
         )
 
@@ -181,5 +181,90 @@ class ExtractTrackDetailsUseCaseTest {
         assertNotNull(best)
         assertEquals("Spotify", best?.source)
         assertEquals(200.0, best?.duration)
+    }
+
+    @Test
+    fun `test buildSearchQueries includes Artist+Title, Title+Artist and Title-only variants`() {
+        val queries = ExtractTrackDetailsUseCase.buildSearchQueries(
+            artist = "Linkin Park",
+            title = "Numb (Official Video)"
+        )
+
+        assertTrue(queries.contains("Linkin Park Numb (Official Video)"))
+        assertTrue(queries.contains("Linkin Park Numb"))
+        assertTrue(queries.contains("Numb (Official Video) Linkin Park"))
+        assertTrue(queries.contains("Numb Linkin Park"))
+        assertTrue(queries.contains("Numb (Official Video)"))
+        assertTrue(queries.contains("Numb"))
+
+        // Order check: Artist+Title first, then Title+Artist, then Title-only
+        val idxArtistFirst = queries.indexOf("Linkin Park Numb (Official Video)")
+        val idxTitleFirst = queries.indexOf("Numb (Official Video) Linkin Park")
+        val idxTitleOnly = queries.indexOf("Numb (Official Video)")
+        assertTrue(idxArtistFirst < idxTitleFirst)
+        assertTrue(idxTitleFirst < idxTitleOnly)
+    }
+
+    @Test
+    fun `test generateInstrumentalLyrics creates 00s to end duration timestamps by language`() {
+        val ptLrc = ExtractTrackDetailsUseCase.generateInstrumentalLyrics(
+            durationSeconds = 215,
+            langOrLocale = "pt-BR"
+        )
+        assertEquals("[00:00.00] ♪ Instrumental ♪\n[03:35.00] ♪ Instrumental ♪", ptLrc)
+
+        val jaLrc = ExtractTrackDetailsUseCase.generateInstrumentalLyrics(
+            durationSeconds = 125,
+            langOrLocale = "ja-JP"
+        )
+        assertEquals("[00:00.00] ♪ インストゥルメンタル ♪\n[02:05.00] ♪ インストゥルメンタル ♪", jaLrc)
+
+        val zhLrc = ExtractTrackDetailsUseCase.generateInstrumentalLyrics(
+            durationSeconds = 90,
+            langOrLocale = "zh-CN"
+        )
+        assertEquals("[00:00.00] ♪ 纯音乐 ♪\n[01:30.00] ♪ 纯音乐 ♪", zhLrc)
+    }
+
+    @Test
+    fun `test HttpRateLimitInterceptor uses API Retry-After when provided and 1s fallback when absent`() {
+        val dummyRequest = okhttp3.Request.Builder().url("https://lrclib.net/api/search").build()
+
+        val headerResponse = okhttp3.Response.Builder()
+            .request(dummyRequest)
+            .protocol(okhttp3.Protocol.HTTP_1_1)
+            .code(429)
+            .message("Too Many Requests")
+            .addHeader("Retry-After", "3")
+            .body("".toResponseBody(null))
+            .build()
+        val headerDelay = comparison.infrastructure.clients.HttpRateLimitInterceptor.extractRetryDelayMs(
+            response = headerResponse
+        )
+        assertEquals(3000L, headerDelay)
+
+        val bodyResponse = okhttp3.Response.Builder()
+            .request(dummyRequest)
+            .protocol(okhttp3.Protocol.HTTP_1_1)
+            .code(429)
+            .message("Too Many Requests")
+            .body("""{"message":"You are being rate limited","retry_after":1.5}""".toResponseBody(null))
+            .build()
+        val bodyDelay = comparison.infrastructure.clients.HttpRateLimitInterceptor.extractRetryDelayMs(
+            response = bodyResponse
+        )
+        assertEquals(1500L, bodyDelay)
+
+        val fallbackResponse = okhttp3.Response.Builder()
+            .request(dummyRequest)
+            .protocol(okhttp3.Protocol.HTTP_1_1)
+            .code(429)
+            .message("Too Many Requests")
+            .body("Too Many Requests".toResponseBody(null))
+            .build()
+        val fallbackDelay = comparison.infrastructure.clients.HttpRateLimitInterceptor.extractRetryDelayMs(
+            response = fallbackResponse
+        )
+        assertEquals(1000L, fallbackDelay)
     }
 }

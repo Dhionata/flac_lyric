@@ -3,13 +3,16 @@ package comparison.application.usecases
 import comparison.domain.models.ComparisonTrackDetails
 import comparison.domain.models.LrcLibLyrics
 import comparison.domain.models.ReportIssueItem
+import comparison.domain.models.TrackAudioMetadata
 import comparison.domain.ports.AudioMetadataExtractor
 import comparison.domain.ports.LyricFileStorage
 import comparison.domain.ports.LyricLineParser
 import comparison.infrastructure.parsers.LyricLineParserImpl
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import kotlin.math.abs
 
 /**
  * Use case to aggregate audio metadata, local lyrics, remote multi-provider lyrics, and parsed lines
@@ -46,7 +49,7 @@ class ExtractTrackDetailsUseCase(
             if (targetDurationSeconds <= 0) return 0.0
             val d = cand.duration
             return if (d != null && d > 0.0) {
-                kotlin.math.abs(d - targetDurationSeconds)
+                abs(d - targetDurationSeconds)
             } else {
                 Double.MAX_VALUE
             }
@@ -55,7 +58,7 @@ class ExtractTrackDetailsUseCase(
         /**
          * Returns true if the candidate has > 0 parsed synchronized verses.
          */
-        fun hasValidSyncedVerses(
+        private fun hasValidSyncedVerses(
             cand: LrcLibLyrics,
             parser: LyricLineParser = defaultParser,
         ): Boolean {
@@ -66,7 +69,7 @@ class ExtractTrackDetailsUseCase(
         /**
          * Returns true if the candidate has > 0 parsed plain verses.
          */
-        fun hasValidPlainVerses(
+        private fun hasValidPlainVerses(
             cand: LrcLibLyrics,
             parser: LyricLineParser = defaultParser,
         ): Boolean {
@@ -87,8 +90,7 @@ class ExtractTrackDetailsUseCase(
             val validPlain = cand.plainLyrics?.takeIf { it.isNotBlank() && parser.parsePlain(it).isNotEmpty() }
             if (validSynced == null && validPlain == null) return null
             return cand.copy(
-                syncedLyrics = validSynced,
-                plainLyrics = validPlain ?: validSynced
+                syncedLyrics = validSynced, plainLyrics = validPlain ?: validSynced
             )
         }
 
@@ -102,9 +104,7 @@ class ExtractTrackDetailsUseCase(
         ): List<LrcLibLyrics> = candidates.mapNotNull { normalizeCandidateWithVerses(it, parser) }
 
         private fun candidateComparator(targetDurationSeconds: Int): Comparator<LrcLibLyrics> =
-            compareBy<LrcLibLyrics> { !hasValidSyncedVerses(it) }
-                .thenBy { !hasValidPlainVerses(it) }
-                .thenBy { cand -> durationDistance(cand, targetDurationSeconds) }
+            compareBy<LrcLibLyrics> { !hasValidSyncedVerses(it) }.thenBy { !hasValidPlainVerses(it) }.thenBy { cand -> durationDistance(cand, targetDurationSeconds) }
                 .thenBy { cand -> sourcePriority(cand.source) }
 
         /**
@@ -140,6 +140,96 @@ class ExtractTrackDetailsUseCase(
 
             return listOf(selectedRecord) + sortedOthers
         }
+
+        /**
+         * Builds the search queries covering all three cases:
+         * 1. Artist followed by Track Title ("Artist Title")
+         * 2. Track Title followed by Artist ("Title Artist")
+         * 3. Track Title only ("Title")
+         * Including cleaned title variants (without parenthetical/bracketed suffixes) when applicable.
+         */
+        fun buildSearchQueries(artist: String, title: String): List<String> {
+            val cleanArtist = artist.trim()
+            val rawTitle = title.trim()
+            val cleanTitle = rawTitle.replace(Regex("\\s*\\([^)]*\\)"), "").replace(Regex("\\s*\\[[^]]*]"), "").trim()
+
+            val effectiveTitle = cleanTitle.ifBlank { rawTitle }
+            val rawQueries = mutableListOf<String>()
+
+            // 1. Artist + Title
+            if (cleanArtist.isNotBlank() && rawTitle.isNotBlank()) {
+                rawQueries.add("$cleanArtist $rawTitle")
+            }
+            if (cleanArtist.isNotBlank() && effectiveTitle.isNotBlank() && !effectiveTitle.equals(rawTitle, ignoreCase = true)) {
+                rawQueries.add("$cleanArtist $effectiveTitle")
+            }
+
+            // 2. Title + Artist
+            if (rawTitle.isNotBlank() && cleanArtist.isNotBlank()) {
+                rawQueries.add("$rawTitle $cleanArtist")
+            }
+            if (effectiveTitle.isNotBlank() && cleanArtist.isNotBlank() && !effectiveTitle.equals(rawTitle, ignoreCase = true)) {
+                rawQueries.add("$effectiveTitle $cleanArtist")
+            }
+
+            // 3. Title only
+            if (rawTitle.isNotBlank()) {
+                rawQueries.add(rawTitle)
+            }
+            if (effectiveTitle.isNotBlank() && !effectiveTitle.equals(rawTitle, ignoreCase = true)) {
+                rawQueries.add(effectiveTitle)
+            }
+
+            // Fallback if title was blank but artist was present
+            if (rawQueries.isEmpty() && cleanArtist.isNotBlank()) {
+                rawQueries.add(cleanArtist)
+            }
+
+            val seen = mutableSetOf<String>()
+            val deduplicated = mutableListOf<String>()
+            for (q in rawQueries) {
+                val normalized = q.replace(Regex("\\s+"), " ").trim()
+                if (normalized.isNotBlank() && seen.add(normalized.lowercase())) {
+                    deduplicated.add(normalized)
+                }
+            }
+            return deduplicated
+        }
+
+        /**
+         * Resolves the localized instrumental tag text for a given language/locale.
+         */
+        private fun resolveInstrumentalTag(langOrLocale: String? = null): String {
+            val code = (langOrLocale ?: services.Messages.getLocale().toLanguageTag()).lowercase().trim()
+            return when {
+                code.startsWith("pt") -> "♪ Instrumental ♪"
+                code.startsWith("en") -> "♪ Instrumental ♪"
+                code.startsWith("es") -> "♪ Instrumental ♪"
+                code.startsWith("ja") -> "♪ インストゥルメンタル ♪"
+                code.startsWith("zh") -> "♪ 纯音乐 ♪"
+                code.startsWith("ko") -> "♪ 연주곡 ♪"
+                code.startsWith("ru") -> "♪ Инструментал ♪"
+                else -> services.Messages.get("lyric.instrumental.tag")
+            }
+        }
+
+        /**
+         * Generates a synchronized LRC string for instrumental tracks from 00:00.00 up to the track's total duration
+         * so that sync validation recognizes the full duration and never triggers a false-positive premature ending.
+         */
+        fun generateInstrumentalLyrics(
+            durationSeconds: Int,
+            langOrLocale: String? = null,
+            customTag: String? = null,
+        ): String {
+            val tagText = customTag?.trim()?.takeIf { it.isNotBlank() } ?: resolveInstrumentalTag(langOrLocale)
+            val effectiveSeconds = if (durationSeconds > 0) durationSeconds else 180
+            val endMin = effectiveSeconds / 60
+            val endSec = effectiveSeconds % 60
+            val endFormatted = String.format("%02d:%02d.00", endMin, endSec)
+
+            return "[00:00.00] $tagText\n[$endFormatted] $tagText"
+        }
     }
 
     fun execute(item: ReportIssueItem): ComparisonTrackDetails {
@@ -152,79 +242,63 @@ class ExtractTrackDetailsUseCase(
             val parts = baseName.split(" - ", limit = 2)
             val artist = if (parts.size > 1) parts[0].trim() else ""
             val title = if (parts.size > 1) parts[1].trim() else baseName
-            comparison.domain.models.TrackAudioMetadata(
-                title = title,
-                artist = artist,
-                album = "",
-                durationSeconds = 0,
-                hasArtwork = false
+            TrackAudioMetadata(
+                title = title, artist = artist, album = "", durationSeconds = 0, hasArtwork = false
             )
         }
 
         val localRawLyrics = lyricStorage.readText(item.lyricFile)
         val localLines = parseLinesUseCase.execute(localRawLyrics)
 
-        val cleanTitle = metadata.title.replace(Regex("\\s*\\([^)]*\\)"), "").trim()
-        val primaryQuery = "${metadata.artist} ${metadata.title}".trim()
-        val queryWithCleanTitle = "${metadata.artist} $cleanTitle".trim()
-        val titleOnlyQuery = cleanTitle.ifBlank { metadata.title }.trim()
+        // Build comprehensive search query variants:
+        // 1. Artist + Title, 2. Title + Artist, 3. Title only (plus clean title variants)
+        val queryList = buildSearchQueries(metadata.artist, metadata.title)
 
-        // Build comprehensive search query variants so covers/remixes without duration match
-        // still bring back all versions of the song across all providers
-        val queryList = linkedSetOf<String>().apply {
-            if (primaryQuery.isNotBlank()) add(primaryQuery)
-            if (queryWithCleanTitle.isNotBlank()) add(queryWithCleanTitle)
-            if (titleOnlyQuery.isNotBlank()) add(titleOnlyQuery)
-        }.toList()
+        val collectedSearchResults = CopyOnWriteArrayList<LrcLibLyrics>()
+        val collectedExactResults = CopyOnWriteArrayList<LrcLibLyrics>()
 
-        // Run search queries and exact match in parallel across all providers
-        val searchFuture = CompletableFuture.supplyAsync({
-            val allResults = mutableListOf<LrcLibLyrics>()
-            for (query in queryList) {
+        // Run search queries and exact matches in parallel across all providers,
+        // collecting results progressively so no partial results are lost on timeout
+        val queryFutures = queryList.map { query ->
+            CompletableFuture.runAsync({
                 try {
                     val batch = fetchLrcLibUseCase.search(query)
-                    allResults.addAll(batch)
+                    collectedSearchResults.addAll(batch)
                 } catch (_: Exception) {
                 }
-            }
-            allResults
-        }, parallelPool)
+            }, parallelPool)
+        }
 
         // Do NOT pass duration to fetchAllMatches so we don't limit exact lookups by duration
-        val exactFuture = CompletableFuture.supplyAsync({
-            fetchLrcLibUseCase.fetchAllMatches(
-                trackName = metadata.title,
-                artistName = metadata.artist,
-                albumName = metadata.album.takeIf { it.isNotBlank() }
-            )
+        val exactFuture = CompletableFuture.runAsync({
+            try {
+                val exactBatch = fetchLrcLibUseCase.fetchAllMatches(
+                    trackName = metadata.title, artistName = metadata.artist, albumName = metadata.album.takeIf { it.isNotBlank() })
+                collectedExactResults.addAll(exactBatch)
+            } catch (_: Exception) {
+            }
         }, parallelPool)
 
-        val candidatesList = try {
-            searchFuture.get(10, TimeUnit.SECONDS)
+        val allFutures = queryFutures + exactFuture
+        try {
+            CompletableFuture.allOf(*allFutures.toTypedArray()).get(25, TimeUnit.SECONDS)
         } catch (_: Exception) {
-            emptyList()
+            // Preserve all results collected so far in collectedSearchResults and collectedExactResults
         }
 
-        val exactRecords = try {
-            exactFuture.get(10, TimeUnit.SECONDS)
-        } catch (_: Exception) {
-            emptyList()
-        }
-
-        val rawCombined = exactRecords + candidatesList
+        val rawCombined = collectedExactResults.toList() + collectedSearchResults.toList()
 
         val allSearchResults = rawCombined.distinctBy { cand ->
-            if (cand.id != null) {
+            if (cand.id != null && cand.id != 0L) {
                 "${cand.source}:${cand.id}"
             } else {
                 "${cand.source}:${cand.trackName}:${cand.artistName}:${cand.duration}:${cand.syncedLyrics?.hashCode()}:${cand.plainLyrics?.hashCode()}"
             }
         }
 
-        // Deduplicate by (source, id) when id is present, or by content signature,
-        // and strictly enforce > 0 parsed verses (synced or plain) so 0-verse results never appear in filtered candidates.
-        val combinedCandidates = allSearchResults
-            .mapNotNull { normalizeCandidateWithVerses(it) }
+        // Deduplicate and strictly enforce > 0 parsed verses (synced or plain)
+        // so all valid results across all 3 search strategies appear in candidates ordered by duration proximity.
+        val combinedCandidates = allSearchResults.mapNotNull { normalizeCandidateWithVerses(it) }
 
         val remoteRecord = selectBestCandidate(combinedCandidates, metadata.durationSeconds)
         val orderedCandidates = orderCandidates(combinedCandidates, remoteRecord, metadata.durationSeconds)
@@ -245,20 +319,20 @@ class ExtractTrackDetailsUseCase(
         }
 
         return ComparisonTrackDetails(
-            id = item.id,
-            fileName = item.fileName,
-            lyricPath = item.lyricFile.absolutePath,
-            audioPath = item.audioFile?.absolutePath,
-            metadata = metadata,
-            issues = item.issues,
-            localRawLyrics = localRawLyrics,
-            localLines = localLines,
-            remoteRawLyrics = remoteRawLyrics,
-            remoteLines = remoteLines,
-            remoteStatus = remoteStatus,
-            status = item.status,
-            candidates = orderedCandidates,
-            allSearchResults = allSearchResults
+            item.id,
+            item.fileName,
+            item.lyricFile.absolutePath,
+            item.audioFile?.absolutePath,
+            metadata,
+            item.issues,
+            localRawLyrics,
+            localLines,
+            remoteRawLyrics,
+            remoteLines,
+            remoteStatus,
+            item.status,
+            orderedCandidates,
+            allSearchResults
         )
     }
 }

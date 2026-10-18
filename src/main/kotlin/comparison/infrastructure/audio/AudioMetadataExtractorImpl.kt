@@ -28,20 +28,14 @@ class AudioMetadataExtractorImpl : AudioMetadataExtractor {
             val durationSeconds = header?.trackLength ?: 0
             val hasArtwork = tag?.firstArtwork != null
 
+            val fallback = fallbackMetadata(audioFile)
             if (titleFromTag.isNotBlank()) {
                 TrackAudioMetadata(
-                    title = titleFromTag,
-                    artist = artistFromTag,
-                    album = albumFromTag,
-                    durationSeconds = durationSeconds,
-                    hasArtwork = hasArtwork
+                    titleFromTag, artistFromTag.ifBlank { fallback.artist }, albumFromTag, durationSeconds, hasArtwork
                 )
             } else {
-                val fallback = fallbackMetadata(audioFile)
                 fallback.copy(
-                    album = albumFromTag,
-                    durationSeconds = durationSeconds,
-                    hasArtwork = hasArtwork
+                    title = artistFromTag.ifBlank { fallback.artist }, artist = albumFromTag, durationSeconds = durationSeconds, hasArtwork = hasArtwork
                 )
             }
         } catch (_: Exception) {
@@ -67,11 +61,7 @@ class AudioMetadataExtractorImpl : AudioMetadataExtractor {
         val title = if (parts.size > 1) parts[1].trim() else baseName
 
         return TrackAudioMetadata(
-            title = title,
-            artist = artist,
-            album = "",
-            durationSeconds = 0,
-            hasArtwork = false
+            title, artist, "", 0, false
         )
     }
 }

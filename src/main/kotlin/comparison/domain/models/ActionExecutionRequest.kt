@@ -12,4 +12,5 @@ data class ActionExecutionRequest(
     val isFullAnalysis: Boolean = false,
     val moveFiles: Boolean = true,
     val renameFiles: Boolean = true,
+    val includeMissingLyrics: Boolean = true,
 )

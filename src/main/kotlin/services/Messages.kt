@@ -1,6 +1,7 @@
 package services
 
 import java.util.*
+import services.Messages.currentLocale
 
 /**
  * Service providing internationalized strings from resource bundles (`messages.properties`),

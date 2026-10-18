@@ -7,10 +7,6 @@ plugins {
 group = "br.com.dhionata"
 version = findProperty("version") as? String ?: "1.7.0"
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test:+")
     implementation("org.apache.commons:commons-text:+")

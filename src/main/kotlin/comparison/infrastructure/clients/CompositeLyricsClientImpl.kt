@@ -4,13 +4,15 @@ import comparison.application.usecases.ExtractTrackDetailsUseCase
 import comparison.domain.models.LrcLibLyrics
 import comparison.domain.ports.LrcLibClient
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 /**
  * Multi-provider lyrics client that queries LRCLIB and all fallback providers
- * (AppleMusic, Spotify, YouTube, NetEase, QQMusic, KuGou, Musixmatch, Deezer, Genius, Karalyr)
- * in parallel to maximize speed and song coverage.
+ * (AppleMusic, Spotify, YouTube, NetEase, QQMusic, KuGou, Musixmatch, Deezer, Genius)
+ * in parallel and collects each provider's results immediately upon completion
+ * so a slow or rate-limited provider never blocks or discards fast providers' results.
  */
 class CompositeLyricsClientImpl(
     private val providers: List<LrcLibClient> = listOf(
@@ -23,10 +25,9 @@ class CompositeLyricsClientImpl(
         KuGouLyricsClientImpl(),
         MusixmatchLyricsClientImpl(),
         DeezerLyricsClientImpl(),
-        GeniusLyricsClientImpl(),
-        LrcLibClientImpl(baseUrl = "https://karalyr.com", providerName = "Karalyr")
+        GeniusLyricsClientImpl()
     ),
-    private val timeoutSeconds: Long = 8L,
+    private val timeoutSeconds: Long = 10L,
 ) : LrcLibClient {
 
     companion object {
@@ -51,44 +52,52 @@ class CompositeLyricsClientImpl(
         albumName: String?,
         durationSeconds: Int?,
     ): List<LrcLibLyrics> {
+        val collected = CopyOnWriteArrayList<LrcLibLyrics>()
+
         val futures = providers.map { provider ->
-            CompletableFuture.supplyAsync({
+            CompletableFuture.runAsync({
                 try {
-                    provider.getAllLyrics(trackName, artistName, albumName, durationSeconds)
+                    val batch = provider.getAllLyrics(trackName, artistName, albumName, durationSeconds)
+                    if (batch.isNotEmpty()) {
+                        collected.addAll(batch)
+                    }
                 } catch (_: Exception) {
-                    emptyList()
                 }
             }, executor)
         }
 
-        return futures.flatMap { future ->
-            try {
-                future.get(timeoutSeconds, TimeUnit.SECONDS)
-            } catch (_: Exception) {
-                emptyList()
-            }
+        try {
+            CompletableFuture.allOf(*futures.toTypedArray()).get(timeoutSeconds, TimeUnit.SECONDS)
+        } catch (_: Exception) {
+            // Return all results collected from providers that completed within the timeout window
         }
+
+        return collected.toList()
     }
 
     override fun searchLyrics(query: String): List<LrcLibLyrics> {
         if (query.isBlank()) return emptyList()
 
+        val collected = CopyOnWriteArrayList<LrcLibLyrics>()
+
         val futures = providers.map { provider ->
-            CompletableFuture.supplyAsync({
+            CompletableFuture.runAsync({
                 try {
-                    provider.searchLyrics(query)
+                    val batch = provider.searchLyrics(query)
+                    if (batch.isNotEmpty()) {
+                        collected.addAll(batch)
+                    }
                 } catch (_: Exception) {
-                    emptyList()
                 }
             }, executor)
         }
 
-        return futures.flatMap { future ->
-            try {
-                future.get(timeoutSeconds, TimeUnit.SECONDS)
-            } catch (_: Exception) {
-                emptyList()
-            }
+        try {
+            CompletableFuture.allOf(*futures.toTypedArray()).get(timeoutSeconds, TimeUnit.SECONDS)
+        } catch (_: Exception) {
+            // Return all results collected from providers that completed within the timeout window
         }
+
+        return collected.toList()
     }
 }

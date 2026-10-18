@@ -1,6 +1,5 @@
 package services
 
-import comparison.application.services.LyricReviewCoordinatorService
 import interfaces.AudioAnalysisService
 import interfaces.AudioFileHandler
 import interfaces.AudioNomenclatureValidator
@@ -50,10 +49,12 @@ class MusicLyricsService(
         val changes = mutableSetOf<String>()
         val errors = mutableSetOf<Exception>()
         if (incorrectlyNamedFiles.isNotEmpty()) {
-            val txtFileName = "${txtPrefix}_${incorrectlyNamedFiles.hashCode()}.txt"
-            File(txtFileName).writeText(
-                incorrectlyNamedFiles.joinToString("\n") { it.name }
+            val reportFile = AppOutputDirectories.createReportFile(
+                AppOutputDirectories.SUBDIR_INCORRECT_NOMENCLATURE, "${txtPrefix}_${incorrectlyNamedFiles.hashCode()}.txt"
             )
+            val txtFileName = reportFile.path
+            reportFile.writeText(
+                incorrectlyNamedFiles.joinToString("\n") { it.name })
 
             val shouldMove = userInterface.askToMoveIncorrectFiles(incorrectlyNamedFiles.size, txtFileName)
 
@@ -139,10 +140,12 @@ class MusicLyricsService(
 
         val changes = mutableSetOf<String>()
         if (musicFilesWithoutLyrics.isNotEmpty()) {
-            val txtFileName = "MusicsWithoutLyrics_${musicFilesWithoutLyrics.hashCode()}.txt"
-            File(txtFileName).writeText(
-                musicFilesWithoutLyrics.joinToString("\n") { it.name }
+            val reportFile = AppOutputDirectories.createReportFile(
+                AppOutputDirectories.SUBDIR_NO_LYRICS, "MusicsWithoutLyrics_${musicFilesWithoutLyrics.hashCode()}.txt"
             )
+            val txtFileName = reportFile.path
+            reportFile.writeText(
+                musicFilesWithoutLyrics.joinToString("\n") { it.name })
             changes.add(Messages.get("result.found_no_lyrics", musicFilesWithoutLyrics.size, txtFileName))
         } else {
             changes.add(Messages.get("result.no_lyrics_unpaired", audioFiles.size))
@@ -172,9 +175,11 @@ class MusicLyricsService(
         userInterface.closeProgress()
 
         if (lyricsFilesWithoutSync.isNotEmpty()) {
-            File("LyricsWithoutSync_${lyricsFilesWithoutSync.hashCode()}.txt").writeText(
-                lyricsFilesWithoutSync.joinToString("\n") { it.name }
+            val reportFile = AppOutputDirectories.createReportFile(
+                AppOutputDirectories.SUBDIR_UNSYNCED_LYRICS, "LyricsWithoutSync_${lyricsFilesWithoutSync.hashCode()}.txt"
             )
+            reportFile.writeText(
+                lyricsFilesWithoutSync.joinToString("\n") { it.name })
         }
 
         val changes = mutableSetOf<String>()
@@ -183,7 +188,7 @@ class MusicLyricsService(
         userInterface.showProgress(Messages.get("progress.move_unsynced"), lyricsFilesWithoutSync.size)
         lyricsFilesWithoutSync.forEachIndexed { index, lyric ->
             userInterface.updateProgress(index + 1, lyric.name)
-            val (_, moveResult) = fileService.moveLyricFile(lyric, outDirectory)
+            val [_, moveResult] = fileService.moveLyricFile(lyric, outDirectory)
             changes.addAll(moveResult.changedSet)
             errors.addAll(moveResult.errorSet)
         }
@@ -213,10 +218,11 @@ class MusicLyricsService(
         val errors = mutableSetOf<Exception>()
 
         if (lyricsFilesWithV1.isNotEmpty()) {
-            val txtFileName = "LyricsWithV1_${lyricsFilesWithV1.hashCode()}.txt"
-            File(txtFileName).writeText(
-                lyricsFilesWithV1.joinToString("\n") { it.name }
+            val reportFile = AppOutputDirectories.createReportFile(
+                AppOutputDirectories.SUBDIR_V1_LYRICS, "LyricsWithV1_${lyricsFilesWithV1.hashCode()}.txt"
             )
+            reportFile.writeText(
+                lyricsFilesWithV1.joinToString("\n") { it.name })
 
             userInterface.showProgress(Messages.get("progress.remove_v1"), lyricsFilesWithV1.size)
             lyricsFilesWithV1.forEachIndexed { index, lyricFile ->
@@ -261,7 +267,7 @@ class MusicLyricsService(
         aloneLyrics.forEachIndexed { index, lyric ->
             userInterface.updateProgress(index + 1, lyric.name)
             val parentFolder = lyric.parentFile
-            val (_, moveResult) = fileService.moveLyricFile(lyric, outDirectory)
+            val [_, moveResult] = fileService.moveLyricFile(lyric, outDirectory)
             changes.addAll(moveResult.changedSet)
             errors.addAll(moveResult.errorSet)
             movedLyricsNames.add(lyric.name)
@@ -275,7 +281,10 @@ class MusicLyricsService(
         userInterface.closeProgress()
 
         if (movedLyricsNames.isNotEmpty()) {
-            File("AloneLyricsMoved_${movedLyricsNames.hashCode()}.txt").writeText(
+            val reportFile = AppOutputDirectories.createReportFile(
+                AppOutputDirectories.SUBDIR_ALONE_LYRICS, "AloneLyricsMoved_${movedLyricsNames.hashCode()}.txt"
+            )
+            reportFile.writeText(
                 movedLyricsNames.joinToString("\n")
             )
         }
@@ -302,10 +311,7 @@ class MusicLyricsService(
         logService.info("log.nomenclature.checked", audioFiles.size, incorrectlyNamedFiles.size)
 
         val (changedSet, errorSet) = processIncorrectlyNamedFiles(
-            incorrectlyNamedFiles,
-            "AdvancedIncorrectNomenclatureMoved",
-            "result.moved_incorrect",
-            "result.all_correct"
+            incorrectlyNamedFiles, "AdvancedIncorrectNomenclatureMoved", "result.moved_incorrect", "result.all_correct"
         )
         userInterface.showResult(changedSet, errorSet)
 
@@ -344,8 +350,11 @@ class MusicLyricsService(
         logService.info("log.spectrum.checked", audioFiles.size, fakeFiles.size)
 
         if (fakeFiles.isNotEmpty()) {
-            val txtFileName = "FakeLossless_${fakeFiles.hashCode()}.txt"
-            File(txtFileName).writeText(analysisResults.joinToString("\n"))
+            val reportFile = AppOutputDirectories.createReportFile(
+                AppOutputDirectories.SUBDIR_FAKE_FLAC, "FakeLossless_${fakeFiles.hashCode()}.txt"
+            )
+            val txtFileName = reportFile.path
+            reportFile.writeText(analysisResults.joinToString("\n"))
 
             val shouldMove = userInterface.askToMoveFakeLossless(fakeFiles.size, txtFileName)
 
@@ -378,7 +387,7 @@ class MusicLyricsService(
         return fakeFiles
     }
 
-    fun verifyLyricsSyncAndCompatibility(): List<LyricValidationIssue> {
+    fun verifyLyricsSyncAndCompatibility(includeMissingLyrics: Boolean = true): List<LyricValidationIssue> {
         val musicDirectory = getValidatedMusicDirectory(Messages.get("prompt.select.music_lyrics_dir"))
         val lyricFiles = lyricFileHandler.getLyricFiles(musicDirectory)
         val audioFiles = audioFileHandler.getAudioFiles(musicDirectory)
@@ -386,22 +395,23 @@ class MusicLyricsService(
         val changes = mutableSetOf<String>()
         val errors = mutableSetOf<Exception>()
 
-        if (lyricFiles.isEmpty()) {
+        if (lyricFiles.isEmpty() && (!includeMissingLyrics || audioFiles.isEmpty())) {
             changes.add(Messages.get("result.no_lyrics_found"))
             userInterface.showResult(changes, errors)
             return emptyList()
         }
 
         val audioMap = audioFiles.groupBy { it.nameWithoutExtension.lowercase() }
+        val lyricMap = lyricFiles.groupBy { it.nameWithoutExtension.lowercase() }
         val allIssues = mutableListOf<LyricValidationIssue>()
 
-        userInterface.showProgress(Messages.get("progress.check_sync_compatibility"), lyricFiles.size)
+        val totalSteps = lyricFiles.size + if (includeMissingLyrics) audioFiles.size else 0
+        userInterface.showProgress(Messages.get("progress.check_sync_compatibility"), totalSteps.coerceAtLeast(1))
         lyricFiles.forEachIndexed { index, lyricFile ->
             userInterface.updateProgress(index + 1, lyricFile.name)
             try {
                 val candidates = audioMap[lyricFile.nameWithoutExtension.lowercase()]
-                val matchingAudio = candidates?.find { it.parentFile == lyricFile.parentFile }
-                    ?: candidates?.firstOrNull()
+                val matchingAudio = candidates?.find { it.parentFile == lyricFile.parentFile } ?: candidates?.firstOrNull()
 
                 val issues = lyricSyncValidator.validate(lyricFile, matchingAudio)
                 allIssues.addAll(issues)
@@ -409,11 +419,35 @@ class MusicLyricsService(
                 errors.add(e)
             }
         }
+
+        if (includeMissingLyrics) {
+            audioFiles.forEachIndexed { index, audioFile ->
+                userInterface.updateProgress(lyricFiles.size + index + 1, audioFile.name)
+                try {
+                    val siblingLrc = File(audioFile.parentFile, "${audioFile.nameWithoutExtension}.lrc")
+                    val matchingLyrics = lyricMap[audioFile.nameWithoutExtension.lowercase()]
+                    val hasMatchingLrc = siblingLrc.exists() || !matchingLyrics.isNullOrEmpty()
+                    if (!hasMatchingLrc) {
+                        allIssues.add(
+                            LyricValidationIssue(
+                                lyricFile = siblingLrc, audioFile = audioFile, issueType = "SEM_LETRA", description = Messages.get("lyric.issue.missing_lyric")
+                            )
+                        )
+                    }
+                } catch (e: Exception) {
+                    errors.add(e)
+                }
+            }
+        }
         userInterface.closeProgress()
 
         if (allIssues.isNotEmpty()) {
             val distinctProblematicFiles = allIssues.map { it.lyricFile }.distinct()
-            val txtFileName = "LyricsSyncIssues_${allIssues.hashCode()}.txt"
+            val existingProblematicFiles = distinctProblematicFiles.filter { it.exists() }
+            val reportFile = AppOutputDirectories.createReportFile(
+                AppOutputDirectories.SUBDIR_SYNC_REPORTS, "LyricsSyncIssues_${allIssues.hashCode()}.txt"
+            )
+            val txtFileName = reportFile.path
 
             logService.warning("log.sync.checked", lyricFiles.size, allIssues.size)
 
@@ -424,7 +458,7 @@ class MusicLyricsService(
                 appendLine("=".repeat(70))
                 appendLine()
 
-                allIssues.groupBy { it.lyricFile }.forEach { (file, fileIssues) ->
+                allIssues.groupBy { it.lyricFile }.forEach { [file, fileIssues] ->
                     appendLine(Messages.get("lyric.report.file_label", file.name))
                     appendLine(Messages.get("lyric.report.path_label", file.absolutePath))
                     val audio = fileIssues.firstOrNull()?.audioFile
@@ -439,19 +473,19 @@ class MusicLyricsService(
                 }
             }
 
-            File(txtFileName).writeText(reportContent)
+            reportFile.writeText(reportContent)
 
-            val shouldMove = userInterface.askToMoveProblematicLyrics(distinctProblematicFiles.size, txtFileName)
+            val shouldMove = existingProblematicFiles.isNotEmpty() && userInterface.askToMoveProblematicLyrics(existingProblematicFiles.size, txtFileName)
 
             if (shouldMove) {
                 val outDirectory = directoryService.getDirectory(Messages.get("prompt.select.move_problematic_lyrics"))
                 val movedFiles = mutableListOf<String>()
 
-                userInterface.showProgress(Messages.get("progress.move_problematic_lyrics"), distinctProblematicFiles.size)
-                distinctProblematicFiles.forEachIndexed { index, file ->
+                userInterface.showProgress(Messages.get("progress.move_problematic_lyrics"), existingProblematicFiles.size)
+                existingProblematicFiles.forEachIndexed { index, file ->
                     userInterface.updateProgress(index + 1, file.name)
                     try {
-                        val (_, moveResult) = fileService.moveLyricFile(file, outDirectory)
+                        val [_, moveResult] = fileService.moveLyricFile(file, outDirectory)
                         changes.addAll(moveResult.changedSet)
                         errors.addAll(moveResult.errorSet)
                         movedFiles.add(file.name)
@@ -461,7 +495,7 @@ class MusicLyricsService(
                 }
                 userInterface.closeProgress()
 
-                changes.add(Messages.get("result.moved_problematic_lyrics", txtFileName, movedFiles.size, distinctProblematicFiles.size, outDirectory.absolutePath))
+                changes.add(Messages.get("result.moved_problematic_lyrics", txtFileName, movedFiles.size, existingProblematicFiles.size, outDirectory.absolutePath))
             } else {
                 changes.add(Messages.get("result.found_problematic_lyrics", distinctProblematicFiles.size, txtFileName))
             }
@@ -475,16 +509,4 @@ class MusicLyricsService(
         return allIssues
     }
 
-    /**
-     * Launches the embedded web server and opens the browser for interactive
-     * side-by-side lyrics comparison with LRCLIB.
-     *
-     * @param coordinatorService The coordinator service managing server lifecycle.
-     * @return The bound web interface URL.
-     */
-    fun launchLyricComparisonWeb(
-        coordinatorService: LyricReviewCoordinatorService = LyricReviewCoordinatorService(),
-    ): String {
-        return coordinatorService.startReview()
-    }
 }

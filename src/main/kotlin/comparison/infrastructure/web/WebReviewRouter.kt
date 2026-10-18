@@ -1,6 +1,7 @@
 package comparison.infrastructure.web
 
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpHandler
 import comparison.application.usecases.ExtractTrackDetailsUseCase
@@ -44,23 +45,26 @@ class WebReviewRouter(
         val method = exchange.requestMethod
 
         try {
-            when {
-                path == "/" && method == "GET" -> handleIndex(exchange)
-                path == "/api/reports" && method == "GET" -> handleListReports(exchange)
-                path == "/api/items" && method == "GET" -> handleGetItems(exchange)
-                path == "/api/track" && method == "GET" -> handleGetTrack(exchange)
-                path == "/api/audio" && method == "GET" -> handleStreamAudio(exchange)
-                path == "/api/artwork" && method == "GET" -> handleGetArtwork(exchange)
-                path == "/api/save" && method == "POST" -> handleSaveLyric(exchange)
-                path == "/api/search" && method == "GET" -> handleSearchRemote(exchange)
-                path == "/api/open-location" && method == "GET" -> handleOpenLocation(exchange)
-                path == "/api/parse-lrc" && method == "POST" -> handleParseLrc(exchange)
-                path == "/api/menu-options" && method == "GET" -> handleMenuOptions(exchange)
-                path == "/api/action/execute" && method == "POST" -> handleActionExecute(exchange)
-                path == "/api/action/status" && method == "GET" -> handleActionStatus(exchange)
-                path == "/api/action/browse-dir" && method == "GET" -> handleActionBrowseDir(exchange)
-                path == "/api/action/config" && method == "GET" -> handleActionConfig(exchange)
-                path == "/api/locale" && method == "GET" -> handleLocale(exchange)
+            when (path) {
+                "/" if method == "GET" -> handleIndex(exchange)
+                "/api/reports" if method == "GET" -> handleListReports(exchange)
+                "/api/items" if method == "GET" -> handleGetItems(exchange)
+                "/api/track" if method == "GET" -> handleGetTrack(exchange)
+                "/api/audio" if method == "GET" -> handleStreamAudio(exchange)
+                "/api/artwork" if method == "GET" -> handleGetArtwork(exchange)
+                "/api/save" if method == "POST" -> handleSaveLyric(exchange)
+                "/api/instrumental" if method == "POST" -> handleGenerateInstrumental(exchange)
+                "/api/save-best" if method == "POST" -> handleSaveBestForTrack(exchange)
+                "/api/batch-save-best" if method == "POST" -> handleBatchSaveBest(exchange)
+                "/api/search" if method == "GET" -> handleSearchRemote(exchange)
+                "/api/open-location" if method == "GET" -> handleOpenLocation(exchange)
+                "/api/parse-lrc" if method == "POST" -> handleParseLrc(exchange)
+                "/api/menu-options" if method == "GET" -> handleMenuOptions(exchange)
+                "/api/action/execute" if method == "POST" -> handleActionExecute(exchange)
+                "/api/action/status" if method == "GET" -> handleActionStatus(exchange)
+                "/api/action/browse-dir" if method == "GET" -> handleActionBrowseDir(exchange)
+                "/api/action/config" if method == "GET" -> handleActionConfig(exchange)
+                "/api/locale" if method == "GET" -> handleLocale(exchange)
                 else -> sendJsonResponse(exchange, 404, mapOf("error" to Messages.get("error.endpoint_not_found", path)))
             }
         } catch (e: Exception) {
@@ -83,10 +87,7 @@ class WebReviewRouter(
     private fun handleMenuOptions(exchange: HttpExchange) {
         val options = (0..8).map { index ->
             mapOf(
-                "id" to index,
-                "title" to Messages.get("menu.option.$index.title"),
-                "hint" to Messages.get("menu.option.$index.hint"),
-                "isComparator" to (index == 8)
+                "id" to index, "title" to Messages.get("menu.option.$index.title"), "hint" to Messages.get("menu.option.$index.hint"), "isComparator" to (index == 8)
             )
         }
         sendJsonResponse(exchange, 200, options)
@@ -164,12 +165,8 @@ class WebReviewRouter(
                 "hint" to Messages.get("menu.option.5.hint"),
                 "description" to Messages.get("action.5.description"),
                 "inputs" to listOf(
-                    mapOf("key" to "musicDir", "label" to Messages.get("prompt.select.music_base_dir"), "required" to true, "placeholder" to "Ex: C:\\Musicas"),
-                    mapOf(
-                        "key" to "outDir",
-                        "label" to Messages.get("prompt.select.move_incorrect"),
-                        "required" to false,
-                        "placeholder" to "Ex: C:\\NomesIncorretos (opcional)"
+                    mapOf("key" to "musicDir", "label" to Messages.get("prompt.select.music_base_dir"), "required" to true, "placeholder" to "Ex: C:\\Musicas"), mapOf(
+                        "key" to "outDir", "label" to Messages.get("prompt.select.move_incorrect"), "required" to false, "placeholder" to "Ex: C:\\NomesIncorretos (opcional)"
                     )
                 ),
                 "options" to listOf(
@@ -192,8 +189,7 @@ class WebReviewRouter(
                             mapOf("value" to false, "label" to Messages.get("dialog.confirm.analysis_type_option_quick")),
                             mapOf("value" to true, "label" to Messages.get("dialog.confirm.analysis_type_option_full"))
                         ), "default" to false
-                    ),
-                    mapOf("key" to "moveFiles", "label" to Messages.get("action.6.opt.move_files"), "type" to "checkbox", "default" to false)
+                    ), mapOf("key" to "moveFiles", "label" to Messages.get("action.6.opt.move_files"), "type" to "checkbox", "default" to false)
                 )
             )
 
@@ -203,8 +199,7 @@ class WebReviewRouter(
                 "hint" to Messages.get("menu.option.7.hint"),
                 "description" to Messages.get("action.7.description"),
                 "inputs" to listOf(
-                    mapOf("key" to "musicDir", "label" to Messages.get("prompt.select.music_lyrics_dir"), "required" to true, "placeholder" to "Ex: C:\\Musicas"),
-                    mapOf(
+                    mapOf("key" to "musicDir", "label" to Messages.get("prompt.select.music_lyrics_dir"), "required" to true, "placeholder" to "Ex: C:\\Musicas"), mapOf(
                         "key" to "outDir",
                         "label" to Messages.get("prompt.select.move_problematic_lyrics"),
                         "required" to false,
@@ -212,6 +207,7 @@ class WebReviewRouter(
                     )
                 ),
                 "options" to listOf(
+                    mapOf("key" to "includeMissingLyrics", "label" to Messages.get("action.7.opt.include_missing_lyrics"), "type" to "checkbox", "default" to true),
                     mapOf("key" to "moveFiles", "label" to Messages.get("action.7.opt.move_files"), "type" to "checkbox", "default" to false)
                 )
             )
@@ -242,10 +238,7 @@ class WebReviewRouter(
     }
 
     private fun handleListReports(exchange: HttpExchange) {
-        val rootDir = File(".")
-        val reportFiles = rootDir.listFiles { file ->
-            file.isFile && file.name.startsWith("LyricsSyncIssues_") && file.name.endsWith(".txt")
-        }?.map { it.canonicalPath } ?: emptyList()
+        val reportFiles = services.AppOutputDirectories.findAllSyncIssueReports().map { it.canonicalPath }
 
         sendJsonResponse(exchange, 200, reportFiles)
     }
@@ -255,11 +248,9 @@ class WebReviewRouter(
         val reportPath = queryParams["report"]
 
         val reportFile = if (!reportPath.isNullOrBlank()) {
-            File(reportPath)
+            services.AppOutputDirectories.resolveSyncReportFile(reportPath)
         } else {
-            File(".").listFiles { f ->
-                f.isFile && f.name.startsWith("LyricsSyncIssues_") && f.name.endsWith(".txt")
-            }?.firstOrNull() ?: File("LyricsSyncIssues_331299062.txt")
+            services.AppOutputDirectories.findAllSyncIssueReports().firstOrNull() ?: File("LyricsSyncIssues_331299062.txt")
         }
 
         val items = parseReportUseCase.execute(reportFile)
@@ -268,10 +259,7 @@ class WebReviewRouter(
 
         val simplifiedItems = items.map {
             mapOf(
-                "id" to it.id,
-                "fileName" to it.fileName,
-                "issues" to it.issues,
-                "status" to it.status
+                "id" to it.id, "fileName" to it.fileName, "issues" to it.issues, "status" to it.status
             )
         }
 
@@ -332,10 +320,126 @@ class WebReviewRouter(
         val result = saveLyricUseCase.execute(request)
 
         cachedItems.values.find { it.lyricFile.absolutePath == request.lyricPath }?.let {
-            it.status = if (request.choice.equals("LRCLIB", ignoreCase = true)) "SAVED_LRCLIB" else "KEPT_LOCAL"
+            it.status = if (request.choice.equals("LRCLIB", true)) "SAVED_LRCLIB" else "KEPT_LOCAL"
         }
 
         sendJsonResponse(exchange, 200, result)
+    }
+
+    private fun handleGenerateInstrumental(exchange: HttpExchange) {
+        val bodyMap = parseJsonBodyMap(exchange)
+
+        val itemId = (bodyMap["id"] as? Number)?.toInt()
+        val cachedItem = itemId?.let { cachedItems[it] }
+        val lyricPath = (bodyMap["lyricPath"] as? String)?.takeIf { it.isNotBlank() } ?: cachedItem?.lyricFile?.absolutePath ?: ""
+
+        var durationSeconds = (bodyMap["durationSeconds"] as? Number)?.toInt() ?: 0
+        if (durationSeconds <= 0 && cachedItem?.audioFile != null && cachedItem.audioFile.exists()) {
+            durationSeconds = audioMetadataExtractor.extractMetadata(cachedItem.audioFile).durationSeconds
+        }
+
+        val lang = bodyMap["lang"] as? String
+        val customTag = bodyMap["customTag"] as? String
+        val autoSave = (bodyMap["autoSave"] as? Boolean) ?: true
+
+        val lrcContent = ExtractTrackDetailsUseCase.generateInstrumentalLyrics(
+            durationSeconds, lang, customTag
+        )
+        val parsedLines = parseLinesUseCase.execute(lrcContent)
+
+        if (autoSave && lyricPath.isNotBlank()) {
+            val saveRes = saveLyricUseCase.execute(
+                SaveLyricRequest(
+                    lyricPath, "LOCAL", lrcContent
+                )
+            )
+            if (saveRes.success) {
+                cachedItems.values.find { it.lyricFile.absolutePath == lyricPath }?.let {
+                    it.status = "KEPT_LOCAL"
+                }
+            }
+            sendJsonResponse(
+                exchange, 200, mapOf(
+                    "success" to saveRes.success, "message" to saveRes.message, "lrcContent" to lrcContent, "lines" to parsedLines, "status" to "KEPT_LOCAL"
+                )
+            )
+        } else {
+            sendJsonResponse(
+                exchange, 200, mapOf(
+                    "success" to true, "lrcContent" to lrcContent, "lines" to parsedLines
+                )
+            )
+        }
+    }
+
+    private fun saveBestCandidateForItem(item: ReportIssueItem): Map<String, Any?> {
+        val details = extractDetailsUseCase.execute(item)
+        val bestCandidate = details.candidates.firstOrNull()
+        val bestLyrics = bestCandidate?.let { it.syncedLyrics ?: it.plainLyrics } ?: details.remoteRawLyrics
+
+        if (bestLyrics.isNullOrBlank()) {
+            return mapOf(
+                "id" to item.id, "fileName" to item.fileName, "success" to false, "status" to item.status, "message" to "Nenhuma letra compatível encontrada"
+            )
+        }
+
+        val saveRes = saveLyricUseCase.execute(
+            SaveLyricRequest(
+                item.lyricFile.absolutePath, bestLyrics, bestLyrics
+            )
+        )
+        if (saveRes.success) {
+            item.status = "SAVED_LRCLIB"
+        }
+
+        return mapOf(
+            "id" to item.id,
+            "fileName" to item.fileName,
+            "success" to saveRes.success,
+            "status" to item.status,
+            "source" to (bestCandidate?.source ?: "LRCLIB"),
+            "duration" to bestCandidate?.duration,
+            "message" to saveRes.message
+        )
+    }
+
+    private fun handleSaveBestForTrack(exchange: HttpExchange) {
+        val bodyMap = parseJsonBodyMap(exchange)
+        val queryParams = parseQueryParams(exchange)
+        val id = (bodyMap["id"] as? Number)?.toInt() ?: queryParams["id"]?.toIntOrNull()
+
+        if (id == null || !cachedItems.containsKey(id)) {
+            sendJsonResponse(exchange, 404, mapOf("error" to Messages.get("error.track_not_found", id.toString())))
+            return
+        }
+
+        val item = cachedItems[id]!!
+        val res = saveBestCandidateForItem(item)
+        sendJsonResponse(exchange, 200, res)
+    }
+
+    private fun handleBatchSaveBest(exchange: HttpExchange) {
+        val bodyMap = parseJsonBodyMap(exchange)
+
+        val requestedIds = (bodyMap["ids"] as? List<*>)?.mapNotNull { (it as? Number)?.toInt() }
+        val onlyPending = (bodyMap["onlyPending"] as? Boolean) ?: true
+
+        val targetItems = when {
+            !requestedIds.isNullOrEmpty() -> requestedIds.mapNotNull { cachedItems[it] }
+            onlyPending -> cachedItems.values.filter { it.status == "PENDING" }
+            else -> cachedItems.values.toList()
+        }
+
+        val results = targetItems.map { item ->
+            saveBestCandidateForItem(item)
+        }
+        val savedCount = results.count { it["success"] == true }
+
+        sendJsonResponse(
+            exchange, 200, mapOf(
+                "total" to targetItems.size, "savedCount" to savedCount, "failedCount" to (targetItems.size - savedCount), "results" to results
+            )
+        )
     }
 
     private fun handleSearchRemote(exchange: HttpExchange) {
@@ -355,23 +459,41 @@ class WebReviewRouter(
     private fun handleParseLrc(exchange: HttpExchange) {
         val bodyString = exchange.requestBody.reader(StandardCharsets.UTF_8).use { it.readText() }
         val syncedLines = parseLinesUseCase.execute(bodyString)
-        val lines = if (syncedLines.isNotEmpty()) {
-            syncedLines
-        } else {
+        val lines = syncedLines.ifEmpty {
             parseLinesUseCase.executePlain(bodyString)
         }
         sendJsonResponse(exchange, 200, lines)
     }
 
     private fun sendJsonResponse(exchange: HttpExchange, statusCode: Int, data: Any) {
-        val jsonBytes = gson.toJson(data).toByteArray(StandardCharsets.UTF_8)
+        val jsonString = gson.toJson(data)
+        val path = exchange.requestURI.path
+        // Log all API requests except repetitive in-progress status polling
+        val shouldLog = path != "/api/action/status" || statusCode != 200
+        if (shouldLog) {
+            services.LoggingInitializer.logHttpExchange(
+                "WEB ROUTER INTERNO", exchange.requestMethod, exchange.requestURI.toString(), responseStatus = statusCode, responseBody = jsonString
+            )
+        }
+
+        val jsonBytes = jsonString.toByteArray(StandardCharsets.UTF_8)
         exchange.responseHeaders.set("Content-Type", "application/json; charset=utf-8")
         exchange.sendResponseHeaders(statusCode, jsonBytes.size.toLong())
         exchange.responseBody.use { it.write(jsonBytes) }
     }
 
-    private fun parseQueryParams(exchange: HttpExchange): Map<String, String> =
-        parseQueryParams(exchange.requestURI.rawQuery)
+    private fun parseJsonBodyMap(exchange: HttpExchange): Map<String, Any?> {
+        val bodyString = exchange.requestBody.reader(StandardCharsets.UTF_8).use { it.readText() }
+        if (bodyString.isBlank()) return emptyMap()
+        return try {
+            val mapType = object : TypeToken<Map<String, Any?>>() {}.type
+            gson.fromJson<Map<String, Any?>>(bodyString, mapType) ?: emptyMap()
+        } catch (_: Exception) {
+            emptyMap()
+        }
+    }
+
+    private fun parseQueryParams(exchange: HttpExchange): Map<String, String> = parseQueryParams(exchange.requestURI.rawQuery)
 
     companion object {
         /**

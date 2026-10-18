@@ -22,15 +22,12 @@ import okhttp3.Request
  * Only returns candidates that have > 0 valid verses (synced or plain).
  */
 class KuGouLyricsClientImpl(
-    private val httpClient: OkHttpClient = OkHttpClient.Builder()
-        .connectTimeout(6, TimeUnit.SECONDS)
-        .readTimeout(6, TimeUnit.SECONDS)
-        .build(),
+    private val httpClient: OkHttpClient = HttpRateLimitInterceptor.createDefaultHttpClient(),
     private val gson: Gson = Gson(),
-    private val songSearchBaseUrl: String = "http://mobilecdn.kugou.com",
-    private val lyricSearchBaseUrl: String = "http://krcs.kugou.com",
-    private val lyricDownloadBaseUrl: String = "http://lyrics.kugou.com",
-    private val maxCandidates: Int = 3,
+    private val songSearchBaseUrl: String = "https://mobilecdn.kugou.com",
+    private val lyricSearchBaseUrl: String = "https://krcs.kugou.com",
+    private val lyricDownloadBaseUrl: String = "https://lyrics.kugou.com",
+    private val maxCandidates: Int = 4,
     private val lyricParser: LyricLineParser = LyricLineParserImpl(),
 ) : LrcLibClient {
 
@@ -106,7 +103,7 @@ class KuGouLyricsClientImpl(
 
         return futures.mapNotNull { future ->
             try {
-                future.get(6, TimeUnit.SECONDS)
+                future.get(12, TimeUnit.SECONDS)
             } catch (_: Exception) {
                 null
             }

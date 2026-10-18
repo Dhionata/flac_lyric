@@ -51,7 +51,7 @@ class WebActionRunnerService(
             desktopDirectoryService.getDirectory(title).canonicalPath
         } catch (_: OperationCancelledException) {
             null
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }
@@ -108,7 +108,7 @@ class WebActionRunnerService(
                     4 -> service.findAndMoveAloneLyrics()
                     5 -> service.verifyAdvancedNomenclature()
                     6 -> service.verifyFakeFlacFiles()
-                    7 -> service.verifyLyricsSyncAndCompatibility()
+                    7 -> service.verifyLyricsSyncAndCompatibility(request.includeMissingLyrics)
                     else -> progressUi.showError(Messages.get("error.unknown_option", request.actionId))
                 }
             } catch (_: OperationCancelledException) {

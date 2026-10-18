@@ -6,7 +6,6 @@ import comparison.domain.models.LrcLibLyrics
 import comparison.domain.ports.LrcLibClient
 import comparison.domain.ports.LyricLineParser
 import comparison.infrastructure.parsers.LyricLineParserImpl
-import java.util.concurrent.TimeUnit
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -17,10 +16,7 @@ import okhttp3.Request
  * Only returns candidates that have > 0 valid verses (synced or plain).
  */
 class MusixmatchLyricsClientImpl(
-    private val httpClient: OkHttpClient = OkHttpClient.Builder()
-        .connectTimeout(6, TimeUnit.SECONDS)
-        .readTimeout(6, TimeUnit.SECONDS)
-        .build(),
+    private val httpClient: OkHttpClient = HttpRateLimitInterceptor.createDefaultHttpClient(),
     private val gson: Gson = Gson(),
     private val baseUrl: String = "https://apic-desktop.musixmatch.com/ws/1.1",
     private val lyricParser: LyricLineParser = LyricLineParserImpl(),
@@ -40,7 +36,22 @@ class MusixmatchLyricsClientImpl(
         albumName: String?,
         durationSeconds: Int?,
     ): LrcLibLyrics? {
-        if (trackName.isBlank() && artistName.isBlank()) return null
+        return fetchSubtitles(
+            trackName = trackName,
+            artistName = artistName,
+            albumName = albumName,
+            durationSeconds = durationSeconds
+        )
+    }
+
+    private fun fetchSubtitles(
+        trackName: String,
+        artistName: String,
+        albumName: String? = null,
+        durationSeconds: Int? = null,
+        freeQuery: String? = null,
+    ): LrcLibLyrics? {
+        if (trackName.isBlank() && artistName.isBlank() && freeQuery.isNullOrBlank()) return null
         val token = getValidToken() ?: return null
 
         val urlBuilder = "$baseUrl/macro.subtitles.get".toHttpUrlOrNull()?.newBuilder() ?: return null
@@ -49,8 +60,15 @@ class MusixmatchLyricsClientImpl(
         urlBuilder.addQueryParameter("namespace", "lyrics_richsynched")
         urlBuilder.addQueryParameter("subtitle_format", "lrc")
         urlBuilder.addQueryParameter("usertoken", token)
-        urlBuilder.addQueryParameter("q_track", trackName)
-        urlBuilder.addQueryParameter("q_artist", artistName)
+        if (!freeQuery.isNullOrBlank()) {
+            urlBuilder.addQueryParameter("q", freeQuery)
+        }
+        if (trackName.isNotBlank()) {
+            urlBuilder.addQueryParameter("q_track", trackName)
+        }
+        if (artistName.isNotBlank()) {
+            urlBuilder.addQueryParameter("q_artist", artistName)
+        }
         if (!albumName.isNullOrBlank()) {
             urlBuilder.addQueryParameter("q_album", albumName)
         }
@@ -79,14 +97,15 @@ class MusixmatchLyricsClientImpl(
                     ?.getAsJsonObject("body")
                     ?.getAsJsonObject("track")
 
-                val foundTrackName = trackObj?.get("track_name")?.takeIf { !it.isJsonNull }?.asString ?: trackName
+                val fallbackTrack = trackName.ifBlank { freeQuery.orEmpty() }
+                val foundTrackName = trackObj?.get("track_name")?.takeIf { !it.isJsonNull }?.asString ?: fallbackTrack
                 val foundArtistName = trackObj?.get("artist_name")?.takeIf { !it.isJsonNull }?.asString ?: artistName
                 val foundAlbumName = trackObj?.get("album_name")?.takeIf { !it.isJsonNull }?.asString ?: albumName
                 val trackId = trackObj?.get("track_id")?.takeIf { !it.isJsonNull }?.asLong ?: 0L
                 val trackLength = trackObj?.get("track_length")?.takeIf { !it.isJsonNull }?.asDouble
 
                 // Guard against Musixmatch anti-bot dummy track ("NOKIA" by "Drake")
-                if (foundTrackName.equals("NOKIA", ignoreCase = true) && !trackName.contains("NOKIA", ignoreCase = true)) {
+                if (foundTrackName.equals("NOKIA", ignoreCase = true) && !fallbackTrack.contains("NOKIA", ignoreCase = true)) {
                     return null
                 }
 
@@ -140,17 +159,11 @@ class MusixmatchLyricsClientImpl(
     override fun searchLyrics(query: String): List<LrcLibLyrics> {
         if (query.isBlank()) return emptyList()
         val parts = query.split(" - ", limit = 2)
-        val (artist, track) = if (parts.size == 2) {
-            parts[0].trim() to parts[1].trim()
+        val single = if (parts.size == 2) {
+            getLyrics(trackName = parts[1].trim(), artistName = parts[0].trim())
         } else {
-            val words = query.trim().split(Regex("\\s+"))
-            if (words.size >= 2) {
-                words.take(words.size / 2).joinToString(" ") to words.drop(words.size / 2).joinToString(" ")
-            } else {
-                "" to query.trim()
-            }
+            fetchSubtitles(trackName = "", artistName = "", freeQuery = query.trim())
         }
-        val single = getLyrics(trackName = track, artistName = artist)
         return if (single != null) listOf(single) else emptyList()
     }
 

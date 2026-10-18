@@ -6,8 +6,6 @@ import com.google.gson.JsonObject
 import comparison.application.usecases.ExtractTrackDetailsUseCase
 import comparison.domain.models.LrcLibLyrics
 import comparison.domain.ports.LrcLibClient
-import comparison.domain.ports.LyricLineParser
-import comparison.infrastructure.parsers.LyricLineParserImpl
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -20,15 +18,11 @@ import okhttp3.Request
  * using the same architecture as `Lambada10/SongSync`.
  */
 class AppleMusicLyricsClientImpl(
-    private val httpClient: OkHttpClient = OkHttpClient.Builder()
-        .connectTimeout(6, TimeUnit.SECONDS)
-        .readTimeout(6, TimeUnit.SECONDS)
-        .build(),
+    private val httpClient: OkHttpClient = HttpRateLimitInterceptor.createDefaultHttpClient(),
     private val gson: Gson = Gson(),
     private val appleCatalogBaseUrl: String = "https://amp-api.music.apple.com/v1/catalog/us",
     private val paxLyricsBaseUrl: String = "https://lyrics.paxsenix.org",
-    private val maxCandidates: Int = 3,
-    private val lineParser: LyricLineParser = LyricLineParserImpl(),
+    private val maxCandidates: Int = 4,
 ) : LrcLibClient {
 
     private val appleWebUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/119.0"
@@ -124,7 +118,7 @@ class AppleMusicLyricsClientImpl(
 
         return futures.mapNotNull { future ->
             try {
-                future.get(7, TimeUnit.SECONDS)
+                future.get(12, TimeUnit.SECONDS)
             } catch (_: Exception) {
                 null
             }
@@ -136,48 +130,41 @@ class AppleMusicLyricsClientImpl(
             ?.addQueryParameter("id", song.id.toString())
             ?.build() ?: return null
 
-        for (attempt in 1..2) {
-            val request = Request.Builder()
-                .url(url)
-                .header("User-Agent", paxUserAgent)
-                .get()
-                .build()
+        val request = Request.Builder()
+            .url(url)
+            .header("User-Agent", paxUserAgent)
+            .get()
+            .build()
 
-            try {
-                httpClient.newCall(request).execute().use { response ->
-                    if (!response.isSuccessful) {
-                        if (attempt == 1 && response.code in listOf(429, 502, 503)) {
-                            Thread.sleep(350)
-                            return@use
-                        }
-                        return null
-                    }
-
-                    val bodyStr = response.body.string()
-                    if (bodyStr.isBlank()) return null
-
-                    val (syncedLrc, plainText) = convertPaxJsonToLyrics(bodyStr)
-                    val rawSynced = syncedLrc?.takeIf { it.isNotBlank() }
-                    val rawPlain = plainText?.takeIf { it.isNotBlank() }
-                    if (rawSynced == null && rawPlain == null) return null
-
-                    return LrcLibLyrics(
-                        id = song.id,
-                        trackName = song.trackName,
-                        artistName = song.artistName,
-                        albumName = song.albumName,
-                        duration = song.durationSeconds,
-                        instrumental = false,
-                        plainLyrics = rawPlain,
-                        syncedLyrics = rawSynced,
-                        source = "AppleMusic"
-                    )
+        return try {
+            httpClient.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    return null
                 }
-            } catch (_: Exception) {
-                if (attempt == 2) return null
+
+                val bodyStr = response.body.string()
+                if (bodyStr.isBlank()) return null
+
+                val [syncedLrc, plainText] = convertPaxJsonToLyrics(bodyStr)
+                val rawSynced = syncedLrc?.takeIf { it.isNotBlank() }
+                val rawPlain = plainText?.takeIf { it.isNotBlank() }
+                if (rawSynced == null && rawPlain == null) return null
+
+                LrcLibLyrics(
+                    id = song.id,
+                    trackName = song.trackName,
+                    artistName = song.artistName,
+                    albumName = song.albumName,
+                    duration = song.durationSeconds,
+                    instrumental = false,
+                    plainLyrics = rawPlain,
+                    syncedLyrics = rawSynced,
+                    source = "AppleMusic"
+                )
             }
+        } catch (_: Exception) {
+            null
         }
-        return null
     }
 
     private fun convertPaxJsonToLyrics(jsonStr: String): Pair<String?, String?> {

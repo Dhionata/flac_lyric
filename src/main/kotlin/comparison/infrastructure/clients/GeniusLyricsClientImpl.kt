@@ -7,7 +7,6 @@ import comparison.domain.ports.LrcLibClient
 import comparison.domain.ports.LyricLineParser
 import comparison.infrastructure.parsers.LyricLineParserImpl
 import java.text.Normalizer
-import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
@@ -18,10 +17,7 @@ import okhttp3.Request
  * Fetches plain (unsynchronized) lyrics with > 0 verses so the user can select and synchronize them manually.
  */
 class GeniusLyricsClientImpl(
-    private val httpClient: OkHttpClient = OkHttpClient.Builder()
-        .connectTimeout(6, TimeUnit.SECONDS)
-        .readTimeout(6, TimeUnit.SECONDS)
-        .build(),
+    private val httpClient: OkHttpClient = HttpRateLimitInterceptor.createDefaultHttpClient(),
     private val gson: Gson = Gson(),
     private val baseUrl: String = "https://lyrics.paxsenix.org",
     private val lyricParser: LyricLineParser = LyricLineParserImpl(),
@@ -86,7 +82,7 @@ class GeniusLyricsClientImpl(
     override fun searchLyrics(query: String): List<LrcLibLyrics> {
         if (query.isBlank()) return emptyList()
         val parts = query.split(" - ", limit = 2)
-        val (artist, track) = if (parts.size == 2) {
+        val [artist, track] = if (parts.size == 2) {
             parts[0].trim() to parts[1].trim()
         } else {
             val words = query.trim().split(Regex("\\s+"))

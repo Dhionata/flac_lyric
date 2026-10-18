@@ -22,10 +22,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
  * Only returns candidates that have > 0 valid verses (synced or plain).
  */
 class NetEaseLyricsClientImpl(
-    private val httpClient: OkHttpClient = OkHttpClient.Builder()
-        .connectTimeout(6, TimeUnit.SECONDS)
-        .readTimeout(6, TimeUnit.SECONDS)
-        .build(),
+    private val httpClient: OkHttpClient = HttpRateLimitInterceptor.createDefaultHttpClient(),
     private val gson: Gson = Gson(),
     private val baseUrl: String = "https://music.163.com",
     private val maxCandidates: Int = 4,
@@ -107,7 +104,7 @@ class NetEaseLyricsClientImpl(
 
         return futures.mapNotNull { future ->
             try {
-                future.get(6, TimeUnit.SECONDS)
+                future.get(12, TimeUnit.SECONDS)
             } catch (_: Exception) {
                 null
             }

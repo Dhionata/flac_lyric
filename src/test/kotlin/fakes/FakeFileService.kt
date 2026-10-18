@@ -6,26 +6,26 @@ import java.io.File
 import models.OperationResult
 
 class FakeFileService : FileService {
-    val permissionsPrinted: MutableList<File> = mutableListOf<File>()
+    private val permissionsPrinted: MutableList<File> = mutableListOf()
 
-    val moveFileCalls: MutableList<Pair<File, File>> = mutableListOf()
-    var moveFileResponse: Boolean = true
+    private val moveFileCalls: MutableList<Pair<File, File>> = mutableListOf()
+    private var moveFileResponse: Boolean = true
 
-    val renameFileCalls: MutableList<Pair<File, String>> = mutableListOf()
-    var renameFileResponse: Boolean = true
+    private val renameFileCalls: MutableList<Pair<File, String>> = mutableListOf()
+    private var renameFileResponse: Boolean = true
 
-    val sameFilesWithDiffNamesCalls: MutableList<Pair<File, File>> = mutableListOf()
-    var sameFilesWithDiffNamesResponse: Boolean = false
+    private val sameFilesWithDiffNamesCalls: MutableList<Pair<File, File>> = mutableListOf()
+    private var sameFilesWithDiffNamesResponse: Boolean = false
 
-    val handleUnmatchedFilesCalls: MutableList<Pair<File, File>> = mutableListOf()
-    var handleUnmatchedFilesResponse: OperationResult = OperationResult()
+    private val handleUnmatchedFilesCalls: MutableList<Pair<File, File>> = mutableListOf()
+    private var handleUnmatchedFilesResponse: OperationResult = OperationResult()
 
     val moveLyricFileCalls: MutableList<Pair<File, File>> = mutableListOf()
-    var moveLyricFileResponse: File? = null
-    var moveLyricOperationResult: OperationResult = OperationResult()
+    private var moveLyricFileResponse: File? = null
+    private var moveLyricOperationResult: OperationResult = OperationResult()
 
     val renameLyricFileCalls: MutableList<Pair<File, File>> = mutableListOf()
-    var renameLyricFileResponse: OperationResult = OperationResult()
+    private var renameLyricFileResponse: OperationResult = OperationResult()
 
     override fun printFilePermissions(file: File) {
         permissionsPrinted.add(file)

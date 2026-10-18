@@ -47,3 +47,4 @@ bin/
 /logs/flac_lyric.log.0
 /logs/flac_lyric.log.0.lck
 /logs/flac_lyric.log.1
+/logs/

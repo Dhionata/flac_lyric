@@ -6,8 +6,6 @@ import com.google.gson.JsonObject
 import comparison.application.usecases.ExtractTrackDetailsUseCase
 import comparison.domain.models.LrcLibLyrics
 import comparison.domain.ports.LrcLibClient
-import comparison.domain.ports.LyricLineParser
-import comparison.infrastructure.parsers.LyricLineParserImpl
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -20,15 +18,11 @@ import okhttp3.Request
  * Supports both synchronized LRC and unsynchronized plain lyrics (with > 0 verses).
  */
 class DeezerLyricsClientImpl(
-    private val httpClient: OkHttpClient = OkHttpClient.Builder()
-        .connectTimeout(6, TimeUnit.SECONDS)
-        .readTimeout(6, TimeUnit.SECONDS)
-        .build(),
+    private val httpClient: OkHttpClient = HttpRateLimitInterceptor.createDefaultHttpClient(),
     private val gson: Gson = Gson(),
     private val deezerSearchBaseUrl: String = "https://api.deezer.com",
     private val paxBaseUrl: String = "https://lyrics.paxsenix.org",
-    private val maxCandidates: Int = 2,
-    private val lyricParser: LyricLineParser = LyricLineParserImpl(),
+    private val maxCandidates: Int = 3,
 ) : LrcLibClient {
 
     private val userAgent = "SongSync/3.5 (Android 14)"
@@ -102,7 +96,7 @@ class DeezerLyricsClientImpl(
 
         return futures.mapNotNull { future ->
             try {
-                future.get(6, TimeUnit.SECONDS)
+                future.get(12, TimeUnit.SECONDS)
             } catch (_: Exception) {
                 null
             }

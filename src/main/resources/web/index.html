@@ -1902,6 +1902,268 @@
         [data-theme="light"] .lyric-line {
             color: #334155;
         }
+
+        /* Issue Tag Filters in FAIXAS Sidebar */
+        .issue-tag-filters-box {
+            margin-top: 8px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 7px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .issue-tag-filters-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .issue-tag-clear-btn {
+            background: transparent;
+            border: none;
+            color: #38bdf8;
+            font-size: 0.68rem;
+            font-weight: 700;
+            cursor: pointer;
+            padding: 0 4px;
+            display: none;
+        }
+
+        .issue-tag-clear-btn:hover {
+            text-decoration: underline;
+        }
+
+        .issue-tag-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            max-height: 110px;
+            overflow-y: auto;
+        }
+
+        .issue-tag-chip {
+            background: #1a1a1a;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 3px 7px;
+            border-radius: 999px;
+            font-size: 0.66rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            user-select: none;
+        }
+
+        .issue-tag-chip:hover {
+            border-color: #60a5fa;
+            color: var(--text-main);
+        }
+
+        .issue-tag-chip.active {
+            background: rgba(59, 130, 246, 0.22);
+            border-color: #3b82f6;
+            color: #93c5fd;
+            box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.25);
+        }
+
+        .track-issue-tag-badge {
+            display: inline-block;
+            padding: 1px 5px;
+            border-radius: 4px;
+            font-size: 0.64rem;
+            font-weight: 700;
+            background: rgba(245, 158, 11, 0.14);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            cursor: pointer;
+            margin-right: 4px;
+            transition: all 0.15s ease;
+        }
+
+        .track-issue-tag-badge:hover,
+        .track-issue-tag-badge.active {
+            background: rgba(59, 130, 246, 0.25);
+            color: #93c5fd;
+            border-color: #3b82f6;
+        }
+
+        /* Lyric Line Drag & Drop Card + Multi-Selection */
+        .line-select-checkbox {
+            width: 14px;
+            height: 14px;
+            accent-color: #3b82f6;
+            cursor: pointer;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .line-drag-handle {
+            cursor: grab;
+            color: #64748b;
+            font-size: 0.85rem;
+            line-height: 1;
+            padding: 2px 3px;
+            border-radius: 4px;
+            user-select: none;
+            flex-shrink: 0;
+            transition: color 0.15s, background 0.15s;
+        }
+
+        .line-drag-handle:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .line-drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .lyric-line.selected-line {
+            background: rgba(59, 130, 246, 0.16) !important;
+            border: 1px solid rgba(59, 130, 246, 0.55) !important;
+        }
+
+        .lyric-line.focused-line {
+            outline: 1px dashed rgba(56, 189, 248, 0.65);
+        }
+
+        .lyric-line.dragging {
+            opacity: 0.45;
+            transform: scale(0.99);
+            border: 1px dashed #60a5fa !important;
+        }
+
+        .lyric-line.drag-over-top {
+            border-top: 2px solid #38bdf8 !important;
+            box-shadow: 0 -2px 0 rgba(56, 189, 248, 0.5);
+        }
+
+        .lyric-line.drag-over-bottom {
+            border-bottom: 2px solid #38bdf8 !important;
+            box-shadow: 0 2px 0 rgba(56, 189, 248, 0.5);
+        }
+
+        /* Batch Multi-Line Selection Action Bar */
+        .batch-selection-bar {
+            display: none;
+            padding: 8px 12px;
+            background: rgba(30, 58, 138, 0.28);
+            border-bottom: 1px solid rgba(59, 130, 246, 0.45);
+            font-size: 0.74rem;
+            color: #bfdbfe;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .batch-selection-bar.active {
+            display: flex;
+        }
+
+        .batch-bar-group {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .batch-time-input {
+            width: 72px;
+            background: var(--bg-dark);
+            border: 1px solid rgba(59, 130, 246, 0.5);
+            color: var(--text-main);
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            font-family: 'JetBrains Mono', monospace;
+            text-align: center;
+        }
+
+        /* Clickable Shortcut Badge & Shortcuts Modal */
+        #shortcutBadge {
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        #shortcutBadge:hover {
+            border-color: #38bdf8;
+            color: #38bdf8;
+            background: rgba(56, 189, 248, 0.12);
+        }
+
+        .shortcuts-help-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+
+        .shortcut-help-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.82rem;
+        }
+
+        .shortcut-kbd-group {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-shrink: 0;
+        }
+
+        .shortcut-kbd {
+            background: #262626;
+            border: 1px solid #404040;
+            border-bottom-width: 2px;
+            color: #f8fafc;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.74rem;
+            font-weight: 700;
+        }
+
+        [data-theme="light"] .issue-tag-chip {
+            background: #f1f5f9;
+            color: #475569;
+            border-color: #cbd5e1;
+        }
+
+        [data-theme="light"] .issue-tag-chip.active {
+            background: #dbeafe;
+            color: #1d4ed8;
+            border-color: #3b82f6;
+        }
+
+        [data-theme="light"] .batch-selection-bar {
+            background: #eff6ff;
+            color: #1e3a8a;
+            border-bottom-color: #93c5fd;
+        }
+
+        [data-theme="light"] .shortcut-kbd {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #0f172a;
+        }
     </style>
 </head>
 <body>
@@ -1932,7 +2194,7 @@
                 <svg fill="none" height="15" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="15">
                     <polygon points="5 3 19 12 5 21 5 3"></polygon>
                 </svg>
-                Comparador de Letras (LRCLIB)
+                Comparador de Letras
             </button>
         </nav>
 
@@ -1948,7 +2210,7 @@
             <option value="dark">🌙 Escuro</option>
             <option value="light">☀️ Claro</option>
         </select>
-        <span class="badge" id="shortcutBadge" title="Atalhos: [Espaço] Play/Pause (ou Set no Modo Edição) | [Ctrl] Set no Modo Edição | [1] Manter Local | [2] Salvar Remota | [Alt+A] Faixa Anterior | [Alt+F] Próxima Faixa">⌨️ [Espaço/Ctrl] [1] [2] [Alt+A/F]</span>
+        <span class="badge" id="shortcutBadge" onclick="openShortcutsHelpModal()" title="Clique para ver o guia completo de atalhos de teclado">⌨️ [Espaço/Ctrl] [Z] [N/L] [1] [2] (Ver Atalhos)</span>
     </div>
 </header>
 
@@ -1959,7 +2221,8 @@
     <div class="menu-view-container">
         <div class="menu-header-hero">
             <h1>Painel Geral de Operações</h1>
-            <p>Gerencie sua biblioteca de áudio FLAC e arquivos .lrc com ferramentas avançadas de organização, verificação de espectro acústico e sincronização com LRCLIB.</p>
+            <p>Gerencie sua biblioteca de áudio FLAC e arquivos .lrc com ferramentas avançadas de organização, verificação de espectro acústico e sincronização multi-API de
+                letras.</p>
         </div>
 
         <div class="options-grid" id="optionsGrid"></div>
@@ -1979,6 +2242,19 @@
                 <button class="filter-btn" data-filter="PENDING">Pendentes (<span id="countPending">0</span>)</button>
                 <button class="filter-btn" data-filter="RESOLVED">Resolvidos (<span id="countResolved">0</span>)</button>
             </div>
+            <!-- Filtro por Tags de Problema (Adicionável/Removível a qualquer momento) -->
+            <div class="issue-tag-filters-box" id="issueTagFiltersBox" style="display: none;">
+                <div class="issue-tag-filters-header">
+                    <span>🏷️ Filtrar por Tag (<span id="activeTagFilterCount">0</span>)</span>
+                    <button class="issue-tag-clear-btn" id="btnClearIssueTagFilters" onclick="clearAllIssueTagFilters()" type="button">Limpar filtros</button>
+                </div>
+                <div class="issue-tag-chips" id="issueTagChipsContainer"></div>
+            </div>
+            <button class="btn-action" id="btnOpenBatchBestModal" onclick="openBatchBestModal()"
+                    style="margin-top: 8px; width: 100%; padding: 8px 10px; font-size: 0.78rem; background: linear-gradient(135deg, #0284c7, #4f46e5); color: #fff; border-radius: 6px;"
+                    title="Baixa e salva automaticamente a primeira letra mais compatível para as músicas da lista">
+                📥 Baixar Todas as Primeiras Mais Compatíveis
+            </button>
         </div>
         <ul class="track-list" id="trackList"></ul>
     </aside>
@@ -2007,10 +2283,55 @@
                     <button class="btn-offset" onclick="applyCustomOffset('local')">Aplicar</button>
                 </div>
                 <div class="offset-btn-group">
-                    <button class="btn-offset" onclick="openPasteLyricsModal('local')" style="color: #a78bfa;" title="Colar uma letra inteira (ou pressione Ctrl+V com o mouse sobre esta coluna) com minutagens zeradas [00:00.00]">📋 Colar Letra</button>
-                    <button class="btn-offset" id="btnSyncEditModeLocal" onclick="toggleSyncEditMode('local')" style="color: #fbbf24;" title="Ativa o Modo Edição para ir apertando [Espaço] ou [Ctrl] e definir a minutagem da próxima linha no instante exato da música">🎯 Modo Edição (Set)</button>
-                    <button class="btn-offset" id="btnToggleTimestampsLocal" onclick="toggleStripTimestamps('local')" style="color: #f87171;" title="Retira todas as minutagens em memória (com opção de reverter). Só grava no arquivo ao clicar em Salvar [1] ou [2].">🧹 Retirar Minutagens</button>
-                    <button class="btn-offset" onclick="addNewLyricLine('local')" style="color: #34d399;">+ Novo Verso</button>
+                    <button class="btn-offset" onclick="openInstrumentalModal()" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.45);"
+                            title="Cria automaticamente letra instrumental do 00:00 até o minuto/segundo final da música conforme o idioma (evita falso positivo de término prematuro)">
+                        🎵 Criar Instrumental
+                    </button>
+                    <button class="btn-offset" onclick="openPasteLyricsModal('local')" style="color: #a78bfa;"
+                            title="Colar uma letra inteira (ou pressione Ctrl+V com o mouse sobre esta coluna) com minutagens zeradas [00:00.00]">📋 Colar Letra
+                    </button>
+                    <button class="btn-offset" id="btnSyncEditModeLocal" onclick="toggleSyncEditMode('local')" style="color: #fbbf24;"
+                            title="Ativa o Modo Edição para ir apertando [Espaço] ou [Ctrl] e definir a minutagem da próxima linha no instante exato da música">🎯 Modo Edição
+                        (Set)
+                    </button>
+                    <button class="btn-offset" id="btnToggleTimestampsLocal" onclick="toggleStripTimestamps('local')" style="color: #f87171;"
+                            title="Retira todas as minutagens em memória (com opção de reverter). Só grava no arquivo ao clicar em Salvar [1] ou [2].">🧹 Retirar Minutagens
+                    </button>
+                    <button class="btn-offset" onclick="addNewLyricLine('local')" style="color: #34d399;"
+                            title="Insere um novo verso imediatamente abaixo da linha selecionada (Atalho: N ou L)">+ Novo Verso [N/L]
+                    </button>
+                    <button class="btn-offset" onclick="selectAllLines('local')" title="Selecionar todas as linhas desta coluna para edição em bloco">☑️ Selecionar Tudo
+                    </button>
+                </div>
+            </div>
+
+            <!-- Barra de Ações em Bloco (Seleção Múltipla Local) -->
+            <div class="batch-selection-bar" id="batchSelectionBarLocal">
+                <div class="batch-bar-group">
+                    <strong id="batchSelectedCountLocal">0 selecionadas</strong>
+                    <button class="btn-offset" onclick="selectAllLines('local')" title="Selecionar todas as linhas">Todas</button>
+                    <button class="btn-offset" onclick="clearLineSelection('local')" title="Desmarcar seleção">Limpar</button>
+                </div>
+                <div class="batch-bar-group">
+                    <button class="btn-offset" onclick="zeroSelectedLinesTimestamps('local')" style="color: #fbbf24; border-color: rgba(251, 191, 36, 0.45);"
+                            title="Zera a minutagem das linhas selecionadas para [00:00.00]">⏱️ Zerar [00:00.00]
+                    </button>
+                    <input class="batch-time-input" id="batchTimeInputLocal" placeholder="±1.5 ou 01:20"
+                           title="Digite segundos (ex: +1.5, -0.8) para deslocar o bloco ou um tempo mm:ss.xx (ex: 01:15.00) para iniciar o bloco nesse tempo mantendo os intervalos"
+                           type="text" value="+0.5">
+                    <button class="btn-offset" onclick="shiftSelectedLinesByTime('local')" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.45);"
+                            title="Soma/subtrai o tempo H (em segundos ou mm:ss.xx) em todas as linhas selecionadas">± Deslocar H
+                    </button>
+                    <button class="btn-offset" onclick="alignSelectedBlockToStartTime('local', false)" style="color: #34d399; border-color: rgba(52, 211, 153, 0.45);"
+                            title="Define o início da 1ª linha selecionada para o tempo H digitado e ajusta as demais mantendo a diferença relativa entre elas">🎯 Iniciar Bloco
+                        em H
+                    </button>
+                    <button class="btn-offset" onclick="alignSelectedBlockToStartTime('local', true)" style="color: #a78bfa; border-color: rgba(167, 139, 250, 0.45);"
+                            title="Alinha a 1ª linha selecionada com o tempo atual do player de áudio e mantém os intervalos relativos do bloco">🎵 Iniciar no Player
+                    </button>
+                    <button class="btn-offset" onclick="deleteSelectedLines('local')" style="color: #f87171; border-color: rgba(248, 113, 113, 0.45);"
+                            title="Excluir todas as linhas selecionadas (Delete)">🗑️ Deletar Bloco
+                    </button>
                 </div>
             </div>
 
@@ -2018,11 +2339,14 @@
             <div class="sync-edit-banner" id="syncEditBannerLocal">
                 <div>
                     <strong id="syncEditStatusLocal">🎯 Modo Edição Ativo (Linha 1)</strong>
-                    <div style="font-size: 0.7rem; opacity: 0.9;">Aperte <b>[Espaço]</b> ou <b>[Ctrl]</b> para marcar o tempo exato na linha destacada e avançar • <b>[Backspace]</b> volta 1 linha • <b>[P]</b> Play/Pause</div>
+                    <div style="font-size: 0.7rem; opacity: 0.9;">Aperte <b>[Espaço]</b> ou <b>[Ctrl]</b> para marcar o tempo exato na linha destacada e avançar • <b>[Backspace
+                        / Z]</b> volta 1 linha • <b>[N / L]</b> novo verso abaixo • <b>[P]</b> Play/Pause
+                    </div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
-                    <button class="btn-offset" onclick="stampNextSyncLine()" style="color: #34d399; border-color: #10b981; font-weight: 700;">⏱️ Set Próxima [Espaço/Ctrl]</button>
-                    <button class="btn-offset" onclick="stepSyncCursor(-1)" title="Voltar para a linha anterior (Atalho: Backspace)">↩️ Linha Anterior</button>
+                    <button class="btn-offset" onclick="stampNextSyncLine()" style="color: #34d399; border-color: #10b981; font-weight: 700;">⏱️ Set Próxima [Espaço/Ctrl]
+                    </button>
+                    <button class="btn-offset" onclick="stepSyncCursor(-1)" title="Voltar para a linha anterior (Atalho: Backspace ou Z)">↩️ Linha Anterior [Z]</button>
                     <button class="btn-offset" onclick="setSyncCursor(0)" title="Voltar o cursor para a primeira linha">⏮️ Topo</button>
                     <button class="btn-offset" onclick="toggleSyncEditMode('local')" style="color: #f87171;" title="Sair do Modo Edição">✕ Sair</button>
                 </div>
@@ -2038,6 +2362,11 @@
                         <polyline points="20 6 9 17 4 12"></polyline>
                     </svg>
                     Manter / Salvar Local [1]
+                </button>
+                <button class="btn-action" id="btnQuickInstrumentalFooter" onclick="openInstrumentalModal()"
+                        style="flex: 0 0 auto; padding: 11px 14px; background: #1e293b; border: 1px solid #38bdf8; color: #38bdf8; font-size: 0.82rem;"
+                        title="Criar letra para música instrumental (00:00 até a duração final da faixa)">
+                    🎵 Instrumental
                 </button>
             </div>
         </section>
@@ -2112,13 +2441,15 @@
             </div>
         </section>
 
-        <!-- Coluna Direita: Letra Remota (LRCLIB + Fallbacks) -->
+        <!-- Coluna Direita: Letra Remota (Multi-API) -->
         <section class="column-panel column-right" id="columnRightPanel">
             <div class="column-header">
                 <h3>
                     <span style="color: var(--accent-lrclib);">●</span>
                     <span>Letra Online (Multi-API)</span>
-                    <button class="btn-offset" id="btnOpenAllApiModal" onclick="openAllApiResultsModal()" style="margin-left: 4px; display: inline-flex; align-items: center; gap: 5px; color: #38bdf8; border-color: rgba(56, 189, 248, 0.45); padding: 3px 8px;" title="Abrir popup em tela cheia com todas as letras encontradas por todas as APIs (incluindo resultados não filtrados)">
+                    <button class="btn-offset" id="btnOpenAllApiModal" onclick="openAllApiResultsModal()"
+                            style="margin-left: 4px; display: inline-flex; align-items: center; gap: 5px; color: #38bdf8; border-color: rgba(56, 189, 248, 0.45); padding: 3px 8px;"
+                            title="Abrir popup em tela cheia com todas as letras encontradas por todas as APIs (incluindo resultados não filtrados)">
                         <svg fill="none" height="13" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" width="13">
                             <circle cx="11" cy="11" r="8"></circle>
                             <line x1="21" x2="16.65" y1="21" y2="16.65"></line>
@@ -2129,7 +2460,7 @@
                     </button>
                 </h3>
                 <div style="display: flex; align-items: center; gap: 6px;">
-                    <span class="badge badge-source-lrclib" id="remoteSourceBadge">LRCLIB</span>
+                    <span class="badge badge-source-lrclib" id="remoteSourceBadge">ONLINE</span>
                     <span class="badge badge-info" id="remoteStatusBadge">...</span>
                 </div>
             </div>
@@ -2143,7 +2474,7 @@
                 <div class="candidates-list" id="candidatesList" style="display: none;"></div>
             </div>
 
-            <!-- Offset Toolbar (LRCLIB) -->
+            <!-- Offset Toolbar (Online) -->
             <div class="offset-toolbar">
                 <span>Ajuste Geral:</span>
                 <div class="offset-btn-group">
@@ -2155,10 +2486,51 @@
                     <button class="btn-offset" onclick="applyCustomOffset('remote')">Aplicar</button>
                 </div>
                 <div class="offset-btn-group">
-                    <button class="btn-offset" onclick="openPasteLyricsModal('remote')" style="color: #a78bfa;" title="Colar uma letra inteira (ou pressione Ctrl+V com o mouse sobre esta coluna) com minutagens zeradas [00:00.00]">📋 Colar Letra</button>
-                    <button class="btn-offset" id="btnSyncEditModeRemote" onclick="toggleSyncEditMode('remote')" style="color: #fbbf24;" title="Ativa o Modo Edição para ir apertando [Espaço] ou [Ctrl] e definir a minutagem da próxima linha no instante exato da música">🎯 Modo Edição (Set)</button>
-                    <button class="btn-offset" id="btnToggleTimestampsRemote" onclick="toggleStripTimestamps('remote')" style="color: #f87171;" title="Retira todas as minutagens em memória (com opção de reverter). Só grava no arquivo ao clicar em Salvar [1] ou [2].">🧹 Retirar Minutagens</button>
-                    <button class="btn-offset" onclick="addNewLyricLine('remote')" style="color: #60a5fa;">+ Novo Verso</button>
+                    <button class="btn-offset" onclick="openPasteLyricsModal('remote')" style="color: #a78bfa;"
+                            title="Colar uma letra inteira (ou pressione Ctrl+V com o mouse sobre esta coluna) com minutagens zeradas [00:00.00]">📋 Colar Letra
+                    </button>
+                    <button class="btn-offset" id="btnSyncEditModeRemote" onclick="toggleSyncEditMode('remote')" style="color: #fbbf24;"
+                            title="Ativa o Modo Edição para ir apertando [Espaço] ou [Ctrl] e definir a minutagem da próxima linha no instante exato da música">🎯 Modo Edição
+                        (Set)
+                    </button>
+                    <button class="btn-offset" id="btnToggleTimestampsRemote" onclick="toggleStripTimestamps('remote')" style="color: #f87171;"
+                            title="Retira todas as minutagens em memória (com opção de reverter). Só grava no arquivo ao clicar em Salvar [1] ou [2].">🧹 Retirar Minutagens
+                    </button>
+                    <button class="btn-offset" onclick="addNewLyricLine('remote')" style="color: #60a5fa;"
+                            title="Insere um novo verso imediatamente abaixo da linha selecionada (Atalho: N ou L)">+ Novo Verso [N/L]
+                    </button>
+                    <button class="btn-offset" onclick="selectAllLines('remote')" title="Selecionar todas as linhas desta coluna para edição em bloco">☑️ Selecionar Tudo
+                    </button>
+                </div>
+            </div>
+
+            <!-- Barra de Ações em Bloco (Seleção Múltipla Online) -->
+            <div class="batch-selection-bar" id="batchSelectionBarRemote">
+                <div class="batch-bar-group">
+                    <strong id="batchSelectedCountRemote">0 selecionadas</strong>
+                    <button class="btn-offset" onclick="selectAllLines('remote')" title="Selecionar todas as linhas">Todas</button>
+                    <button class="btn-offset" onclick="clearLineSelection('remote')" title="Desmarcar seleção">Limpar</button>
+                </div>
+                <div class="batch-bar-group">
+                    <button class="btn-offset" onclick="zeroSelectedLinesTimestamps('remote')" style="color: #fbbf24; border-color: rgba(251, 191, 36, 0.45);"
+                            title="Zera a minutagem das linhas selecionadas para [00:00.00]">⏱️ Zerar [00:00.00]
+                    </button>
+                    <input class="batch-time-input" id="batchTimeInputRemote" placeholder="±1.5 ou 01:20"
+                           title="Digite segundos (ex: +1.5, -0.8) para deslocar o bloco ou um tempo mm:ss.xx (ex: 01:15.00) para iniciar o bloco nesse tempo mantendo os intervalos"
+                           type="text" value="+0.5">
+                    <button class="btn-offset" onclick="shiftSelectedLinesByTime('remote')" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.45);"
+                            title="Soma/subtrai o tempo H (em segundos ou mm:ss.xx) em todas as linhas selecionadas">± Deslocar H
+                    </button>
+                    <button class="btn-offset" onclick="alignSelectedBlockToStartTime('remote', false)" style="color: #34d399; border-color: rgba(52, 211, 153, 0.45);"
+                            title="Define o início da 1ª linha selecionada para o tempo H digitado e ajusta as demais mantendo a diferença relativa entre elas">🎯 Iniciar Bloco
+                        em H
+                    </button>
+                    <button class="btn-offset" onclick="alignSelectedBlockToStartTime('remote', true)" style="color: #a78bfa; border-color: rgba(167, 139, 250, 0.45);"
+                            title="Alinha a 1ª linha selecionada com o tempo atual do player de áudio e mantém os intervalos relativos do bloco">🎵 Iniciar no Player
+                    </button>
+                    <button class="btn-offset" onclick="deleteSelectedLines('remote')" style="color: #f87171; border-color: rgba(248, 113, 113, 0.45);"
+                            title="Excluir todas as linhas selecionadas (Delete)">🗑️ Deletar Bloco
+                    </button>
                 </div>
             </div>
 
@@ -2166,33 +2538,236 @@
             <div class="sync-edit-banner" id="syncEditBannerRemote">
                 <div>
                     <strong id="syncEditStatusRemote">🎯 Modo Edição Ativo (Linha 1)</strong>
-                    <div style="font-size: 0.7rem; opacity: 0.9;">Aperte <b>[Espaço]</b> ou <b>[Ctrl]</b> para marcar o tempo exato na linha destacada e avançar • <b>[Backspace]</b> volta 1 linha • <b>[P]</b> Play/Pause</div>
+                    <div style="font-size: 0.7rem; opacity: 0.9;">Aperte <b>[Espaço]</b> ou <b>[Ctrl]</b> para marcar o tempo exato na linha destacada e avançar • <b>[Backspace
+                        / Z]</b> volta 1 linha • <b>[N / L]</b> novo verso abaixo • <b>[P]</b> Play/Pause
+                    </div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
-                    <button class="btn-offset" onclick="stampNextSyncLine()" style="color: #34d399; border-color: #10b981; font-weight: 700;">⏱️ Set Próxima [Espaço/Ctrl]</button>
-                    <button class="btn-offset" onclick="stepSyncCursor(-1)" title="Voltar para a linha anterior (Atalho: Backspace)">↩️ Linha Anterior</button>
+                    <button class="btn-offset" onclick="stampNextSyncLine()" style="color: #34d399; border-color: #10b981; font-weight: 700;">⏱️ Set Próxima [Espaço/Ctrl]
+                    </button>
+                    <button class="btn-offset" onclick="stepSyncCursor(-1)" title="Voltar para a linha anterior (Atalho: Backspace ou Z)">↩️ Linha Anterior [Z]</button>
                     <button class="btn-offset" onclick="setSyncCursor(0)" title="Voltar o cursor para a primeira linha">⏮️ Topo</button>
                     <button class="btn-offset" onclick="toggleSyncEditMode('remote')" style="color: #f87171;" title="Sair do Modo Edição">✕ Sair</button>
                 </div>
             </div>
 
             <div class="lyrics-container" id="remoteLyricsScroller">
-                <p style="text-align: center; color: #777777; margin-top: 40px;">Buscando letra no LRCLIB...</p>
+                <p style="text-align: center; color: #777777; margin-top: 40px;">Buscando letra nas APIs online...</p>
             </div>
 
             <div class="column-footer">
-                <button class="btn-action btn-lrclib" id="btnSaveLrclib" title="Substituir e salvar com a letra do LRCLIB (Atalho: [2])">
+                <button class="btn-action btn-lrclib" id="btnSaveLrclib" title="Substituir e salvar com a letra online selecionada (Atalho: [2])">
                     <svg fill="none" height="18" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" width="18">
                         <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
                         <polyline points="17 21 17 13 7 13 7 21"></polyline>
                         <polyline points="7 3 7 8 15 8"></polyline>
                     </svg>
-                    Salvar Letra LRCLIB [2]
+                    Salvar Letra Online [2]
                 </button>
             </div>
         </section>
     </div>
 </main>
+
+<!-- =========================================================================
+     MODAL DE AJUDA DE ATALHOS DE TECLADO (CLICÁVEL NO RESUMO DO TOPO)
+     ========================================================================= -->
+<div class="modal-backdrop" id="shortcutsHelpModal" style="display: none;">
+    <div class="modal-card" style="max-width: 660px;">
+        <div class="modal-header">
+            <div class="modal-title-group">
+                <span class="modal-action-icon">⌨️</span>
+                <div>
+                    <h2>Guia de Atalhos e Recursos de Edição</h2>
+                    <div class="modal-action-subtitle">Todos os atalhos de teclado e interações rápidas do Comparador</div>
+                </div>
+            </div>
+            <button class="btn-close-modal" onclick="closeShortcutsHelpModal()" title="Fechar (Esc)">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="shortcuts-help-grid">
+                <div class="shortcut-help-row">
+                    <span><b>Play / Pause</b> da música (ou marcar tempo da linha no Modo Edição)</span>
+                    <div class="shortcut-kbd-group"><span class="shortcut-kbd">Espaço</span> <span class="shortcut-kbd">P</span></div>
+                </div>
+                <div class="shortcut-help-row">
+                    <span><b>Marcar tempo exato (Set)</b> na linha destacada e avançar (Modo Edição)</span>
+                    <div class="shortcut-kbd-group"><span class="shortcut-kbd">Espaço</span> <span class="shortcut-kbd">Ctrl</span></div>
+                </div>
+                <div class="shortcut-help-row">
+                    <span><b>Voltar 1 linha</b> na seleção / cursor do Modo Edição</span>
+                    <div class="shortcut-kbd-group"><span class="shortcut-kbd">Z</span> <span class="shortcut-kbd">Backspace</span></div>
+                </div>
+                <div class="shortcut-help-row">
+                    <span><b>Inserir novo verso abaixo da linha selecionada</b> (pausado = abaixo da selecionada; tocando = com a minutagem do instante atual)</span>
+                    <div class="shortcut-kbd-group"><span class="shortcut-kbd">N</span> <span class="shortcut-kbd">L</span></div>
+                </div>
+                <div class="shortcut-help-row">
+                    <span><b>Manter / Salvar Letra Local</b> e avançar para a próxima faixa</span>
+                    <div class="shortcut-kbd-group"><span class="shortcut-kbd">1</span></div>
+                </div>
+                <div class="shortcut-help-row">
+                    <span><b>Salvar Letra Online</b> e avançar para a próxima faixa</span>
+                    <div class="shortcut-kbd-group"><span class="shortcut-kbd">2</span></div>
+                </div>
+                <div class="shortcut-help-row">
+                    <span><b>Faixa Anterior / Próxima Faixa</b> da lista</span>
+                    <div class="shortcut-kbd-group"><span class="shortcut-kbd">Alt + A</span> <span class="shortcut-kbd">Alt + F</span></div>
+                </div>
+                <div class="shortcut-help-row">
+                    <span><b>Voltar / Avançar 5 segundos</b> no áudio</span>
+                    <div class="shortcut-kbd-group"><span class="shortcut-kbd">←</span> <span class="shortcut-kbd">→</span></div>
+                </div>
+                <div class="shortcut-help-row">
+                    <span><b>Arrastar Verso(s) (Card Drag & Drop)</b> para outra posição sem alterar a ordem das demais linhas</span>
+                    <div class="shortcut-kbd-group"><span class="shortcut-kbd">Arrastar ⠿</span></div>
+                </div>
+                <div class="shortcut-help-row">
+                    <span><b>Selecionar Múltiplas Linhas</b> (deletar, arrastar bloco, zerar minutagem ou ajustar bloco em um tempo H)</span>
+                    <div class="shortcut-kbd-group"><span class="shortcut-kbd"> Checkbox</span> <span class="shortcut-kbd">Shift + Clique</span> <span class="shortcut-kbd">Ctrl + Clique</span>
+                    </div>
+                </div>
+                <div class="shortcut-help-row">
+                    <span><b>Excluir linhas selecionadas</b> na coluna em foco</span>
+                    <div class="shortcut-kbd-group"><span class="shortcut-kbd">Delete</span></div>
+                </div>
+                <div class="shortcut-help-row">
+                    <span><b>Colar letra completa</b> com minutagens zeradas <code>[00:00.00]</code></span>
+                    <div class="shortcut-kbd-group"><span class="shortcut-kbd">Ctrl + V</span></div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-action btn-primary" onclick="closeShortcutsHelpModal()">Entendi</button>
+        </div>
+    </div>
+</div>
+
+<!-- =========================================================================
+     MODAL PARA CRIAR LETRA DE MÚSICA INSTRUMENTAL (00:00 ATÉ DURAÇÃO DA FAIXA)
+     ========================================================================= -->
+<div class="modal-backdrop" id="instrumentalModal" style="display: none;">
+    <div class="modal-card" style="max-width: 560px;">
+        <div class="modal-header">
+            <div class="modal-title-group">
+                <span class="modal-action-icon">🎵</span>
+                <div>
+                    <h2>Criar Letra Instrumental</h2>
+                    <div class="modal-action-subtitle" id="instrumentalModalSubtitle">Preenche automaticamente de [00:00.00] até o término da música</div>
+                </div>
+            </div>
+            <button class="btn-close-modal" onclick="closeInstrumentalModal()" title="Fechar (Esc)">✕</button>
+        </div>
+        <div class="modal-body">
+            <p class="modal-desc">
+                Cria um arquivo <code>.lrc</code> sincronizado do segundo <code>00:00.00</code> até a duração final da faixa (<code
+                    id="instrumentalEndDurationLabel">03:00.00</code>) com a tag de instrumental. Isso evita que o verificador aponte falso positivo de <b>término
+                prematuro</b>.
+            </p>
+            <div class="form-group">
+                <label class="form-label">Idioma / Tag de Instrumental:</label>
+                <select class="select-input" id="instrumentalLangSelect" onchange="updateInstrumentalPreview()">
+                    <option value="pt">Português / Inglês / Espanhol — ♪ Instrumental ♪</option>
+                    <option value="ja">Japonês (日本語) — ♪ インストゥルメンタル ♪</option>
+                    <option value="zh">Chinês (中文) — ♪ 纯音乐 ♪</option>
+                    <option value="ko">Coreano (한국어) — ♪ 연주곡 ♪</option>
+                    <option value="ru">Russo (Русский) — ♪ Инструментал ♪</option>
+                    <option value="custom">Personalizado...</option>
+                </select>
+            </div>
+            <div class="form-group" id="instrumentalCustomTagGroup" style="display: none;">
+                <label class="form-label">Tag Personalizada:</label>
+                <input class="form-input" id="instrumentalCustomTagInput" oninput="updateInstrumentalPreview()" placeholder="Ex: ♪ Instrumental ♪" type="text"
+                       value="♪ Instrumental ♪">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Pré-visualização do .lrc gerado:</label>
+                <pre class="form-input" id="instrumentalPreviewBox" style="margin: 0; white-space: pre-wrap; line-height: 1.6; color: #38bdf8;"></pre>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeInstrumentalModal()">Cancelar</button>
+            <button class="btn-secondary" onclick="applyInstrumentalLyrics(false)" style="color: #38bdf8; border-color: #38bdf8;">
+                Preencher na Coluna Local
+            </button>
+            <button class="btn-action btn-local" onclick="applyInstrumentalLyrics(true)">
+                ✅ Gerar e Salvar .lrc Agora
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- =========================================================================
+     MODAL DE CONFIRMAÇÃO COM TIMER DE 5S: BAIXAR TODAS AS PRIMEIRAS MAIS COMPATÍVEIS
+     ========================================================================= -->
+<div class="modal-backdrop" id="batchBestConfirmModal" style="display: none;">
+    <div class="modal-card" style="max-width: 620px;">
+        <div class="modal-header">
+            <div class="modal-title-group">
+                <span class="modal-action-icon">⚠️</span>
+                <div>
+                    <h2>Baixar Todas as Primeiras Mais Compatíveis</h2>
+                    <div class="modal-action-subtitle">Ação em lote • Confirmação de segurança obrigatória</div>
+                </div>
+            </div>
+            <button class="btn-close-modal" id="btnCloseBatchBestModal" onclick="closeBatchBestModal()" title="Fechar (Esc)">✕</button>
+        </div>
+        <div class="modal-body">
+            <div id="batchBestConfirmSection" style="display: flex; flex-direction: column; gap: 14px;">
+                <div class="issues-card"
+                     style="margin: 0; padding: 12px 14px; font-size: 0.84rem; border-color: rgba(239, 68, 68, 0.45); background: rgba(239, 68, 68, 0.10); color: #fecaca;">
+                    <h4 style="color: #f87171; font-size: 0.9rem; margin-bottom: 6px;">🛑 Atenção: Esta ação substituirá/criará os arquivos .lrc automaticamente!</h4>
+                    <p style="line-height: 1.5;">
+                        O sistema pesquisará cada música (usando <b>Artista + Música</b>, <b>Música + Artista</b> e <b>Só a Música</b>, respeitando automaticamente qualquer
+                        limite de taxa <code>HTTP 429</code> das APIs) e salvará imediatamente a <b>primeira alternativa mais compatível por tempo</b> sem revisão manual faixa
+                        a faixa.
+                    </p>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label">Quais faixas da lista deseja processar?</label>
+                    <select class="select-input" id="batchBestScopeSelect">
+                        <option value="PENDING">Apenas faixas Pendentes (recomendado)</option>
+                        <option value="ALL">Todas as faixas do relatório atual</option>
+                    </select>
+                </div>
+
+                <div id="batchBestCountdownBanner"
+                     style="padding: 10px 14px; border-radius: 8px; background: #262626; border: 1px solid #fbbf24; color: #fde68a; font-weight: 700; text-align: center; font-size: 0.88rem;">
+                    ⏳ Aguarde <span id="batchBestTimerSeconds">5</span>s para liberar o botão de confirmação...
+                </div>
+
+                <label class="checkbox-group" style="border-color: rgba(239, 68, 68, 0.45);">
+                    <input id="batchBestConfirmCheckbox" onchange="updateBatchBestConfirmBtnState()" type="checkbox">
+                    <span style="font-weight: 700; color: #fca5a5;">Sim, eu li e sei que é irreversível!</span>
+                </label>
+            </div>
+
+            <!-- Progresso do Download em Lote -->
+            <div class="modal-progress-section" id="batchBestProgressSection" style="display: none;">
+                <div class="progress-info-row">
+                    <span class="progress-title" id="batchBestProgressTitle">Baixando letras mais compatíveis...</span>
+                    <span class="progress-count" id="batchBestProgressCount">0 / 0</span>
+                </div>
+                <div class="progress-bar-wrapper">
+                    <div class="progress-bar-fill" id="batchBestProgressBar" style="width: 0%;"></div>
+                </div>
+                <div class="progress-current-item" id="batchBestProgressItem">Preparando...</div>
+                <div class="result-details-box" style="max-height: 200px;">
+                    <h4>Progresso Faixa a Faixa:</h4>
+                    <div class="result-log-list" id="batchBestLogList"></div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" id="btnCancelBatchBest" onclick="closeBatchBestModal()">Cancelar</button>
+            <button class="btn-action" disabled id="btnConfirmBatchBest" onclick="runBatchBestDownload()"
+                    style="background: #dc2626; color: #fff; opacity: 0.45; cursor: not-allowed;">
+                Sim (5s)
+            </button>
+        </div>
+    </div>
+</div>
 
 <!-- =========================================================================
      MODAL PARA COLAR LETRA COM MINUTAGENS ZERADAS
@@ -2211,7 +2786,8 @@
         </div>
         <div class="modal-body">
             <p class="modal-desc">
-                Cole abaixo a letra completa da música. Linhas em branco entre estrofes serão ignoradas automaticamente e cada verso será criado com a minutagem zerada (<code>[00:00.00]</code>) para você sincronizar facilmente com o <b>Modo Edição (Espaço / Ctrl)</b>.
+                Cole abaixo a letra completa da música. Linhas em branco entre estrofes serão ignoradas automaticamente e cada verso será criado com a minutagem zerada (<code>[00:00.00]</code>)
+                para você sincronizar facilmente com o <b>Modo Edição (Espaço / Ctrl)</b>.
             </p>
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
                 <div style="display: flex; align-items: center; gap: 8px;">
@@ -2223,7 +2799,8 @@
                 </div>
                 <button class="btn-browse" onclick="readClipboardIntoPasteTextarea()" type="button">📋 Ler da Área de Transferência</button>
             </div>
-            <textarea class="form-input" id="pasteLyricsTextarea" placeholder="Cole a letra aqui (Ctrl + V)..." rows="13" style="width: 100%; resize: vertical; line-height: 1.5; font-family: 'Inter', sans-serif;"></textarea>
+            <textarea class="form-input" id="pasteLyricsTextarea" placeholder="Cole a letra aqui (Ctrl + V)..." rows="13"
+                      style="width: 100%; resize: vertical; line-height: 1.5; font-family: 'Inter', sans-serif;"></textarea>
             <label class="checkbox-group">
                 <input checked id="pasteAutoEnterSyncMode" type="checkbox">
                 <span>Já ativar o <b>🎯 Modo Edição (Set Rápido com Espaço / Ctrl)</b> na linha 1 após aplicar</span>
@@ -2248,7 +2825,9 @@
                 <span class="modal-action-icon">🌐</span>
                 <div>
                     <h2>Todos os Resultados das APIs (Sem Filtro)</h2>
-                    <div class="modal-action-subtitle" id="allApiModalSubtitle">Resultados completos de LRCLIB, AppleMusic, Spotify, YouTube, NetEase, QQMusic, KuGou, Musixmatch, Deezer, Genius e Karalyr</div>
+                    <div class="modal-action-subtitle" id="allApiModalSubtitle">Resultados completos de LRCLIB, AppleMusic, Spotify, YouTube, NetEase, QQMusic, KuGou,
+                        Musixmatch, Deezer, Genius e Karalyr
+                    </div>
                 </div>
             </div>
             <button class="btn-close-modal" id="btnCloseAllApiModal" onclick="closeAllApiResultsModal()" title="Fechar (Esc)">✕</button>
@@ -2256,9 +2835,11 @@
 
         <div class="all-api-toolbar">
             <div class="all-api-search-row">
-                <input class="form-input" id="allApiCustomQueryInput" placeholder="Pesquisar manualmente em todas as APIs (ex: Artista Título)..." style="max-width: 480px;" type="text">
+                <input class="form-input" id="allApiCustomQueryInput" placeholder="Pesquisar manualmente em todas as APIs (ex: Artista Título)..." style="max-width: 480px;"
+                       type="text">
                 <button class="btn-browse" id="btnRunAllApiCustomSearch" onclick="runCustomAllApiSearch()">🔍 Pesquisar em Todas as APIs</button>
-                <input class="form-input" id="allApiLocalFilterInput" oninput="renderAllApiModalList()" placeholder="Filtrar resultados listados abaixo por título, artista, álbum ou letra..." style="max-width: 380px;" type="text">
+                <input class="form-input" id="allApiLocalFilterInput" oninput="renderAllApiModalList()"
+                       placeholder="Filtrar resultados listados abaixo por título, artista, álbum ou letra..." style="max-width: 380px;" type="text">
                 <span class="badge badge-info" id="allApiTotalBadge">0 resultados</span>
             </div>
             <div class="all-api-provider-chips" id="allApiProviderChips"></div>
@@ -2273,12 +2854,18 @@
                         <div id="allApiDetailSubtitle" style="font-size: 0.82rem; color: var(--text-muted);">-</div>
                     </div>
                     <div style="display: flex; align-items: center; gap: 8px;">
-                        <button class="btn-offset" id="btnUseSelectedApiSynced" onclick="useSelectedAllApiResult('synced')" style="display: none; padding: 7px 12px; color: #34d399; border-color: #10b981;">⚡ Usar Letra Sincronizada no Comparador</button>
-                        <button class="btn-offset" id="btnUseSelectedApiPlain" onclick="useSelectedAllApiResult('plain')" style="display: none; padding: 7px 12px; color: #60a5fa; border-color: #3b82f6;">📄 Usar Letra Pura no Comparador</button>
+                        <button class="btn-offset" id="btnUseSelectedApiSynced" onclick="useSelectedAllApiResult('synced')"
+                                style="display: none; padding: 7px 12px; color: #34d399; border-color: #10b981;">⚡ Usar Letra Sincronizada no Comparador
+                        </button>
+                        <button class="btn-offset" id="btnUseSelectedApiPlain" onclick="useSelectedAllApiResult('plain')"
+                                style="display: none; padding: 7px 12px; color: #60a5fa; border-color: #3b82f6;">📄 Usar Letra Pura no Comparador
+                        </button>
                     </div>
                 </div>
                 <div class="all-api-detail-meta-grid" id="allApiDetailMetaGrid" style="display: none;"></div>
-                <div class="all-api-lyrics-preview" id="allApiLyricsPreview">Clique em qualquer item encontrado à esquerda para inspecionar todos os metadados e o conteúdo bruto retornado pela API.</div>
+                <div class="all-api-lyrics-preview" id="allApiLyricsPreview">Clique em qualquer item encontrado à esquerda para inspecionar todos os metadados e o conteúdo
+                    bruto retornado pela API.
+                </div>
             </div>
         </div>
     </div>
@@ -2629,7 +3216,7 @@
         const isSyncEditingThisContainer =
             (typeof syncEditModeSide !== 'undefined' && syncEditModeSide !== null) &&
             ((syncEditModeSide === 'local' && container === localLyricsScroller) ||
-             (syncEditModeSide === 'remote' && container === remoteLyricsScroller));
+                (syncEditModeSide === 'remote' && container === remoteLyricsScroller));
 
         lines.forEach((line, idx) => {
             if (idx === activeIndex) {
@@ -2781,7 +3368,8 @@
             outDir: document.getElementById('input_outDir')?.value?.trim(),
             isFullAnalysis: document.getElementById('input_isFullAnalysis')?.value === 'true',
             moveFiles: document.getElementById('input_moveFiles')?.checked ?? true,
-            renameFiles: document.getElementById('input_renameFiles')?.checked ?? true
+            renameFiles: document.getElementById('input_renameFiles')?.checked ?? true,
+            includeMissingLyrics: document.getElementById('input_includeMissingLyrics')?.checked ?? true
         };
 
         document.getElementById('modalFormSection').style.display = 'none';
@@ -2858,10 +3446,10 @@
             reportRow.style.display = 'flex';
             document.getElementById('btnOpenInComparator').onclick = async () => {
                 closeActionModal();
-                await init();
+                await init(true);
                 reportSelect.value = status.generatedReportPath;
-                await loadReportItems(status.generatedReportPath);
                 switchView('comparator');
+                await loadReportItems(status.generatedReportPath);
             };
         } else {
             reportRow.style.display = 'none';
@@ -2936,9 +3524,130 @@
     }
 
     // =========================================================================
-    // COMPARADOR & TRACK LIST
+    // COMPARADOR, MULTI-TAG FILTERING & RACE-SAFE TRACK SELECTION
     // =========================================================================
-    async function init() {
+    let activeIssueTagFilters = new Set();
+    let activeTrackRequestId = 0;
+    let activeTrackAbortController = null;
+
+    const ISSUE_TAG_LABELS = {
+        'SEM_LETRA': 'Sem Letra',
+        'SEM_TIMESTAMPS': 'Sem Timestamps',
+        'TAG_LENGTH_DIVERGENTE': 'Tamanho Divergente',
+        'TERMINO_PREMATURO': 'Término Prematuro',
+        'ULTRAPASSOU_DURACAO': 'Ultrapassou Duração',
+        'TIMESTAMPS_FORA_DE_ORDEM': 'Fora de Ordem',
+        'TIMESTAMPS_ESTATICOS': 'Timestamps Estáticos',
+        'MUSICA_DIFERENTE': 'Música Diferente'
+    };
+
+    function extractIssueTagsFromItem(item) {
+        const tags = [];
+        if (!item || !Array.isArray(item.issues)) return tags;
+        item.issues.forEach(iss => {
+            const m = String(iss || '').match(/^\[([A-Z0-9_]+)\]/i);
+            if (m && m[1]) {
+                const code = m[1].toUpperCase();
+                if (!tags.includes(code)) tags.push(code);
+            } else {
+                const lower = String(iss || '').toLowerCase();
+                let inferred = null;
+                if (lower.includes('não encontrado') || lower.includes('sem letra')) inferred = 'SEM_LETRA';
+                else if (lower.includes('sem marcações') || lower.includes('sem timestamps')) inferred = 'SEM_TIMESTAMPS';
+                else if (lower.includes('length') || lower.includes('duração')) inferred = 'TAG_LENGTH_DIVERGENTE';
+                else if (lower.includes('prematuro') || lower.includes('acaba aos')) inferred = 'TERMINO_PREMATURO';
+                else if (lower.includes('fora de ordem')) inferred = 'TIMESTAMPS_FORA_DE_ORDEM';
+                if (inferred && !tags.includes(inferred)) tags.push(inferred);
+            }
+        });
+        return tags;
+    }
+
+    function getIssueTagFriendlyName(tagCode) {
+        return ISSUE_TAG_LABELS[tagCode] || tagCode;
+    }
+
+    function toggleIssueTagFilter(tagCode) {
+        const code = String(tagCode || '').toUpperCase();
+        if (!code) return;
+        if (activeIssueTagFilters.has(code)) {
+            activeIssueTagFilters.delete(code);
+        } else {
+            activeIssueTagFilters.add(code);
+        }
+        renderIssueTagFilterChips();
+        renderTrackList();
+    }
+
+    function clearAllIssueTagFilters() {
+        activeIssueTagFilters.clear();
+        renderIssueTagFilterChips();
+        renderTrackList();
+    }
+
+    function renderIssueTagFilterChips() {
+        const box = document.getElementById('issueTagFiltersBox');
+        const container = document.getElementById('issueTagChipsContainer');
+        const activeCountEl = document.getElementById('activeTagFilterCount');
+        const clearBtn = document.getElementById('btnClearIssueTagFilters');
+        if (!box || !container) return;
+
+        const countsByTag = {};
+        currentItems.forEach(item => {
+            const tags = extractIssueTagsFromItem(item);
+            tags.forEach(t => {
+                countsByTag[t] = (countsByTag[t] || 0) + 1;
+            });
+        });
+
+        // Remove any active filter tag that doesn't exist in the current report
+        Array.from(activeIssueTagFilters).forEach(t => {
+            if (!countsByTag[t]) activeIssueTagFilters.delete(t);
+        });
+
+        const allTags = Object.keys(countsByTag).sort((a, b) => (countsByTag[b] - countsByTag[a]) || a.localeCompare(b));
+        if (allTags.length === 0) {
+            box.style.display = 'none';
+            container.innerHTML = '';
+            return;
+        }
+
+        box.style.display = 'flex';
+        if (activeCountEl) activeCountEl.textContent = String(activeIssueTagFilters.size);
+        if (clearBtn) clearBtn.style.display = activeIssueTagFilters.size > 0 ? 'inline-block' : 'none';
+
+        container.innerHTML = '';
+        allTags.forEach(tag => {
+            const isActive = activeIssueTagFilters.has(tag);
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'issue-tag-chip' + (isActive ? ' active' : '');
+            btn.title = `${isActive ? 'Remover filtro' : 'Filtrar por'} [${tag}] (${getIssueTagFriendlyName(tag)})`;
+            btn.innerHTML = `<span>${escapeHtml(getIssueTagFriendlyName(tag))}</span><span style="opacity:0.75;">(${countsByTag[tag]})</span>`;
+            btn.addEventListener('click', () => toggleIssueTagFilter(tag));
+            container.appendChild(btn);
+        });
+    }
+
+    function itemMatchesActiveFilters(item) {
+        const isPending = !item.status || item.status === 'PENDING';
+        if (activeFilter === 'PENDING' && !isPending) return false;
+        if (activeFilter === 'RESOLVED' && isPending) return false;
+
+        const filterText = trackSearchInput.value.toLowerCase().trim();
+        if (filterText && !item.fileName.toLowerCase().includes(filterText)) {
+            return false;
+        }
+
+        if (activeIssueTagFilters.size > 0) {
+            const itemTags = extractIssueTagsFromItem(item);
+            const matchesAnySelectedTag = itemTags.some(t => activeIssueTagFilters.has(t));
+            if (!matchesAnySelectedTag) return false;
+        }
+        return true;
+    }
+
+    async function init(skipAutoLoad = false) {
         await loadMenuOptions();
         try {
             const res = await fetch('/api/reports');
@@ -2951,9 +3660,9 @@
                 reportSelect.appendChild(opt);
             });
 
-            if (reports.length > 0) {
-                loadReportItems(reports[0]);
-            } else {
+            if (reports.length > 0 && !skipAutoLoad) {
+                await loadReportItems(reports[0]);
+            } else if (reports.length === 0) {
                 headerProgress.textContent = 'Pronto';
             }
         } catch (err) {
@@ -2966,16 +3675,28 @@
     });
 
     async function loadReportItems(reportPath) {
+        // Cancel any in-flight track request from previous report/track
+        activeTrackRequestId++;
+        if (activeTrackAbortController) {
+            try {
+                activeTrackAbortController.abort();
+            } catch (_e) {
+            }
+            activeTrackAbortController = null;
+        }
+
         headerProgress.textContent = 'Carregando lista...';
         try {
             const res = await fetch('/api/items?report=' + encodeURIComponent(reportPath));
             currentItems = await res.json();
+            activeIssueTagFilters.clear();
             updateFilterCounts();
+            renderIssueTagFilterChips();
             renderTrackList();
             headerProgress.textContent = `${currentItems.length} faixas para revisar`;
 
             if (currentItems.length > 0) {
-                selectTrack(0, viewComparator.classList.contains('active'));
+                await selectTrack(0, viewComparator.classList.contains('active'));
             } else {
                 clearViewer();
             }
@@ -2997,16 +3718,9 @@
 
     function renderTrackList() {
         trackList.innerHTML = '';
-        const filterText = trackSearchInput.value.toLowerCase().trim();
 
         currentItems.forEach((item, index) => {
-            const isPending = !item.status || item.status === 'PENDING';
-            if (activeFilter === 'PENDING' && !isPending) return;
-            if (activeFilter === 'RESOLVED' && isPending) return;
-
-            if (filterText && !item.fileName.toLowerCase().includes(filterText)) {
-                return;
-            }
+            if (!itemMatchesActiveFilters(item)) return;
 
             const li = document.createElement('li');
             li.className = 'track-item' + (index === currentIndex ? ' active' : '');
@@ -3015,22 +3729,41 @@
             if (item.status === 'KEPT_LOCAL') {
                 statusBadge = '<span class="badge badge-success" style="font-size:0.65rem;">LOCAL</span>';
             } else if (item.status === 'SAVED_LRCLIB') {
-                statusBadge = '<span class="badge badge-info" style="font-size:0.65rem;">LRCLIB</span>';
+                statusBadge = '<span class="badge badge-info" style="font-size:0.65rem;">ONLINE</span>';
             }
+
+            const issuesHtml = (item.issues || []).map(iss => {
+                const m = String(iss || '').match(/^\[([A-Z0-9_]+)\]:?\s*(.*)$/i);
+                if (m && m[1]) {
+                    const code = m[1].toUpperCase();
+                    const rest = m[2] || '';
+                    const isActive = activeIssueTagFilters.has(code);
+                    return `<span>• <span class="track-issue-tag-badge ${isActive ? 'active' : ''}" data-issue-tag="${escapeHtml(code)}" title="Clique para filtrar/remover filtro pela tag [${escapeHtml(code)}]">[${escapeHtml(code)}]</span>${escapeHtml(rest)}</span>`;
+                }
+                return `<span>• ${escapeHtml(String(iss || ''))}</span>`;
+            }).join('');
 
             li.innerHTML = `
           <div style="display: flex; justify-content: space-between; align-items: center; gap: 6px;">
-            <div class="track-item-title" title="${item.fileName}">
-              ${item.id}. ${item.fileName}
+            <div class="track-item-title" title="${escapeHtml(item.fileName)}">
+              ${item.id}. ${escapeHtml(item.fileName)}
             </div>
             ${statusBadge}
           </div>
           <div class="track-item-issues">
-            ${item.issues.map(iss => `<span>• ${iss}</span>`).join('')}
+            ${issuesHtml}
           </div>
         `;
 
-            li.addEventListener('click', () => selectTrack(index));
+            li.querySelectorAll('.track-issue-tag-badge').forEach(badge => {
+                badge.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const tagCode = badge.getAttribute('data-issue-tag');
+                    if (tagCode) toggleIssueTagFilter(tagCode);
+                });
+            });
+
+            li.addEventListener('click', () => selectTrack(index, true));
             trackList.appendChild(li);
         });
     }
@@ -3049,20 +3782,65 @@
 
     async function selectTrack(index, autoPlay = true) {
         if (index < 0 || index >= currentItems.length) return;
+
+        // Cancel any previous in-flight /api/track request so its late response never overwrites the current song
+        const reqId = ++activeTrackRequestId;
+        if (activeTrackAbortController) {
+            try {
+                activeTrackAbortController.abort();
+            } catch (_e) {
+            }
+        }
+        const abortController = new AbortController();
+        activeTrackAbortController = abortController;
+
         currentIndex = index;
         renderTrackList();
 
         const item = currentItems[index];
         headerProgress.textContent = `Carregando ${item.fileName}...`;
 
+        // Immediately prepare the audio for the selected track so playback starts right away without waiting for external APIs
+        const shouldPlayNow = autoPlay && viewComparator.classList.contains('active');
+        if (item.audioPath) {
+            const immediateAudioUrl = '/api/audio?path=' + encodeURIComponent(item.audioPath);
+            if (audio.dataset.loadedAudioPath !== item.audioPath) {
+                audio.pause();
+                currentTimeLabel.textContent = '00:00';
+                seekSlider.value = 0;
+                audio.dataset.loadedAudioPath = item.audioPath;
+                audio.src = immediateAudioUrl;
+                audio.load();
+            }
+            if (shouldPlayNow && audio.paused) {
+                audio.play().catch(err => {
+                    console.warn('Reprodução automática bloqueada ou falhou:', err);
+                });
+            }
+        }
+
+        songTitle.textContent = item.fileName || 'Carregando...';
+        remoteLyricsScroller.innerHTML = '<p style="text-align: center; color: #777777; margin-top: 40px;">Buscando letras nas APIs online...</p>';
+
         try {
-            const res = await fetch('/api/track?id=' + item.id);
+            const res = await fetch('/api/track?id=' + item.id, {signal: abortController.signal});
             const details = await res.json();
+
+            // Guard against race conditions: ignore response if user or app already switched to another track/request
+            if (reqId !== activeTrackRequestId || currentIndex !== index) {
+                return;
+            }
+
             currentTrackDetails = details;
             renderTrackDetails(details, autoPlay);
             headerProgress.textContent = `Revisando [${index + 1}/${currentItems.length}]`;
         } catch (err) {
-            showToast('Erro ao carregar detalhes da faixa.');
+            if (err && err.name === 'AbortError') {
+                return;
+            }
+            if (reqId === activeTrackRequestId) {
+                showToast('Erro ao carregar detalhes da faixa.');
+            }
         }
     }
 
@@ -3073,7 +3851,7 @@
     let selectedAllApiItemIndex = -1;
 
     function getSourceBadgeClass(src) {
-        const s = (src || 'LRCLIB').toUpperCase();
+        const s = (src || 'ONLINE').toUpperCase();
         if (s === 'NETEASE') return 'badge-source-netease';
         if (s === 'KUGOU') return 'badge-source-kugou';
         if (s === 'MUSIXMATCH') return 'badge-source-musixmatch';
@@ -3088,7 +3866,7 @@
     }
 
     function updateRemoteSourceBadge(src) {
-        const label = src || 'LRCLIB';
+        const label = src || 'ONLINE';
         const el = document.getElementById('remoteSourceBadge');
         if (el) {
             el.textContent = label;
@@ -3178,35 +3956,45 @@
             issuesBox.style.display = 'none';
         }
 
-        // Reset in-memory timestamp backups and Sync Edit Mode when switching tracks
+        // Reset in-memory timestamp backups, multi-line selection, and Sync Edit Mode when switching tracks
         localTimestampsBackup = null;
         remoteTimestampsBackup = null;
         updateToggleTimestampsBtnUI('local', false);
         updateToggleTimestampsBtnUI('remote', false);
+        if (typeof clearLineSelection === 'function') {
+            clearLineSelection('local', false);
+            clearLineSelection('remote', false);
+        }
         if (typeof disableSyncEditMode === 'function') {
             disableSyncEditMode();
         }
 
-        // Audio Source and player timeline reset
-        audio.pause();
-        currentTimeLabel.textContent = '00:00';
-        seekSlider.value = 0;
         if (d.metadata && d.metadata.durationSeconds) {
             totalDurationLabel.textContent = formatTime(d.metadata.durationSeconds);
-        } else {
+        } else if (!audio.duration || !isFinite(audio.duration)) {
             totalDurationLabel.textContent = '00:00';
         }
 
         const audioUrl = d.audioUrl || (d.audioPath ? ('/api/audio?path=' + encodeURIComponent(d.audioPath)) : null);
+        const shouldAutoPlay = autoPlay && viewComparator.classList.contains('active');
         if (audioUrl) {
-            audio.src = audioUrl;
-            audio.load();
-            if (autoPlay) {
+            // Only reload audio if it is not already loaded for this exact track (prevents interrupting playback when API finishes!)
+            if (audio.dataset.loadedAudioPath !== d.audioPath) {
+                audio.pause();
+                currentTimeLabel.textContent = '00:00';
+                seekSlider.value = 0;
+                audio.dataset.loadedAudioPath = d.audioPath || '';
+                audio.src = audioUrl;
+                audio.load();
+            }
+            if (shouldAutoPlay && audio.paused) {
                 audio.play().catch(err => {
                     console.warn('Reprodução automática bloqueada ou falhou:', err);
                 });
             }
         } else {
+            audio.pause();
+            delete audio.dataset.loadedAudioPath;
             audio.removeAttribute('src');
         }
 
@@ -3872,16 +4660,44 @@
         const lines = syncEditModeSide === 'local' ? localLinesState : remoteLinesState;
         if (!lines || lines.length === 0) return;
         syncEditCursorIndex = Math.max(0, Math.min(index, lines.length - 1));
+        focusedLineIndex[syncEditModeSide] = syncEditCursorIndex;
         updateSyncEditModeUI();
     }
 
     function stepSyncCursor(delta) {
-        if (!syncEditModeSide) return;
-        const lines = syncEditModeSide === 'local' ? localLinesState : remoteLinesState;
+        const targetSide = syncEditModeSide || hoveredColumnSide || 'local';
+        const lines = targetSide === 'local' ? localLinesState : remoteLinesState;
+        const container = targetSide === 'local' ? localLyricsScroller : remoteLyricsScroller;
         if (!lines || lines.length === 0) return;
-        syncEditCursorIndex = Math.max(0, Math.min(syncEditCursorIndex + delta, lines.length - 1));
-        updateSyncEditModeUI();
-        showToast(`🎯 Cursor movido para a linha ${syncEditCursorIndex + 1} de ${lines.length}`);
+
+        if (syncEditModeSide) {
+            syncEditCursorIndex = Math.max(0, Math.min(syncEditCursorIndex + delta, lines.length - 1));
+            focusedLineIndex[syncEditModeSide] = syncEditCursorIndex;
+            updateSyncEditModeUI();
+            showToast(`🎯 Cursor movido para a linha #${syncEditCursorIndex + 1} de ${lines.length}`);
+        } else {
+            const currentFocus = (typeof focusedLineIndex[targetSide] === 'number' && focusedLineIndex[targetSide] >= 0)
+                ? focusedLineIndex[targetSide]
+                : 0;
+            const nextFocus = Math.max(0, Math.min(currentFocus + delta, lines.length - 1));
+            focusedLineIndex[targetSide] = nextFocus;
+            renderLyricLines(container, lines, targetSide);
+            const lineDivs = container.querySelectorAll('.lyric-line');
+            const targetDiv = lineDivs[nextFocus];
+            if (targetDiv) {
+                const containerRect = container.getBoundingClientRect();
+                const lineRect = targetDiv.getBoundingClientRect();
+                const scrollOffset = (lineRect.top - containerRect.top) - (container.clientHeight / 2) + (targetDiv.clientHeight / 2);
+                container.scrollBy({top: scrollOffset, behavior: 'smooth'});
+            }
+            const targetLine = lines[nextFocus];
+            if (targetLine && !targetLine.noTimestamp && audio.src && audio.src !== window.location.href) {
+                const ms = typeof targetLine.timestampMs === 'number' ? targetLine.timestampMs : 0;
+                audio.currentTime = ms / 1000;
+                syncLyricsHighlight(ms);
+            }
+            showToast(`↩️ Linha #${nextFocus + 1} selecionada (${targetSide === 'local' ? 'Local' : 'Online'})`);
+        }
     }
 
     function updateSyncEditModeUI() {
@@ -3963,7 +4779,8 @@
 
         // If audio is paused at the very beginning (0s) and user presses Space/Ctrl, start playing automatically
         if (audio.paused && audio.src && audio.src !== window.location.href && (audio.currentTime || 0) === 0) {
-            audio.play().catch(() => {});
+            audio.play().catch(() => {
+            });
         }
 
         const idx = Math.max(0, Math.min(syncEditCursorIndex, lines.length - 1));
@@ -3992,9 +4809,11 @@
 
         if (idx < lines.length - 1) {
             syncEditCursorIndex = idx + 1;
+            focusedLineIndex[syncEditModeSide] = syncEditCursorIndex;
             updateSyncEditModeUI();
             showToast(`✓ Linha ${idx + 1} marcada em [${line.formattedTime}] → Próxima: #${syncEditCursorIndex + 1}`);
         } else {
+            focusedLineIndex[syncEditModeSide] = syncEditCursorIndex;
             updateSyncEditModeUI();
             showToast(`🎉 Última linha (#${idx + 1}) marcada em [${line.formattedTime}]! Sincronização concluída!`);
         }
@@ -4027,12 +4846,323 @@
         });
     }
 
+    // =========================================================================
+    // MULTI-LINE SELECTION, BATCH OPERATIONS & CARD DRAG-AND-DROP
+    // =========================================================================
+    const selectedLineIndices = {
+        local: new Set(),
+        remote: new Set()
+    };
+    const lastClickedLineIndex = {
+        local: -1,
+        remote: -1
+    };
+    const focusedLineIndex = {
+        local: 0,
+        remote: 0
+    };
+    let dragState = {
+        side: null,
+        draggedIndices: []
+    };
+
+    function updateBatchSelectionBarUI(side) {
+        const isLocal = side === 'local';
+        const bar = document.getElementById(isLocal ? 'batchSelectionBarLocal' : 'batchSelectionBarRemote');
+        const countEl = document.getElementById(isLocal ? 'batchSelectedCountLocal' : 'batchSelectedCountRemote');
+        const count = selectedLineIndices[side].size;
+        if (bar) {
+            bar.classList.toggle('active', count > 0);
+        }
+        if (countEl) {
+            countEl.textContent = `${count} ${count === 1 ? 'linha selecionada' : 'linhas selecionadas'}`;
+        }
+    }
+
+    function updateStatusBadgeCount(side) {
+        if (side === 'local') {
+            localStatusBadge.textContent = localLinesState.length + ' versos';
+        } else {
+            remoteStatusBadge.textContent = remoteLinesState.length + ' versos';
+        }
+    }
+
+    function toggleLineSelection(side, index, isShift = false, forceState = null) {
+        const lines = side === 'local' ? localLinesState : remoteLinesState;
+        const container = side === 'local' ? localLyricsScroller : remoteLyricsScroller;
+        const selSet = selectedLineIndices[side];
+
+        if (isShift && lastClickedLineIndex[side] >= 0 && lastClickedLineIndex[side] < lines.length) {
+            const start = Math.min(lastClickedLineIndex[side], index);
+            const end = Math.max(lastClickedLineIndex[side], index);
+            for (let i = start; i <= end; i++) {
+                selSet.add(i);
+            }
+        } else {
+            const shouldSelect = forceState !== null ? forceState : !selSet.has(index);
+            if (shouldSelect) {
+                selSet.add(index);
+            } else {
+                selSet.delete(index);
+            }
+        }
+
+        lastClickedLineIndex[side] = index;
+        focusedLineIndex[side] = index;
+        updateBatchSelectionBarUI(side);
+
+        // Update DOM classes & checkboxes without full re-render
+        const lineDivs = container.querySelectorAll('.lyric-line');
+        lineDivs.forEach((div, idx) => {
+            const isSel = selSet.has(idx);
+            div.classList.toggle('selected-line', isSel);
+            div.classList.toggle('focused-line', idx === focusedLineIndex[side]);
+            const cb = div.querySelector('.line-select-checkbox');
+            if (cb) cb.checked = isSel;
+        });
+    }
+
+    function selectAllLines(side) {
+        const lines = side === 'local' ? localLinesState : remoteLinesState;
+        const container = side === 'local' ? localLyricsScroller : remoteLyricsScroller;
+        const selSet = selectedLineIndices[side];
+        selSet.clear();
+        for (let i = 0; i < lines.length; i++) {
+            selSet.add(i);
+        }
+        updateBatchSelectionBarUI(side);
+        renderLyricLines(container, lines, side);
+    }
+
+    function clearLineSelection(side, reRender = true) {
+        const lines = side === 'local' ? localLinesState : remoteLinesState;
+        const container = side === 'local' ? localLyricsScroller : remoteLyricsScroller;
+        selectedLineIndices[side].clear();
+        lastClickedLineIndex[side] = -1;
+        updateBatchSelectionBarUI(side);
+        if (reRender) {
+            renderLyricLines(container, lines, side);
+        }
+    }
+
+    function deleteSelectedLines(side) {
+        const lines = side === 'local' ? localLinesState : remoteLinesState;
+        const container = side === 'local' ? localLyricsScroller : remoteLyricsScroller;
+        const selSet = selectedLineIndices[side];
+        if (selSet.size === 0) return;
+
+        const indicesDesc = Array.from(selSet).sort((a, b) => b - a);
+        indicesDesc.forEach(idx => {
+            if (idx >= 0 && idx < lines.length) {
+                lines.splice(idx, 1);
+            }
+        });
+
+        const removedCount = indicesDesc.length;
+        selSet.clear();
+        lastClickedLineIndex[side] = -1;
+        focusedLineIndex[side] = Math.max(0, Math.min(focusedLineIndex[side], lines.length - 1));
+        if (syncEditModeSide === side && syncEditCursorIndex >= lines.length) {
+            syncEditCursorIndex = Math.max(0, lines.length - 1);
+        }
+
+        updateBatchSelectionBarUI(side);
+        updateStatusBadgeCount(side);
+        renderLyricLines(container, lines, side);
+        syncLyricsHighlight(Math.round((audio.currentTime || 0) * 1000));
+        showToast(`🗑️ ${removedCount} ${removedCount === 1 ? 'linha excluída' : 'linhas excluídas'}!`);
+    }
+
+    function zeroSelectedLinesTimestamps(side) {
+        const lines = side === 'local' ? localLinesState : remoteLinesState;
+        const container = side === 'local' ? localLyricsScroller : remoteLyricsScroller;
+        const selSet = selectedLineIndices[side];
+        if (selSet.size === 0) return;
+
+        selSet.forEach(idx => {
+            const line = lines[idx];
+            if (line) {
+                line.noTimestamp = false;
+                line.timestampMs = 0;
+                line.timeMs = 0;
+                line.formattedTime = '00:00.00';
+            }
+        });
+
+        renderLyricLines(container, lines, side);
+        showToast(`⏱️ Minutagem zerada [00:00.00] em ${selSet.size} ${selSet.size === 1 ? 'linha' : 'linhas'}!`);
+    }
+
+    function parseBatchTimeInputToMs(rawInput) {
+        const str = String(rawInput || '').trim();
+        if (!str) return null;
+        const sign = str.startsWith('-') ? -1 : 1;
+        const clean = str.replace(/^[+-]/, '').trim();
+        if (clean.includes(':')) {
+            return sign * parseFormattedTimeToMs(clean);
+        }
+        const sec = parseFloat(clean.replace(',', '.'));
+        if (isNaN(sec)) return null;
+        return Math.round(sign * sec * 1000);
+    }
+
+    function shiftSelectedLinesByTime(side) {
+        const lines = side === 'local' ? localLinesState : remoteLinesState;
+        const container = side === 'local' ? localLyricsScroller : remoteLyricsScroller;
+        const selSet = selectedLineIndices[side];
+        if (selSet.size === 0) return;
+
+        const inputEl = document.getElementById(side === 'local' ? 'batchTimeInputLocal' : 'batchTimeInputRemote');
+        const deltaMs = parseBatchTimeInputToMs(inputEl?.value);
+        if (deltaMs === null) {
+            showToast('Informe um tempo válido (ex: +1.5, -0.8 ou 00:02.50).');
+            return;
+        }
+
+        selSet.forEach(idx => {
+            const line = lines[idx];
+            if (!line) return;
+            const baseMs = line.noTimestamp
+                ? 0
+                : ((typeof line.timestampMs === 'number')
+                    ? line.timestampMs
+                    : parseFormattedTimeToMs(line.formattedTime || '00:00'));
+            const newMs = Math.max(0, baseMs + deltaMs);
+            line.noTimestamp = false;
+            line.timestampMs = newMs;
+            line.timeMs = newMs;
+            line.formattedTime = formatLrcTimestamp(newMs);
+        });
+
+        renderLyricLines(container, lines, side);
+        syncLyricsHighlight(Math.round((audio.currentTime || 0) * 1000));
+        const signLabel = deltaMs >= 0 ? '+' : '-';
+        showToast(`⏱️ Bloco de ${selSet.size} linha(s) deslocado em ${signLabel}${formatLrcTimestamp(Math.abs(deltaMs))}!`);
+    }
+
+    function alignSelectedBlockToStartTime(side, usePlayerTime = false) {
+        const lines = side === 'local' ? localLinesState : remoteLinesState;
+        const container = side === 'local' ? localLyricsScroller : remoteLyricsScroller;
+        const selSet = selectedLineIndices[side];
+        if (selSet.size === 0) return;
+
+        let targetStartMs = 0;
+        if (usePlayerTime) {
+            targetStartMs = Math.round((audio.currentTime || 0) * 1000);
+        } else {
+            const inputEl = document.getElementById(side === 'local' ? 'batchTimeInputLocal' : 'batchTimeInputRemote');
+            const parsed = parseBatchTimeInputToMs(inputEl?.value);
+            if (parsed === null || parsed < 0) {
+                showToast('Informe o tempo inicial H para o bloco (ex: 01:15.00 ou 75).');
+                return;
+            }
+            targetStartMs = parsed;
+        }
+
+        const sortedIndices = Array.from(selSet).sort((a, b) => a - b);
+        const firstLine = lines[sortedIndices[0]];
+        if (!firstLine) return;
+
+        const firstLineMs = firstLine.noTimestamp
+            ? 0
+            : ((typeof firstLine.timestampMs === 'number')
+                ? firstLine.timestampMs
+                : parseFormattedTimeToMs(firstLine.formattedTime || '00:00'));
+        const deltaMs = targetStartMs - firstLineMs;
+
+        sortedIndices.forEach(idx => {
+            const line = lines[idx];
+            if (!line) return;
+            const baseMs = line.noTimestamp
+                ? 0
+                : ((typeof line.timestampMs === 'number')
+                    ? line.timestampMs
+                    : parseFormattedTimeToMs(line.formattedTime || '00:00'));
+            const newMs = Math.max(0, baseMs + deltaMs);
+            line.noTimestamp = false;
+            line.timestampMs = newMs;
+            line.timeMs = newMs;
+            line.formattedTime = formatLrcTimestamp(newMs);
+        });
+
+        renderLyricLines(container, lines, side);
+        syncLyricsHighlight(Math.round((audio.currentTime || 0) * 1000));
+        showToast(`🎯 Bloco (${sortedIndices.length} linhas) ajustado para iniciar em [${formatLrcTimestamp(targetStartMs)}] mantendo os intervalos!`);
+    }
+
+    function moveLinesCardToPosition(side, fromIndices, targetIndex, placeAfter) {
+        const lines = side === 'local' ? localLinesState : remoteLinesState;
+        const container = side === 'local' ? localLyricsScroller : remoteLyricsScroller;
+        if (!lines || lines.length === 0) return;
+
+        const sortedFrom = Array.from(new Set(fromIndices))
+            .filter(i => i >= 0 && i < lines.length)
+            .sort((a, b) => a - b);
+        if (sortedFrom.length === 0) return;
+
+        // If targetIndex is inside the dragged selection, do nothing
+        if (sortedFrom.includes(targetIndex)) return;
+
+        const movingItems = sortedFrom.map(i => lines[i]);
+        const remainingItems = [];
+        let insertAtInRemaining = 0;
+        let foundTarget = false;
+
+        for (let i = 0; i < lines.length; i++) {
+            if (sortedFrom.includes(i)) {
+                continue;
+            }
+            if (i === targetIndex) {
+                foundTarget = true;
+                if (placeAfter) {
+                    remainingItems.push(lines[i]);
+                    insertAtInRemaining = remainingItems.length;
+                } else {
+                    insertAtInRemaining = remainingItems.length;
+                    remainingItems.push(lines[i]);
+                }
+            } else {
+                remainingItems.push(lines[i]);
+            }
+        }
+
+        if (!foundTarget) {
+            insertAtInRemaining = placeAfter ? remainingItems.length : 0;
+        }
+
+        remainingItems.splice(insertAtInRemaining, 0, ...movingItems);
+        lines.splice(0, lines.length, ...remainingItems);
+
+        // Update selection to the newly dropped positions
+        const selSet = selectedLineIndices[side];
+        if (selSet.size > 0) {
+            selSet.clear();
+            for (let k = 0; k < movingItems.length; k++) {
+                selSet.add(insertAtInRemaining + k);
+            }
+        }
+        focusedLineIndex[side] = insertAtInRemaining;
+        if (syncEditModeSide === side) {
+            syncEditCursorIndex = insertAtInRemaining;
+        }
+
+        updateBatchSelectionBarUI(side);
+        renderLyricLines(container, lines, side);
+        syncLyricsHighlight(Math.round((audio.currentTime || 0) * 1000));
+        showToast(movingItems.length === 1
+            ? `⠿ Verso movido para a linha #${insertAtInRemaining + 1}!`
+            : `⠿ Bloco de ${movingItems.length} versos movido para a linha #${insertAtInRemaining + 1}!`);
+    }
+
     function renderLyricLines(container, lines, side) {
         container.innerHTML = '';
+        updateBatchSelectionBarUI(side);
         if (!lines || lines.length === 0) {
             container.innerHTML = '<p style="text-align: center; color: #777777; margin-top: 40px;">Nenhuma letra sincronizada encontrada.</p>';
             return;
         }
+
+        const selSet = selectedLineIndices[side];
 
         lines.forEach((line, index) => {
             const ms = line.noTimestamp
@@ -4050,15 +5180,24 @@
                 : (line.formattedTime || formatLrcTimestamp(ms)).replace(/[\[\]]/g, '');
 
             const isTarget = (syncEditModeSide === side && index === syncEditCursorIndex);
+            const isSelected = selSet.has(index);
+            const isFocused = (focusedLineIndex[side] === index);
+
             const div = document.createElement('div');
-            div.className = 'lyric-line' + (isTarget ? ' sync-target' : '');
+            div.className = 'lyric-line'
+                + (isTarget ? ' sync-target' : '')
+                + (isSelected ? ' selected-line' : '')
+                + (isFocused ? ' focused-line' : '');
             div.setAttribute('data-ms', ms);
             div.setAttribute('data-index', index);
+            div.setAttribute('draggable', 'true');
 
             div.innerHTML = `
+          <input type="checkbox" class="line-select-checkbox" ${isSelected ? 'checked' : ''} title="Selecionar linha (Shift+Clique seleciona intervalo)">
+          <span class="line-drag-handle" title="Arraste para mover esta linha (ou bloco selecionado) para outra posição sem alterar a ordem das demais">⠿</span>
           <span class="timestamp-tag" style="${line.noTimestamp ? 'opacity: 0.45;' : ''}" title="${line.noTimestamp ? 'Minutagem removida em memória' : 'Clique para reproduzir neste momento'}">[${displayTime}]</span>
           ${isTarget ? '<span class="sync-target-badge">🎯 PRÓXIMA</span>' : ''}
-          <span class="lyric-text-span" title="${syncEditModeSide === side ? 'Clique para definir esta linha como a próxima a sincronizar' : 'Clique para reproduzir neste momento'}">${escapeHtml(line.text || '(instrumental)')}</span>
+          <span class="lyric-text-span" title="${syncEditModeSide === side ? 'Clique para definir esta linha como a próxima a sincronizar (Shift/Ctrl+Clique para selecionar múltiplas)' : 'Clique para reproduzir neste momento (Shift/Ctrl+Clique para selecionar múltiplas)'}">${escapeHtml(line.text || '(instrumental)')}</span>
           <div class="line-actions">
             <button class="btn-line-action btn-line-offset btn-line-offset-neg" data-delta="-500" title="Retirar 0.5s apenas desta linha">-0.5s</button>
             <button class="btn-line-action btn-line-offset btn-line-offset-neg" data-delta="-100" title="Retirar 0.1s apenas desta linha">-0.1s</button>
@@ -4070,11 +5209,88 @@
           </div>
         `;
 
-            // Clicking on line: in Sync Edit Mode (when clicking text, not timestamp), moves the sync target cursor to this line; otherwise seeks audio
-            div.addEventListener('click', (e) => {
-                if (e.target.closest('.line-actions') || e.target.tagName === 'INPUT' || div.classList.contains('editing')) {
+            // Checkbox multi-selection handler
+            const checkbox = div.querySelector('.line-select-checkbox');
+            if (checkbox) {
+                checkbox.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleLineSelection(side, index, e.shiftKey, checkbox.checked);
+                });
+            }
+
+            // Card Drag & Drop handlers
+            div.addEventListener('dragstart', (e) => {
+                if (div.classList.contains('editing')) {
+                    e.preventDefault();
                     return;
                 }
+                dragState.side = side;
+                if (selSet.has(index) && selSet.size > 1) {
+                    dragState.draggedIndices = Array.from(selSet).sort((a, b) => a - b);
+                } else {
+                    dragState.draggedIndices = [index];
+                }
+                div.classList.add('dragging');
+                if (e.dataTransfer) {
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', String(index));
+                }
+            });
+
+            div.addEventListener('dragend', () => {
+                div.classList.remove('dragging');
+                container.querySelectorAll('.lyric-line').forEach(el => {
+                    el.classList.remove('drag-over-top', 'drag-over-bottom', 'dragging');
+                });
+            });
+
+            div.addEventListener('dragover', (e) => {
+                if (dragState.side !== side) return;
+                e.preventDefault();
+                if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+                const rect = div.getBoundingClientRect();
+                const isBottomHalf = (e.clientY - rect.top) > (rect.height / 2);
+                div.classList.toggle('drag-over-top', !isBottomHalf);
+                div.classList.toggle('drag-over-bottom', isBottomHalf);
+            });
+
+            div.addEventListener('dragleave', () => {
+                div.classList.remove('drag-over-top', 'drag-over-bottom');
+            });
+
+            div.addEventListener('drop', (e) => {
+                if (dragState.side !== side) return;
+                e.preventDefault();
+                const rect = div.getBoundingClientRect();
+                const placeAfter = (e.clientY - rect.top) > (rect.height / 2);
+                div.classList.remove('drag-over-top', 'drag-over-bottom');
+                moveLinesCardToPosition(side, dragState.draggedIndices, index, placeAfter);
+            });
+
+            // Clicking on line: supports Shift+Click / Ctrl+Click selection, Sync Edit Mode cursor, or audio seek
+            div.addEventListener('click', (e) => {
+                if (
+                    e.target.closest('.line-actions') ||
+                    e.target.closest('.line-select-checkbox') ||
+                    e.target.closest('.line-drag-handle') ||
+                    e.target.tagName === 'INPUT' ||
+                    div.classList.contains('editing')
+                ) {
+                    return;
+                }
+
+                if (e.shiftKey || e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    toggleLineSelection(side, index, e.shiftKey);
+                    return;
+                }
+
+                focusedLineIndex[side] = index;
+                lastClickedLineIndex[side] = index;
+                container.querySelectorAll('.lyric-line').forEach((el, idx) => {
+                    el.classList.toggle('focused-line', idx === index);
+                });
+
                 const clickedTimestampTag = e.target.closest('.timestamp-tag');
                 if (syncEditModeSide === side && !clickedTimestampTag) {
                     setSyncCursor(index);
@@ -4102,6 +5318,7 @@
             div.querySelectorAll('.btn-line-offset').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
+                    focusedLineIndex[side] = index;
                     const deltaMs = parseInt(btn.getAttribute('data-delta'), 10) || 0;
                     const baseMs = typeof line.timestampMs === 'number' ? line.timestampMs : 0;
                     const newMs = Math.max(0, baseMs + deltaMs);
@@ -4124,6 +5341,7 @@
             // Set to current audio time
             div.querySelector('.btn-sync-time').addEventListener('click', (e) => {
                 e.stopPropagation();
+                focusedLineIndex[side] = index;
                 const currentMs = Math.round((audio.currentTime || 0) * 1000);
                 line.noTimestamp = false;
                 line.timestampMs = currentMs;
@@ -4138,6 +5356,7 @@
                 updateOutOfOrderLines(container, lines);
                 if (syncEditModeSide === side && index < lines.length - 1) {
                     syncEditCursorIndex = index + 1;
+                    focusedLineIndex[side] = syncEditCursorIndex;
                     updateSyncEditModeUI();
                 }
                 showToast(`Tempo atualizado para [${line.formattedTime}]`);
@@ -4147,6 +5366,7 @@
             // Edit line text and time
             div.querySelector('.btn-edit-line').addEventListener('click', (e) => {
                 e.stopPropagation();
+                focusedLineIndex[side] = index;
                 startEditingLine(div, line, side, index);
             });
 
@@ -4154,9 +5374,18 @@
             div.querySelector('.btn-delete-line').addEventListener('click', (e) => {
                 e.stopPropagation();
                 lines.splice(index, 1);
+                selSet.delete(index);
+                const updatedSel = new Set();
+                selSet.forEach(sIdx => {
+                    if (sIdx > index) updatedSel.add(sIdx - 1);
+                    else if (sIdx < index) updatedSel.add(sIdx);
+                });
+                selectedLineIndices[side] = updatedSel;
+                focusedLineIndex[side] = Math.max(0, Math.min(focusedLineIndex[side], lines.length - 1));
                 if (syncEditModeSide === side && syncEditCursorIndex >= lines.length) {
                     syncEditCursorIndex = Math.max(0, lines.length - 1);
                 }
+                updateStatusBadgeCount(side);
                 renderLyricLines(container, lines, side);
                 syncLyricsHighlight(Math.round((audio.currentTime || 0) * 1000));
             });
@@ -4169,6 +5398,7 @@
 
     function startEditingLine(lineDiv, line, side, index) {
         lineDiv.classList.add('editing');
+        lineDiv.setAttribute('draggable', 'false');
         const actions = lineDiv.querySelector('.line-actions');
 
         if (actions) actions.style.display = 'none';
@@ -4194,8 +5424,8 @@
         saveBtn.style.color = '#34d399';
         saveBtn.textContent = 'Salvar';
 
-        saveBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
+        const commitEdit = (e) => {
+            if (e) e.stopPropagation();
             line.text = textInput.value.trim();
             const rawTimeVal = timeInput.value.trim().replace(/[\[\]]/g, '');
             if (!rawTimeVal) {
@@ -4211,32 +5441,134 @@
                 line.timeMs = parsedMs;
             }
             const container = side === 'local' ? localLyricsScroller : remoteLyricsScroller;
-            const state = side === 'local' ? localLinesState : remoteLinesState;
+            const state = side === 'local' ? localLyricsStateOrFallback(side) : remoteLinesState;
             renderLyricLines(container, state, side);
             syncLyricsHighlight(Math.round((audio.currentTime || 0) * 1000));
+        };
+
+        saveBtn.addEventListener('click', commitEdit);
+        textInput.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Enter') {
+                ev.preventDefault();
+                commitEdit(ev);
+            }
+        });
+        timeInput.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Enter') {
+                ev.preventDefault();
+                commitEdit(ev);
+            }
         });
 
         lineDiv.appendChild(saveBtn);
         textInput.focus();
     }
 
-    function addNewLyricLine(side) {
-        const container = side === 'local' ? localLyricsScroller : remoteLyricsScroller;
-        const state = side === 'local' ? localLinesState : remoteLinesState;
+    function localLyricsStateOrFallback(side) {
+        return side === 'local' ? localLinesState : remoteLinesState;
+    }
 
-        const currentMs = Math.round((audio.currentTime || 0) * 1000);
+    function resolveSelectedAnchorLineIndex(side) {
+        const state = side === 'local' ? localLinesState : remoteLinesState;
+        const container = side === 'local' ? localLyricsScroller : remoteLyricsScroller;
+        if (!state || state.length === 0) return -1;
+
+        if (syncEditModeSide === side && syncEditCursorIndex >= 0 && syncEditCursorIndex < state.length) {
+            return syncEditCursorIndex;
+        }
+        const selSet = selectedLineIndices[side];
+        if (selSet && selSet.size > 0) {
+            return Math.min(state.length - 1, Math.max(...Array.from(selSet)));
+        }
+        if (typeof focusedLineIndex[side] === 'number' && focusedLineIndex[side] >= 0 && focusedLineIndex[side] < state.length) {
+            return focusedLineIndex[side];
+        }
+        const activeDiv = container.querySelector('.lyric-line.active');
+        if (activeDiv) {
+            const idx = parseInt(activeDiv.getAttribute('data-index'), 10);
+            if (!isNaN(idx) && idx >= 0 && idx < state.length) return idx;
+        }
+        return 0;
+    }
+
+    function addNewLyricLine(side) {
+        const targetSide = side || syncEditModeSide || hoveredColumnSide || 'local';
+        const container = targetSide === 'local' ? localLyricsScroller : remoteLyricsScroller;
+        const state = targetSide === 'local' ? localLinesState : remoteLinesState;
+
+        const anchorIndex = resolveSelectedAnchorLineIndex(targetSide);
+        const insertIndex = state.length === 0 ? 0 : Math.min(state.length, anchorIndex + 1);
+        const isPlaying = !audio.paused && audio.src && audio.src !== window.location.href;
+
+        let newLineMs = 0;
+        if (isPlaying) {
+            // Music is playing: stamp with the exact moment the shortcut/button was pressed
+            newLineMs = Math.round((audio.currentTime || 0) * 1000);
+        } else if (anchorIndex >= 0 && anchorIndex < state.length) {
+            // Music is paused: inherit the selected line's timestamp (or 00:00.00) and place immediately below it
+            const anchorLine = state[anchorIndex];
+            newLineMs = anchorLine && !anchorLine.noTimestamp
+                ? (typeof anchorLine.timestampMs === 'number' ? anchorLine.timestampMs : (anchorLine.timeMs || 0))
+                : Math.round((audio.currentTime || 0) * 1000);
+        } else {
+            newLineMs = Math.round((audio.currentTime || 0) * 1000);
+        }
+
         const newLine = {
             noTimestamp: false,
-            timestampMs: currentMs,
-            timeMs: currentMs,
-            formattedTime: formatLrcTimestamp(currentMs),
+            timestampMs: newLineMs,
+            timeMs: newLineMs,
+            formattedTime: formatLrcTimestamp(newLineMs),
             text: 'Novo verso...'
         };
 
-        state.push(newLine);
-        renderLyricLines(container, state, side);
-        syncLyricsHighlight(currentMs);
-        showToast('Novo verso adicionado no tempo atual!');
+        state.splice(insertIndex, 0, newLine);
+
+        // Shift multi-selection indices below insertIndex
+        const selSet = selectedLineIndices[targetSide];
+        if (selSet && selSet.size > 0) {
+            const shifted = new Set();
+            selSet.forEach(sIdx => {
+                shifted.add(sIdx >= insertIndex ? sIdx + 1 : sIdx);
+            });
+            selectedLineIndices[targetSide] = shifted;
+        }
+
+        focusedLineIndex[targetSide] = insertIndex;
+        if (syncEditModeSide === targetSide) {
+            syncEditCursorIndex = insertIndex;
+        }
+
+        updateStatusBadgeCount(targetSide);
+        renderLyricLines(container, state, targetSide);
+
+        const lineDivs = container.querySelectorAll('.lyric-line');
+        const insertedDiv = lineDivs[insertIndex];
+        if (insertedDiv) {
+            const containerRect = container.getBoundingClientRect();
+            const lineRect = insertedDiv.getBoundingClientRect();
+            const scrollOffset = (lineRect.top - containerRect.top) - (container.clientHeight / 2) + (insertedDiv.clientHeight / 2);
+            container.scrollBy({top: scrollOffset, behavior: 'smooth'});
+        }
+
+        showToast(isPlaying
+            ? `✨ Novo verso inserido na linha #${insertIndex + 1} no tempo [${newLine.formattedTime}]!`
+            : `✨ Novo verso inserido na linha #${insertIndex + 1} (abaixo da linha #${anchorIndex + 1})!`);
+    }
+
+    // Shortcuts Help Modal
+    const shortcutsHelpModal = document.getElementById('shortcutsHelpModal');
+
+    function openShortcutsHelpModal() {
+        if (shortcutsHelpModal) {
+            shortcutsHelpModal.style.display = 'flex';
+        }
+    }
+
+    function closeShortcutsHelpModal() {
+        if (shortcutsHelpModal) {
+            shortcutsHelpModal.style.display = 'none';
+        }
     }
 
     // Global Offset Adjustment
@@ -4315,7 +5647,7 @@
             const result = await res.json();
 
             if (result.success) {
-                showToast(result.message || (choice === 'LRCLIB' ? 'Letra LRCLIB salva com sucesso!' : 'Letra local mantida / atualizada!'));
+                showToast(result.message || (choice === 'LRCLIB' ? 'Letra online salva com sucesso!' : 'Letra local mantida / atualizada!'));
                 currentItems[currentIndex].status = (choice === 'LRCLIB') ? 'SAVED_LRCLIB' : 'KEPT_LOCAL';
                 updateFilterCounts();
                 renderTrackList();
@@ -4343,9 +5675,348 @@
     btnPrevTrack.addEventListener('click', prevTrack);
     btnNextTrack.addEventListener('click', nextTrack);
 
+    // =========================================================================
+    // INSTRUMENTAL LYRICS GENERATOR (00:00 TO TRACK DURATION)
+    // =========================================================================
+    const instrumentalModal = document.getElementById('instrumentalModal');
+    const instrumentalLangSelect = document.getElementById('instrumentalLangSelect');
+    const instrumentalCustomTagGroup = document.getElementById('instrumentalCustomTagGroup');
+    const instrumentalCustomTagInput = document.getElementById('instrumentalCustomTagInput');
+    const instrumentalPreviewBox = document.getElementById('instrumentalPreviewBox');
+    const instrumentalEndDurationLabel = document.getElementById('instrumentalEndDurationLabel');
+
+    function getCurrentTrackDurationSeconds() {
+        const audioDur = (audio.duration && isFinite(audio.duration) && audio.duration > 0)
+            ? Math.round(audio.duration)
+            : 0;
+        const metaDur = currentTrackDetails?.metadata?.durationSeconds || 0;
+        return metaDur > 0 ? metaDur : (audioDur > 0 ? audioDur : 180);
+    }
+
+    function resolveInstrumentalTagForLang(langCode) {
+        const code = (langCode || 'pt').toLowerCase();
+        if (code === 'custom') {
+            return (instrumentalCustomTagInput?.value || '').trim() || '♪ Instrumental ♪';
+        }
+        if (code.startsWith('ja')) return '♪ インストゥルメンタル ♪';
+        if (code.startsWith('zh')) return '♪ 纯音乐 ♪';
+        if (code.startsWith('ko')) return '♪ 연주곡 ♪';
+        if (code.startsWith('ru')) return '♪ Инструментал ♪';
+        return '♪ Instrumental ♪';
+    }
+
+    function updateInstrumentalPreview() {
+        const lang = instrumentalLangSelect?.value || 'pt';
+        if (instrumentalCustomTagGroup) {
+            instrumentalCustomTagGroup.style.display = (lang === 'custom') ? 'flex' : 'none';
+        }
+        const durSec = getCurrentTrackDurationSeconds();
+        const endFormatted = formatLrcTimestamp(durSec * 1000);
+        if (instrumentalEndDurationLabel) {
+            instrumentalEndDurationLabel.textContent = endFormatted;
+        }
+        const tag = resolveInstrumentalTagForLang(lang);
+        if (instrumentalPreviewBox) {
+            instrumentalPreviewBox.textContent = `[00:00.00] ${tag}\n[${endFormatted}] ${tag}`;
+        }
+    }
+
+    function openInstrumentalModal() {
+        if (!currentTrackDetails) {
+            showToast('Selecione uma faixa primeiro para criar a letra instrumental.');
+            return;
+        }
+        const docLang = (document.documentElement.lang || navigator.language || 'pt').toLowerCase();
+        if (instrumentalLangSelect && !instrumentalLangSelect.dataset.userChanged) {
+            if (docLang.startsWith('ja')) instrumentalLangSelect.value = 'ja';
+            else if (docLang.startsWith('zh')) instrumentalLangSelect.value = 'zh';
+            else if (docLang.startsWith('ko')) instrumentalLangSelect.value = 'ko';
+            else if (docLang.startsWith('ru')) instrumentalLangSelect.value = 'ru';
+            else instrumentalLangSelect.value = 'pt';
+        }
+        updateInstrumentalPreview();
+        if (instrumentalModal) {
+            instrumentalModal.style.display = 'flex';
+        }
+    }
+
+    instrumentalLangSelect?.addEventListener('change', () => {
+        instrumentalLangSelect.dataset.userChanged = 'true';
+        updateInstrumentalPreview();
+    });
+
+    function closeInstrumentalModal() {
+        if (instrumentalModal) {
+            instrumentalModal.style.display = 'none';
+        }
+    }
+
+    async function applyInstrumentalLyrics(autoSave = true) {
+        if (!currentTrackDetails) return;
+        const lang = instrumentalLangSelect?.value || 'pt';
+        const customTag = (lang === 'custom')
+            ? ((instrumentalCustomTagInput?.value || '').trim() || '♪ Instrumental ♪')
+            : null;
+        const durationSeconds = getCurrentTrackDurationSeconds();
+
+        try {
+            const res = await fetch('/api/instrumental', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    id: currentTrackDetails.id,
+                    lyricPath: currentTrackDetails.lyricPath || '',
+                    durationSeconds: durationSeconds,
+                    lang: lang === 'custom' ? null : lang,
+                    customTag: customTag,
+                    autoSave: autoSave
+                })
+            });
+            const data = await res.json();
+            if (data.lines && Array.isArray(data.lines)) {
+                localTimestampsBackup = null;
+                updateToggleTimestampsBtnUI('local', false);
+                localLinesState = data.lines;
+                renderLyricLines(localLyricsScroller, localLinesState, 'local');
+                localStatusBadge.textContent = localLinesState.length + ' versos';
+            }
+            closeInstrumentalModal();
+
+            if (autoSave) {
+                if (data.success) {
+                    showToast(data.message || '🎵 Letra instrumental criada e salva com sucesso!');
+                    if (currentItems[currentIndex]) {
+                        currentItems[currentIndex].status = 'KEPT_LOCAL';
+                    }
+                    updateFilterCounts();
+                    renderTrackList();
+                    nextTrack();
+                } else {
+                    showToast('Erro ao salvar instrumental: ' + (data.message || 'Falha desconhecida'));
+                }
+            } else {
+                showToast('🎵 Letra instrumental carregada na coluna Local! Clique em Salvar Local [1] para gravar.');
+            }
+        } catch (err) {
+            showToast('Falha ao gerar letra instrumental.');
+        }
+    }
+
+    // =========================================================================
+    // BATCH DOWNLOAD BEST MATCHES WITH 5-SECOND SAFETY TIMER & CHECKBOX
+    // =========================================================================
+    const batchBestConfirmModal = document.getElementById('batchBestConfirmModal');
+    const batchBestConfirmCheckbox = document.getElementById('batchBestConfirmCheckbox');
+    const btnConfirmBatchBest = document.getElementById('btnConfirmBatchBest');
+    const btnCancelBatchBest = document.getElementById('btnCancelBatchBest');
+    const batchBestCountdownBanner = document.getElementById('batchBestCountdownBanner');
+    const batchBestConfirmSection = document.getElementById('batchBestConfirmSection');
+    const batchBestProgressSection = document.getElementById('batchBestProgressSection');
+
+    let batchBestTimerInterval = null;
+    let batchBestSecondsRemaining = 5;
+    let isBatchBestRunning = false;
+    let cancelBatchBestRequested = false;
+
+    function updateBatchBestConfirmBtnState() {
+        if (!btnConfirmBatchBest) return;
+        const isChecked = !!(batchBestConfirmCheckbox && batchBestConfirmCheckbox.checked);
+        const timerDone = batchBestSecondsRemaining <= 0;
+        const canConfirm = timerDone && isChecked && !isBatchBestRunning;
+
+        btnConfirmBatchBest.disabled = !canConfirm;
+        btnConfirmBatchBest.style.opacity = canConfirm ? '1' : '0.45';
+        btnConfirmBatchBest.style.cursor = canConfirm ? 'pointer' : 'not-allowed';
+        btnConfirmBatchBest.textContent = timerDone ? 'Sim' : `Sim (${batchBestSecondsRemaining}s)`;
+    }
+
+    function openBatchBestModal() {
+        if (!currentItems || currentItems.length === 0) {
+            showToast('Nenhuma faixa carregada no comparador para baixar em lote.');
+            return;
+        }
+        if (batchBestTimerInterval) {
+            clearInterval(batchBestTimerInterval);
+            batchBestTimerInterval = null;
+        }
+
+        isBatchBestRunning = false;
+        cancelBatchBestRequested = false;
+        batchBestSecondsRemaining = 5;
+
+        if (batchBestConfirmSection) batchBestConfirmSection.style.display = 'flex';
+        if (batchBestProgressSection) batchBestProgressSection.style.display = 'none';
+        if (btnConfirmBatchBest) btnConfirmBatchBest.style.display = 'inline-flex';
+        if (btnCancelBatchBest) btnCancelBatchBest.textContent = 'Cancelar';
+
+        if (batchBestConfirmCheckbox) {
+            batchBestConfirmCheckbox.checked = false;
+            batchBestConfirmCheckbox.disabled = false;
+        }
+
+        if (batchBestCountdownBanner) {
+            batchBestCountdownBanner.style.borderColor = '#fbbf24';
+            batchBestCountdownBanner.style.color = '#fde68a';
+            batchBestCountdownBanner.innerHTML = '⏳ Aguarde <span id="batchBestTimerSeconds">5</span>s para liberar o botão de confirmação...';
+        }
+
+        updateBatchBestConfirmBtnState();
+        if (batchBestConfirmModal) {
+            batchBestConfirmModal.style.display = 'flex';
+        }
+
+        batchBestTimerInterval = setInterval(() => {
+            batchBestSecondsRemaining = Math.max(0, batchBestSecondsRemaining - 1);
+            const secEl = document.getElementById('batchBestTimerSeconds');
+            if (secEl) {
+                secEl.textContent = String(batchBestSecondsRemaining);
+            }
+            if (batchBestSecondsRemaining <= 0) {
+                clearInterval(batchBestTimerInterval);
+                batchBestTimerInterval = null;
+                if (batchBestCountdownBanner) {
+                    batchBestCountdownBanner.style.borderColor = '#10b981';
+                    batchBestCountdownBanner.style.color = '#34d399';
+                    batchBestCountdownBanner.textContent = '✅ Tempo de segurança de 5s concluído! Marque a caixa abaixo para habilitar o botão "Sim".';
+                }
+            }
+            updateBatchBestConfirmBtnState();
+        }, 1000);
+    }
+
+    function closeBatchBestModal() {
+        if (batchBestTimerInterval) {
+            clearInterval(batchBestTimerInterval);
+            batchBestTimerInterval = null;
+        }
+        if (isBatchBestRunning) {
+            cancelBatchBestRequested = true;
+            showToast('Interrompendo download em lote após a faixa atual...');
+            return;
+        }
+        if (batchBestConfirmModal) {
+            batchBestConfirmModal.style.display = 'none';
+        }
+    }
+
+    async function runBatchBestDownload() {
+        if (batchBestSecondsRemaining > 0 || !batchBestConfirmCheckbox?.checked || isBatchBestRunning) {
+            return;
+        }
+
+        const scope = document.getElementById('batchBestScopeSelect')?.value || 'PENDING';
+        const targetItems = scope === 'ALL'
+            ? [...currentItems]
+            : currentItems.filter(i => !i.status || i.status === 'PENDING');
+
+        if (targetItems.length === 0) {
+            showToast('Não há faixas pendentes para baixar!');
+            closeBatchBestModal();
+            return;
+        }
+
+        isBatchBestRunning = true;
+        cancelBatchBestRequested = false;
+
+        if (batchBestConfirmSection) batchBestConfirmSection.style.display = 'none';
+        if (batchBestProgressSection) batchBestProgressSection.style.display = 'flex';
+        if (btnConfirmBatchBest) btnConfirmBatchBest.style.display = 'none';
+        if (btnCancelBatchBest) btnCancelBatchBest.textContent = 'Parar / Cancelar';
+
+        const titleEl = document.getElementById('batchBestProgressTitle');
+        const countEl = document.getElementById('batchBestProgressCount');
+        const barEl = document.getElementById('batchBestProgressBar');
+        const itemEl = document.getElementById('batchBestProgressItem');
+        const logList = document.getElementById('batchBestLogList');
+        if (logList) logList.innerHTML = '';
+
+        let savedCount = 0;
+        let notFoundCount = 0;
+
+        for (let i = 0; i < targetItems.length; i++) {
+            if (cancelBatchBestRequested) {
+                break;
+            }
+            const item = targetItems[i];
+            const pct = Math.round(((i) / targetItems.length) * 100);
+            if (titleEl) titleEl.textContent = 'Baixando e salvando primeiras mais compatíveis...';
+            if (countEl) countEl.textContent = `${i + 1} / ${targetItems.length}`;
+            if (barEl) barEl.style.width = `${pct}%`;
+            if (itemEl) itemEl.textContent = `🔍 Buscando: ${item.fileName}`;
+
+            try {
+                const res = await fetch('/api/save-best', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({id: item.id})
+                });
+                const data = await res.json();
+
+                const row = document.createElement('div');
+                row.className = 'result-log-item';
+
+                if (data.success) {
+                    savedCount++;
+                    item.status = 'SAVED_LRCLIB';
+                    row.style.color = '#34d399';
+                    row.textContent = `✔ [${data.source || 'ONLINE'}] ${item.fileName}`;
+                } else {
+                    notFoundCount++;
+                    row.style.color = '#fbbf24';
+                    row.textContent = `⚠️ [Sem letra] ${item.fileName} — ${data.message || 'Nenhuma letra encontrada'}`;
+                }
+                if (logList) {
+                    logList.prepend(row);
+                }
+                updateFilterCounts();
+                renderTrackList();
+            } catch (err) {
+                notFoundCount++;
+                const row = document.createElement('div');
+                row.className = 'result-log-item';
+                row.style.color = '#f87171';
+                row.textContent = `❌ [Erro] ${item.fileName}`;
+                if (logList) {
+                    logList.prepend(row);
+                }
+            }
+        }
+
+        isBatchBestRunning = false;
+        if (barEl) barEl.style.width = '100%';
+        if (titleEl) {
+            titleEl.textContent = cancelBatchBestRequested
+                ? `Processo interrompido (${savedCount} salvas, ${notFoundCount} não encontradas)`
+                : `Concluído! ${savedCount} letras salvas (${notFoundCount} sem correspondência)`;
+        }
+        if (itemEl) {
+            itemEl.textContent = 'Processo finalizado.';
+        }
+        if (btnCancelBatchBest) {
+            btnCancelBatchBest.textContent = 'Concluir & Fechar';
+        }
+        showToast(`Download em lote finalizado: ${savedCount} letras salvas!`);
+
+        if (currentIndex >= 0 && currentIndex < currentItems.length) {
+            selectTrack(currentIndex, false);
+        }
+    }
+
     // Keyboard Shortcuts
     window.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
+            if (shortcutsHelpModal && shortcutsHelpModal.style.display === 'flex') {
+                closeShortcutsHelpModal();
+                return;
+            }
+            if (batchBestConfirmModal && batchBestConfirmModal.style.display === 'flex') {
+                closeBatchBestModal();
+                return;
+            }
+            if (instrumentalModal && instrumentalModal.style.display === 'flex') {
+                closeInstrumentalModal();
+                return;
+            }
             if (pasteLyricsModal && pasteLyricsModal.style.display === 'flex') {
                 closePasteLyricsModal();
                 return;
@@ -4384,13 +6055,41 @@
             e.target.tagName === 'INPUT' ||
             e.target.tagName === 'TEXTAREA' ||
             actionModal.style.display === 'flex' ||
+            (shortcutsHelpModal && shortcutsHelpModal.style.display === 'flex') ||
             (allApiResultsModal && allApiResultsModal.style.display === 'flex') ||
-            (pasteLyricsModal && pasteLyricsModal.style.display === 'flex')
+            (pasteLyricsModal && pasteLyricsModal.style.display === 'flex') ||
+            (instrumentalModal && instrumentalModal.style.display === 'flex') ||
+            (batchBestConfirmModal && batchBestConfirmModal.style.display === 'flex')
         ) return;
+
+        // Global Comparator Shortcuts:
+        // [Z] and [Backspace]: Go back 1 line
+        if ((e.code === 'KeyZ' || e.code === 'Backspace') && !e.ctrlKey && !e.altKey && !e.metaKey) {
+            e.preventDefault();
+            stepSyncCursor(-1);
+            return;
+        }
+
+        // [N] and [L]: Insert a new verse immediately below the selected line (with current time if playing, or below selected line if paused)
+        if ((e.code === 'KeyN' || e.code === 'KeyL') && !e.ctrlKey && !e.altKey && !e.metaKey) {
+            e.preventDefault();
+            const targetSide = syncEditModeSide || hoveredColumnSide || 'local';
+            addNewLyricLine(targetSide);
+            return;
+        }
+
+        // [Delete]: Delete selected lines if any are checked/selected
+        if (e.code === 'Delete' && !e.ctrlKey && !e.altKey && !e.metaKey) {
+            const targetSide = syncEditModeSide || hoveredColumnSide || 'local';
+            if (selectedLineIndices[targetSide] && selectedLineIndices[targetSide].size > 0) {
+                e.preventDefault();
+                deleteSelectedLines(targetSide);
+                return;
+            }
+        }
 
         // When Sync Edit Mode is active:
         // - [Space] or [Ctrl] sets the timestamp of the current target line at the exact instant of the music and advances to the next line
-        // - [Backspace] moves the cursor back 1 line
         // - [P] toggles Play/Pause
         if (syncEditModeSide !== null) {
             if (e.code === 'Space' && !e.altKey && !e.metaKey) {
@@ -4405,11 +6104,6 @@
                 if (!e.repeat) {
                     stampNextSyncLine();
                 }
-                return;
-            }
-            if (e.code === 'Backspace') {
-                e.preventDefault();
-                stepSyncCursor(-1);
                 return;
             }
             if (e.code === 'KeyP') {

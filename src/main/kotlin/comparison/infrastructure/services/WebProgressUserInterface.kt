@@ -5,6 +5,7 @@ import comparison.domain.models.ActionProgressUpdate
 import interfaces.UserInterface
 import java.io.File
 import models.FilePair
+import services.AppOutputDirectories
 
 /**
  * Implementation of [UserInterface] that captures operations progress, messages, and results
@@ -25,9 +26,10 @@ class WebProgressUserInterface(
         errorSet.forEach { state.errors.add(it.message ?: it.toString()) }
 
         changedSet.forEach { change ->
-            val match = Regex("""(LyricsSyncIssues_\d+\.txt)""").find(change)
+            val match = Regex("""([^\s"']*LyricsSyncIssues_-?\d+\.txt)""").find(change)
             if (match != null) {
-                state.generatedReportPath = File(match.groupValues[1]).canonicalPath
+                val resolved = AppOutputDirectories.resolveSyncReportFile(match.groupValues[1])
+                state.generatedReportPath = resolved.canonicalPath
             }
         }
     }
@@ -55,7 +57,7 @@ class WebProgressUserInterface(
     }
 
     override fun askToMoveProblematicLyrics(count: Int, txtFileName: String): Boolean {
-        state.generatedReportPath = File(txtFileName).canonicalPath
+        state.generatedReportPath = AppOutputDirectories.resolveSyncReportFile(txtFileName).canonicalPath
         return request.moveFiles && !request.outDir.isNullOrBlank()
     }
 
