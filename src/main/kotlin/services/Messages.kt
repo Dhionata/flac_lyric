@@ -60,4 +60,11 @@ object Messages {
      * Returns the currently active [Locale].
      */
     fun getLocale(): Locale = currentLocale
+
+    /**
+     * Returns all localized key-value pairs for the currently active [Locale].
+     */
+    fun getAll(): Map<String, String> {
+        return bundle.keySet().sorted().associateWith { key -> get(key) }
+    }
 }

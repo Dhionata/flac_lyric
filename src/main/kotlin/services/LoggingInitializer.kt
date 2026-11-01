@@ -56,8 +56,8 @@ object LoggingInitializer {
 
                 val header = buildString {
                     appendLine("================================================================================")
-                    appendLine("FLAC LYRIC - LOG DE EXECUÇÃO INICIADO EM ${LocalDateTime.now().format(entryTimestampFormatter)}")
-                    appendLine("Arquivo de Log: ${execFile.absolutePath}")
+                    appendLine(Messages.get("log.exec.header_started", LocalDateTime.now().format(entryTimestampFormatter)))
+                    appendLine(Messages.get("log.exec.header_file", execFile.absolutePath))
                     appendLine("================================================================================")
                 }
                 execFile.writeText(header, StandardCharsets.UTF_8)
@@ -86,7 +86,7 @@ object LoggingInitializer {
      * Pretty-prints a raw string if it is valid JSON (Object or Array), or returns it as-is otherwise.
      */
     fun prettyFormatJson(rawBody: String?): String {
-        if (rawBody.isNullOrBlank()) return "(vazio)"
+        if (rawBody.isNullOrBlank()) return Messages.get("log.exec.empty_body")
         val trimmed = rawBody.trim()
         if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) {
             return trimmed
@@ -144,7 +144,7 @@ object LoggingInitializer {
                 appendLine("  Error: $error")
             }
             if (responseBody != null) {
-                appendLine("  Response Body (JSON Formatado):")
+                appendLine("  ${Messages.get("log.exec.response_body_json")}")
                 prettyFormatJson(responseBody).lineSequence().forEach { line ->
                     appendLine("    $line")
                 }

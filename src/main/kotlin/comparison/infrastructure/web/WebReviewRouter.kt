@@ -74,11 +74,26 @@ class WebReviewRouter(
 
     private fun handleLocale(exchange: HttpExchange) {
         val lang = Messages.getLocale().toLanguageTag()
-        sendJsonResponse(exchange, 200, mapOf("locale" to lang, "isPortuguese" to lang.lowercase().startsWith("pt")))
+        sendJsonResponse(
+            exchange,
+            200,
+            mapOf(
+                "locale" to lang,
+                "isPortuguese" to lang.lowercase().startsWith("pt"),
+                "messages" to Messages.getAll()
+            )
+        )
     }
 
     private fun handleIndex(exchange: HttpExchange) {
-        val htmlBytes = WebStaticAssets.INDEX_HTML.toByteArray(StandardCharsets.UTF_8)
+        val lang = Messages.getLocale().toLanguageTag()
+        val messagesJson = gson.toJson(Messages.getAll()).replace("</", "<\\/")
+        val localeJson = gson.toJson(lang)
+        val i18nBootstrapScript = "<script id=\"server-i18n\">window.__SERVER_LOCALE__ = $localeJson; window.__SERVER_MESSAGES__ = $messagesJson;</script>"
+        val localizedHtml = WebStaticAssets.INDEX_HTML
+            .replaceFirst("lang=\"pt-BR\"", "lang=\"$lang\"")
+            .replaceFirst("</head>", "$i18nBootstrapScript\n</head>")
+        val htmlBytes = localizedHtml.toByteArray(StandardCharsets.UTF_8)
         exchange.responseHeaders.set("Content-Type", "text/html; charset=utf-8")
         exchange.sendResponseHeaders(200, htmlBytes.size.toLong())
         exchange.responseBody.use { it.write(htmlBytes) }
@@ -104,8 +119,18 @@ class WebReviewRouter(
                 "hint" to Messages.get("menu.option.0.hint"),
                 "description" to Messages.get("action.0.description"),
                 "inputs" to listOf(
-                    mapOf("key" to "musicDir", "label" to Messages.get("prompt.select.music_dir"), "required" to true, "placeholder" to "Ex: C:\\Musicas"),
-                    mapOf("key" to "lyricsDir", "label" to Messages.get("prompt.select.lyrics_dir"), "required" to true, "placeholder" to "Ex: C:\\Letras")
+                    mapOf(
+                        "key" to "musicDir",
+                        "label" to Messages.get("prompt.select.music_dir"),
+                        "required" to true,
+                        "placeholder" to Messages.get("action.placeholder.music_dir")
+                    ),
+                    mapOf(
+                        "key" to "lyricsDir",
+                        "label" to Messages.get("prompt.select.lyrics_dir"),
+                        "required" to true,
+                        "placeholder" to Messages.get("action.placeholder.lyrics_dir")
+                    )
                 ),
                 "options" to listOf(
                     mapOf("key" to "moveFiles", "label" to Messages.get("action.0.opt.move_files"), "type" to "checkbox", "default" to true),
@@ -119,7 +144,12 @@ class WebReviewRouter(
                 "hint" to Messages.get("menu.option.1.hint"),
                 "description" to Messages.get("action.1.description"),
                 "inputs" to listOf(
-                    mapOf("key" to "musicDir", "label" to Messages.get("prompt.select.music_dir"), "required" to true, "placeholder" to "Ex: C:\\Musicas")
+                    mapOf(
+                        "key" to "musicDir",
+                        "label" to Messages.get("prompt.select.music_dir"),
+                        "required" to true,
+                        "placeholder" to Messages.get("action.placeholder.music_dir")
+                    )
                 ),
                 "options" to emptyList<Any>()
             )
@@ -130,8 +160,18 @@ class WebReviewRouter(
                 "hint" to Messages.get("menu.option.2.hint"),
                 "description" to Messages.get("action.2.description"),
                 "inputs" to listOf(
-                    mapOf("key" to "lyricsDir", "label" to Messages.get("prompt.select.lyrics_dir"), "required" to true, "placeholder" to "Ex: C:\\Letras"),
-                    mapOf("key" to "outDir", "label" to Messages.get("prompt.select.out_dir"), "required" to true, "placeholder" to "Ex: C:\\NaoSincronizadas")
+                    mapOf(
+                        "key" to "lyricsDir",
+                        "label" to Messages.get("prompt.select.lyrics_dir"),
+                        "required" to true,
+                        "placeholder" to Messages.get("action.placeholder.lyrics_dir")
+                    ),
+                    mapOf(
+                        "key" to "outDir",
+                        "label" to Messages.get("prompt.select.out_dir"),
+                        "required" to true,
+                        "placeholder" to Messages.get("action.placeholder.unsynced_dir")
+                    )
                 ),
                 "options" to emptyList<Any>()
             )
@@ -142,7 +182,12 @@ class WebReviewRouter(
                 "hint" to Messages.get("menu.option.3.hint"),
                 "description" to Messages.get("action.3.description"),
                 "inputs" to listOf(
-                    mapOf("key" to "lyricsDir", "label" to Messages.get("prompt.select.lyrics_dir"), "required" to true, "placeholder" to "Ex: C:\\Letras")
+                    mapOf(
+                        "key" to "lyricsDir",
+                        "label" to Messages.get("prompt.select.lyrics_dir"),
+                        "required" to true,
+                        "placeholder" to Messages.get("action.placeholder.lyrics_dir")
+                    )
                 ),
                 "options" to emptyList<Any>()
             )
@@ -153,8 +198,18 @@ class WebReviewRouter(
                 "hint" to Messages.get("menu.option.4.hint"),
                 "description" to Messages.get("action.4.description"),
                 "inputs" to listOf(
-                    mapOf("key" to "musicDir", "label" to Messages.get("prompt.select.main_dir"), "required" to true, "placeholder" to "Ex: C:\\Musicas"),
-                    mapOf("key" to "outDir", "label" to Messages.get("prompt.select.move_alone_lyrics"), "required" to true, "placeholder" to "Ex: C:\\LetrasIsoladas")
+                    mapOf(
+                        "key" to "musicDir",
+                        "label" to Messages.get("prompt.select.main_dir"),
+                        "required" to true,
+                        "placeholder" to Messages.get("action.placeholder.music_dir")
+                    ),
+                    mapOf(
+                        "key" to "outDir",
+                        "label" to Messages.get("prompt.select.move_alone_lyrics"),
+                        "required" to true,
+                        "placeholder" to Messages.get("action.placeholder.alone_lyrics_dir")
+                    )
                 ),
                 "options" to emptyList<Any>()
             )
@@ -165,8 +220,16 @@ class WebReviewRouter(
                 "hint" to Messages.get("menu.option.5.hint"),
                 "description" to Messages.get("action.5.description"),
                 "inputs" to listOf(
-                    mapOf("key" to "musicDir", "label" to Messages.get("prompt.select.music_base_dir"), "required" to true, "placeholder" to "Ex: C:\\Musicas"), mapOf(
-                        "key" to "outDir", "label" to Messages.get("prompt.select.move_incorrect"), "required" to false, "placeholder" to "Ex: C:\\NomesIncorretos (opcional)"
+                    mapOf(
+                        "key" to "musicDir",
+                        "label" to Messages.get("prompt.select.music_base_dir"),
+                        "required" to true,
+                        "placeholder" to Messages.get("action.placeholder.music_dir")
+                    ), mapOf(
+                        "key" to "outDir",
+                        "label" to Messages.get("prompt.select.move_incorrect"),
+                        "required" to false,
+                        "placeholder" to Messages.get("action.placeholder.incorrect_names_dir")
                     )
                 ),
                 "options" to listOf(
@@ -180,8 +243,18 @@ class WebReviewRouter(
                 "hint" to Messages.get("menu.option.6.hint"),
                 "description" to Messages.get("action.6.description"),
                 "inputs" to listOf(
-                    mapOf("key" to "musicDir", "label" to Messages.get("prompt.select.spectrum_dir"), "required" to true, "placeholder" to "Ex: C:\\Musicas"),
-                    mapOf("key" to "outDir", "label" to Messages.get("prompt.select.move_fake"), "required" to false, "placeholder" to "Ex: C:\\FalsosFlac (opcional)")
+                    mapOf(
+                        "key" to "musicDir",
+                        "label" to Messages.get("prompt.select.spectrum_dir"),
+                        "required" to true,
+                        "placeholder" to Messages.get("action.placeholder.music_dir")
+                    ),
+                    mapOf(
+                        "key" to "outDir",
+                        "label" to Messages.get("prompt.select.move_fake"),
+                        "required" to false,
+                        "placeholder" to Messages.get("action.placeholder.fake_flac_dir")
+                    )
                 ),
                 "options" to listOf(
                     mapOf(
@@ -199,11 +272,16 @@ class WebReviewRouter(
                 "hint" to Messages.get("menu.option.7.hint"),
                 "description" to Messages.get("action.7.description"),
                 "inputs" to listOf(
-                    mapOf("key" to "musicDir", "label" to Messages.get("prompt.select.music_lyrics_dir"), "required" to true, "placeholder" to "Ex: C:\\Musicas"), mapOf(
+                    mapOf(
+                        "key" to "musicDir",
+                        "label" to Messages.get("prompt.select.music_lyrics_dir"),
+                        "required" to true,
+                        "placeholder" to Messages.get("action.placeholder.music_dir")
+                    ), mapOf(
                         "key" to "outDir",
                         "label" to Messages.get("prompt.select.move_problematic_lyrics"),
                         "required" to false,
-                        "placeholder" to "Ex: C:\\LetrasComProblemas (opcional)"
+                        "placeholder" to Messages.get("action.placeholder.problematic_lyrics_dir")
                     )
                 ),
                 "options" to listOf(
@@ -275,7 +353,7 @@ class WebReviewRouter(
             return
         }
 
-        val item = cachedItems[id]!!
+        val item = cachedItems[id] ?: return
         val details = extractDetailsUseCase.execute(item)
         sendJsonResponse(exchange, 200, details)
     }
@@ -379,7 +457,7 @@ class WebReviewRouter(
 
         if (bestLyrics.isNullOrBlank()) {
             return mapOf(
-                "id" to item.id, "fileName" to item.fileName, "success" to false, "status" to item.status, "message" to "Nenhuma letra compatível encontrada"
+                "id" to item.id, "fileName" to item.fileName, "success" to false, "status" to item.status, "message" to Messages.get("save.error.no_compatible_lyric")
             )
         }
 
@@ -413,7 +491,7 @@ class WebReviewRouter(
             return
         }
 
-        val item = cachedItems[id]!!
+        val item = cachedItems[id] ?: return
         val res = saveBestCandidateForItem(item)
         sendJsonResponse(exchange, 200, res)
     }
@@ -472,7 +550,7 @@ class WebReviewRouter(
         val shouldLog = path != "/api/action/status" || statusCode != 200
         if (shouldLog) {
             services.LoggingInitializer.logHttpExchange(
-                "WEB ROUTER INTERNO", exchange.requestMethod, exchange.requestURI.toString(), responseStatus = statusCode, responseBody = jsonString
+                Messages.get("log.web.router_category"), exchange.requestMethod, exchange.requestURI.toString(), responseStatus = statusCode, responseBody = jsonString
             )
         }
 

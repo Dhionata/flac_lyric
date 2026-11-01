@@ -2170,7 +2170,7 @@
 
 <header>
     <div class="header-left">
-        <div class="logo" id="logoBtn" title="Voltar ao Menu Principal">
+        <div class="logo" data-i18n-title="web.header.logo_title" id="logoBtn" title="Voltar ao Menu Principal">
             <svg fill="none" height="22" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" width="22">
                 <path d="M9 18V5l12-2v13"></path>
                 <circle cx="6" cy="18" r="3"></circle>
@@ -2188,29 +2188,31 @@
                     <rect height="7" width="7" x="14" y="14"></rect>
                     <rect height="7" width="7" x="3" y="14"></rect>
                 </svg>
-                Menu Principal
+                <span data-i18n="web.header.tab_menu">Menu Principal</span>
             </button>
             <button class="nav-tab-btn" id="tabComparatorBtn">
                 <svg fill="none" height="15" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="15">
                     <polygon points="5 3 19 12 5 21 5 3"></polygon>
                 </svg>
-                Comparador de Letras
+                <span data-i18n="web.header.tab_comparator">Comparador de Letras</span>
             </button>
         </nav>
 
-        <span class="badge badge-info" id="headerProgress">Pronto</span>
+        <span class="badge badge-info" data-i18n="web.header.status.ready" id="headerProgress">Pronto</span>
     </div>
 
     <div class="header-right">
-        <button class="btn-secondary" id="btnToggleSidebar" style="padding: 5px 10px;">☰ Faixas</button>
-        <select class="report-select" id="reportSelect" title="Selecionar arquivo de relatório"></select>
-        <select class="report-select" id="themeSelect" style="max-width: 175px;" title="Tema visual (Auto detecta o modo do sistema)">
-            <option value="auto">🖥️ Sistema (Auto)</option>
-            <option value="amoled">🌑 AMOLED (#000000)</option>
-            <option value="dark">🌙 Escuro</option>
-            <option value="light">☀️ Claro</option>
+        <button class="btn-secondary" data-i18n="web.header.toggle_sidebar" id="btnToggleSidebar" style="padding: 5px 10px;">☰ Faixas</button>
+        <select class="report-select" data-i18n-title="web.header.report_select_title" id="reportSelect" title="Selecionar arquivo de relatório"></select>
+        <select class="report-select" data-i18n-title="web.header.theme_select_title" id="themeSelect" style="max-width: 175px;"
+                title="Tema visual (Auto detecta o modo do sistema)">
+            <option data-i18n="web.header.theme_auto" value="auto">🖥️ Sistema (Auto)</option>
+            <option data-i18n="web.header.theme_amoled" value="amoled">🌑 AMOLED (#000000)</option>
+            <option data-i18n="web.header.theme_dark" value="dark">🌙 Escuro</option>
+            <option data-i18n="web.header.theme_light" value="light">☀️ Claro</option>
         </select>
-        <span class="badge" id="shortcutBadge" onclick="openShortcutsHelpModal()" title="Clique para ver o guia completo de atalhos de teclado">⌨️ [Espaço/Ctrl] [Z] [N/L] [1] [2] (Ver Atalhos)</span>
+        <span class="badge" data-i18n="web.header.shortcuts_badge" data-i18n-title="web.header.shortcuts_badge_title" id="shortcutBadge" onclick="openShortcutsHelpModal()"
+              title="Clique para ver o guia completo de atalhos de teclado">⌨️ [Espaço/Ctrl] [Z] [N/L] [1] [2] (Ver Atalhos)</span>
     </div>
 </header>
 
@@ -2220,8 +2222,9 @@
 <main class="view-content active" id="viewMenu">
     <div class="menu-view-container">
         <div class="menu-header-hero">
-            <h1>Painel Geral de Operações</h1>
-            <p>Gerencie sua biblioteca de áudio FLAC e arquivos .lrc com ferramentas avançadas de organização, verificação de espectro acústico e sincronização multi-API de
+            <h1 data-i18n="web.menu.hero_title">Painel Geral de Operações</h1>
+            <p data-i18n="web.menu.hero_subtitle">Gerencie sua biblioteca de áudio FLAC e arquivos .lrc com ferramentas avançadas de organização, verificação de espectro
+                acústico e sincronização multi-API de
                 letras.</p>
         </div>
 
@@ -2236,21 +2239,31 @@
     <!-- Sidebar: Lista de Músicas Problemáticas -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <input class="search-input" id="trackSearchInput" placeholder="🔍 Filtrar música ou artista..." type="text">
+            <input class="search-input" data-i18n-placeholder="web.sidebar.search_placeholder" id="trackSearchInput" placeholder="🔍 Filtrar música ou artista..." type="text">
             <div class="filter-tabs">
-                <button class="filter-btn active" data-filter="ALL">Todos (<span id="countAll">0</span>)</button>
-                <button class="filter-btn" data-filter="PENDING">Pendentes (<span id="countPending">0</span>)</button>
-                <button class="filter-btn" data-filter="RESOLVED">Resolvidos (<span id="countResolved">0</span>)</button>
+                <button class="filter-btn active" data-filter="ALL" data-i18n-arg0="0" data-i18n-html="web.sidebar.filter_all_html" data-i18n-preserve-id="countAll">Todos
+                    (<span id="countAll">0</span>)
+                </button>
+                <button class="filter-btn" data-filter="PENDING" data-i18n-arg0="0" data-i18n-html="web.sidebar.filter_pending_html" data-i18n-preserve-id="countPending">
+                    Pendentes (<span id="countPending">0</span>)
+                </button>
+                <button class="filter-btn" data-filter="RESOLVED" data-i18n-arg0="0" data-i18n-html="web.sidebar.filter_resolved_html" data-i18n-preserve-id="countResolved">
+                    Resolvidos (<span id="countResolved">0</span>)
+                </button>
             </div>
             <!-- Filtro por Tags de Problema (Adicionável/Removível a qualquer momento) -->
             <div class="issue-tag-filters-box" id="issueTagFiltersBox" style="display: none;">
                 <div class="issue-tag-filters-header">
-                    <span>🏷️ Filtrar por Tag (<span id="activeTagFilterCount">0</span>)</span>
-                    <button class="issue-tag-clear-btn" id="btnClearIssueTagFilters" onclick="clearAllIssueTagFilters()" type="button">Limpar filtros</button>
+                    <span data-i18n-arg0="0" data-i18n-html="web.sidebar.filter_by_tag_html" data-i18n-preserve-id="activeTagFilterCount">🏷️ Filtrar por Tag (<span
+                            id="activeTagFilterCount">0</span>)</span>
+                    <button class="issue-tag-clear-btn" data-i18n="web.sidebar.clear_tag_filters" id="btnClearIssueTagFilters" onclick="clearAllIssueTagFilters()"
+                            type="button">Limpar filtros
+                    </button>
                 </div>
                 <div class="issue-tag-chips" id="issueTagChipsContainer"></div>
             </div>
-            <button class="btn-action" id="btnOpenBatchBestModal" onclick="openBatchBestModal()"
+            <button class="btn-action" data-i18n="web.sidebar.batch_best_btn" data-i18n-title="web.sidebar.batch_best_title" id="btnOpenBatchBestModal"
+                    onclick="openBatchBestModal()"
                     style="margin-top: 8px; width: 100%; padding: 8px 10px; font-size: 0.78rem; background: linear-gradient(135deg, #0284c7, #4f46e5); color: #fff; border-radius: 6px;"
                     title="Baixa e salva automaticamente a primeira letra mais compatível para as músicas da lista">
                 📥 Baixar Todas as Primeiras Mais Compatíveis
@@ -2266,41 +2279,47 @@
             <div class="column-header">
                 <h3>
                     <span style="color: var(--accent-local);">●</span>
-                    Letra Atual (Local .lrc)
+                    <span data-i18n="web.comparator.local_header">Letra Atual (Local .lrc)</span>
                 </h3>
                 <span class="badge badge-warning" id="localStatusBadge">...</span>
             </div>
 
             <!-- Offset Toolbar (Local) -->
             <div class="offset-toolbar">
-                <span>Ajuste Geral:</span>
+                <span data-i18n="web.comparator.global_offset_label">Ajuste Geral:</span>
                 <div class="offset-btn-group">
                     <button class="btn-offset" onclick="applyGlobalOffset('local', -1.0)">-1.0s</button>
                     <button class="btn-offset" onclick="applyGlobalOffset('local', -0.5)">-0.5s</button>
                     <button class="btn-offset" onclick="applyGlobalOffset('local', 0.5)">+0.5s</button>
                     <button class="btn-offset" onclick="applyGlobalOffset('local', 1.0)">+1.0s</button>
                     <input class="offset-input" id="localOffsetInput" step="0.1" type="number" value="0.5">
-                    <button class="btn-offset" onclick="applyCustomOffset('local')">Aplicar</button>
+                    <button class="btn-offset" data-i18n="web.comparator.apply_offset_btn" onclick="applyCustomOffset('local')">Aplicar</button>
                 </div>
                 <div class="offset-btn-group">
-                    <button class="btn-offset" onclick="openInstrumentalModal()" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.45);"
+                    <button class="btn-offset" data-i18n="web.comparator.create_instrumental_btn" data-i18n-title="web.comparator.create_instrumental_title"
+                            onclick="openInstrumentalModal()" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.45);"
                             title="Cria automaticamente letra instrumental do 00:00 até o minuto/segundo final da música conforme o idioma (evita falso positivo de término prematuro)">
                         🎵 Criar Instrumental
                     </button>
-                    <button class="btn-offset" onclick="openPasteLyricsModal('local')" style="color: #a78bfa;"
+                    <button class="btn-offset" data-i18n="web.comparator.paste_btn" data-i18n-title="web.comparator.paste_title" onclick="openPasteLyricsModal('local')"
+                            style="color: #a78bfa;"
                             title="Colar uma letra inteira (ou pressione Ctrl+V com o mouse sobre esta coluna) com minutagens zeradas [00:00.00]">📋 Colar Letra
                     </button>
-                    <button class="btn-offset" id="btnSyncEditModeLocal" onclick="toggleSyncEditMode('local')" style="color: #fbbf24;"
+                    <button class="btn-offset" data-i18n="web.comparator.sync_mode_btn" data-i18n-title="web.comparator.sync_mode_title" id="btnSyncEditModeLocal"
+                            onclick="toggleSyncEditMode('local')" style="color: #fbbf24;"
                             title="Ativa o Modo Edição para ir apertando [Espaço] ou [Ctrl] e definir a minutagem da próxima linha no instante exato da música">🎯 Modo Edição
                         (Set)
                     </button>
-                    <button class="btn-offset" id="btnToggleTimestampsLocal" onclick="toggleStripTimestamps('local')" style="color: #f87171;"
+                    <button class="btn-offset" data-i18n="web.comparator.strip_timestamps_btn" data-i18n-title="web.comparator.strip_timestamps_title"
+                            id="btnToggleTimestampsLocal" onclick="toggleStripTimestamps('local')" style="color: #f87171;"
                             title="Retira todas as minutagens em memória (com opção de reverter). Só grava no arquivo ao clicar em Salvar [1] ou [2].">🧹 Retirar Minutagens
                     </button>
-                    <button class="btn-offset" onclick="addNewLyricLine('local')" style="color: #34d399;"
+                    <button class="btn-offset" data-i18n="web.comparator.add_line_btn" data-i18n-title="web.comparator.add_line_title" onclick="addNewLyricLine('local')"
+                            style="color: #34d399;"
                             title="Insere um novo verso imediatamente abaixo da linha selecionada (Atalho: N ou L)">+ Novo Verso [N/L]
                     </button>
-                    <button class="btn-offset" onclick="selectAllLines('local')" title="Selecionar todas as linhas desta coluna para edição em bloco">☑️ Selecionar Tudo
+                    <button class="btn-offset" data-i18n="web.comparator.select_all_btn" data-i18n-title="web.comparator.select_all_title" onclick="selectAllLines('local')"
+                            title="Selecionar todas as linhas desta coluna para edição em bloco">☑️ Selecionar Tudo
                     </button>
                 </div>
             </div>
@@ -2308,28 +2327,38 @@
             <!-- Barra de Ações em Bloco (Seleção Múltipla Local) -->
             <div class="batch-selection-bar" id="batchSelectionBarLocal">
                 <div class="batch-bar-group">
-                    <strong id="batchSelectedCountLocal">0 selecionadas</strong>
-                    <button class="btn-offset" onclick="selectAllLines('local')" title="Selecionar todas as linhas">Todas</button>
-                    <button class="btn-offset" onclick="clearLineSelection('local')" title="Desmarcar seleção">Limpar</button>
+                    <strong data-i18n="web.batch.selected_count_zero" id="batchSelectedCountLocal">0 selecionadas</strong>
+                    <button class="btn-offset" data-i18n="web.batch.all_btn" data-i18n-title="web.batch.all_title" onclick="selectAllLines('local')"
+                            title="Selecionar todas as linhas">Todas
+                    </button>
+                    <button class="btn-offset" data-i18n="web.batch.clear_btn" data-i18n-title="web.batch.clear_title" onclick="clearLineSelection('local')"
+                            title="Desmarcar seleção">Limpar
+                    </button>
                 </div>
                 <div class="batch-bar-group">
-                    <button class="btn-offset" onclick="zeroSelectedLinesTimestamps('local')" style="color: #fbbf24; border-color: rgba(251, 191, 36, 0.45);"
+                    <button class="btn-offset" data-i18n="web.batch.zero_btn" data-i18n-title="web.batch.zero_title" onclick="zeroSelectedLinesTimestamps('local')"
+                            style="color: #fbbf24; border-color: rgba(251, 191, 36, 0.45);"
                             title="Zera a minutagem das linhas selecionadas para [00:00.00]">⏱️ Zerar [00:00.00]
                     </button>
-                    <input class="batch-time-input" id="batchTimeInputLocal" placeholder="±1.5 ou 01:20"
+                    <input class="batch-time-input" data-i18n-placeholder="web.batch.time_input_placeholder" data-i18n-title="web.batch.time_input_title"
+                           id="batchTimeInputLocal" placeholder="±1.5 ou 01:20"
                            title="Digite segundos (ex: +1.5, -0.8) para deslocar o bloco ou um tempo mm:ss.xx (ex: 01:15.00) para iniciar o bloco nesse tempo mantendo os intervalos"
                            type="text" value="+0.5">
-                    <button class="btn-offset" onclick="shiftSelectedLinesByTime('local')" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.45);"
+                    <button class="btn-offset" data-i18n="web.batch.shift_btn" data-i18n-title="web.batch.shift_title" onclick="shiftSelectedLinesByTime('local')"
+                            style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.45);"
                             title="Soma/subtrai o tempo H (em segundos ou mm:ss.xx) em todas as linhas selecionadas">± Deslocar H
                     </button>
-                    <button class="btn-offset" onclick="alignSelectedBlockToStartTime('local', false)" style="color: #34d399; border-color: rgba(52, 211, 153, 0.45);"
+                    <button class="btn-offset" data-i18n="web.batch.align_h_btn" data-i18n-title="web.batch.align_h_title"
+                            onclick="alignSelectedBlockToStartTime('local', false)" style="color: #34d399; border-color: rgba(52, 211, 153, 0.45);"
                             title="Define o início da 1ª linha selecionada para o tempo H digitado e ajusta as demais mantendo a diferença relativa entre elas">🎯 Iniciar Bloco
                         em H
                     </button>
-                    <button class="btn-offset" onclick="alignSelectedBlockToStartTime('local', true)" style="color: #a78bfa; border-color: rgba(167, 139, 250, 0.45);"
+                    <button class="btn-offset" data-i18n="web.batch.align_player_btn" data-i18n-title="web.batch.align_player_title"
+                            onclick="alignSelectedBlockToStartTime('local', true)" style="color: #a78bfa; border-color: rgba(167, 139, 250, 0.45);"
                             title="Alinha a 1ª linha selecionada com o tempo atual do player de áudio e mantém os intervalos relativos do bloco">🎵 Iniciar no Player
                     </button>
-                    <button class="btn-offset" onclick="deleteSelectedLines('local')" style="color: #f87171; border-color: rgba(248, 113, 113, 0.45);"
+                    <button class="btn-offset" data-i18n="web.batch.delete_btn" data-i18n-title="web.batch.delete_title" onclick="deleteSelectedLines('local')"
+                            style="color: #f87171; border-color: rgba(248, 113, 113, 0.45);"
                             title="Excluir todas as linhas selecionadas (Delete)">🗑️ Deletar Bloco
                     </button>
                 </div>
@@ -2338,32 +2367,42 @@
             <!-- Banner do Modo Edição (Sincronização Rápida Local) -->
             <div class="sync-edit-banner" id="syncEditBannerLocal">
                 <div>
-                    <strong id="syncEditStatusLocal">🎯 Modo Edição Ativo (Linha 1)</strong>
-                    <div style="font-size: 0.7rem; opacity: 0.9;">Aperte <b>[Espaço]</b> ou <b>[Ctrl]</b> para marcar o tempo exato na linha destacada e avançar • <b>[Backspace
-                        / Z]</b> volta 1 linha • <b>[N / L]</b> novo verso abaixo • <b>[P]</b> Play/Pause
+                    <strong data-i18n="web.sync_edit.active_status_default" id="syncEditStatusLocal">🎯 Modo Edição Ativo (Linha 1)</strong>
+                    <div data-i18n-html="web.sync_edit.hint_html" style="font-size: 0.7rem; opacity: 0.9;">Aperte <b>[Espaço]</b> ou <b>[Ctrl]</b> para marcar o tempo exato na
+                        linha destacada e avançar • <b>[Backspace
+                            / Z]</b> volta 1 linha • <b>[N / L]</b> novo verso abaixo • <b>[P]</b> Play/Pause
                     </div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
-                    <button class="btn-offset" onclick="stampNextSyncLine()" style="color: #34d399; border-color: #10b981; font-weight: 700;">⏱️ Set Próxima [Espaço/Ctrl]
+                    <button class="btn-offset" data-i18n="web.sync_edit.set_next_btn" onclick="stampNextSyncLine()"
+                            style="color: #34d399; border-color: #10b981; font-weight: 700;">⏱️ Set Próxima [Espaço/Ctrl]
                     </button>
-                    <button class="btn-offset" onclick="stepSyncCursor(-1)" title="Voltar para a linha anterior (Atalho: Backspace ou Z)">↩️ Linha Anterior [Z]</button>
-                    <button class="btn-offset" onclick="setSyncCursor(0)" title="Voltar o cursor para a primeira linha">⏮️ Topo</button>
-                    <button class="btn-offset" onclick="toggleSyncEditMode('local')" style="color: #f87171;" title="Sair do Modo Edição">✕ Sair</button>
+                    <button class="btn-offset" data-i18n="web.sync_edit.prev_line_btn" data-i18n-title="web.sync_edit.prev_line_title" onclick="stepSyncCursor(-1)"
+                            title="Voltar para a linha anterior (Atalho: Backspace ou Z)">↩️ Linha Anterior [Z]
+                    </button>
+                    <button class="btn-offset" data-i18n="web.sync_edit.top_btn" data-i18n-title="web.sync_edit.top_title" onclick="setSyncCursor(0)"
+                            title="Voltar o cursor para a primeira linha">⏮️ Topo
+                    </button>
+                    <button class="btn-offset" data-i18n="web.sync_edit.exit_btn" data-i18n-title="web.sync_edit.exit_title" onclick="toggleSyncEditMode('local')"
+                            style="color: #f87171;" title="Sair do Modo Edição">✕ Sair
+                    </button>
                 </div>
             </div>
 
             <div class="lyrics-container" id="localLyricsScroller">
-                <p style="text-align: center; color: #777777; margin-top: 40px;">Selecione uma faixa para visualizar</p>
+                <p data-i18n="web.comparator.empty_local_prompt" style="text-align: center; color: #777777; margin-top: 40px;">Selecione uma faixa para visualizar</p>
             </div>
 
             <div class="column-footer">
-                <button class="btn-action btn-local" id="btnKeepLocal" title="Manter ou salvar a letra local ajustada (Atalho: [1])">
+                <button class="btn-action btn-local" data-i18n-title="web.comparator.keep_local_title" id="btnKeepLocal"
+                        title="Manter ou salvar a letra local ajustada (Atalho: [1])">
                     <svg fill="none" height="18" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" width="18">
                         <polyline points="20 6 9 17 4 12"></polyline>
                     </svg>
-                    Manter / Salvar Local [1]
+                    <span data-i18n="web.comparator.keep_local_btn">Manter / Salvar Local [1]</span>
                 </button>
-                <button class="btn-action" id="btnQuickInstrumentalFooter" onclick="openInstrumentalModal()"
+                <button class="btn-action" data-i18n="web.comparator.footer_instrumental_btn" data-i18n-title="web.comparator.footer_instrumental_title"
+                        id="btnQuickInstrumentalFooter" onclick="openInstrumentalModal()"
                         style="flex: 0 0 auto; padding: 11px 14px; background: #1e293b; border: 1px solid #38bdf8; color: #38bdf8; font-size: 0.82rem;"
                         title="Criar letra para música instrumental (00:00 até a duração final da faixa)">
                     🎵 Instrumental
@@ -2374,7 +2413,7 @@
         <!-- Coluna Central: Player de Áudio, Capa e Slider Grossinho -->
         <section class="column-center">
             <div class="album-art-wrapper">
-                <img alt="Capa do Álbum" class="album-art" id="albumArtImg" src="" style="display: none;">
+                <img alt="Capa do Álbum" class="album-art" data-i18n-alt="web.player.album_art_alt" id="albumArtImg" src="" style="display: none;">
                 <svg class="vinyl-placeholder" fill="none" id="vinylFallback" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                     <circle cx="12" cy="12" r="10"></circle>
                     <circle cx="12" cy="12" r="4"></circle>
@@ -2383,20 +2422,21 @@
             </div>
 
             <div class="song-details">
-                <div class="song-title" id="songTitle">Selecione uma música</div>
+                <div class="song-title" data-i18n="web.player.select_song" id="songTitle">Selecione uma música</div>
                 <div class="song-artist" id="songArtist">-</div>
                 <div class="song-album" id="songAlbum">-</div>
             </div>
 
-            <button class="btn-open-folder" id="btnOpenFolder" title="Abre a pasta contendo este áudio e .lrc no explorador de arquivos">
+            <button class="btn-open-folder" data-i18n-title="web.player.open_folder_title" id="btnOpenFolder"
+                    title="Abre a pasta contendo este áudio e .lrc no explorador de arquivos">
                 <svg fill="none" height="15" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="15">
                     <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
                 </svg>
-                Abrir Local do Arquivo
+                <span data-i18n="web.player.open_folder">Abrir Local do Arquivo</span>
             </button>
 
             <div class="issues-card" id="issuesBox" style="display: none;">
-                <h4>⚠️ Problemas Apontados no Relatório:</h4>
+                <h4 data-i18n="web.player.issues_header">⚠️ Problemas Apontados no Relatório:</h4>
                 <ul id="issuesList" style="margin-left: 16px; list-style-type: square;"></ul>
             </div>
 
@@ -2413,12 +2453,12 @@
                 </div>
 
                 <div class="playback-buttons">
-                    <button class="btn-circle" id="btnSeekBack" title="Voltar 5 segundos">
+                    <button class="btn-circle" data-i18n-title="web.player.seek_back_title" id="btnSeekBack" title="Voltar 5 segundos">
                         <svg fill="none" height="18" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="18">
                             <path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/>
                         </svg>
                     </button>
-                    <button class="btn-circle btn-circle-large" id="btnPlayPause" title="Reproduzir / Pausar (Espaço ou P)">
+                    <button class="btn-circle btn-circle-large" data-i18n-title="web.player.play_pause_title" id="btnPlayPause" title="Reproduzir / Pausar (Espaço ou P)">
                         <svg fill="currentColor" height="24" id="playIcon" viewBox="0 0 24 24" width="24">
                             <polygon points="5 3 19 12 5 21 5 3"></polygon>
                         </svg>
@@ -2427,7 +2467,7 @@
                             <rect height="16" width="4" x="14" y="4"></rect>
                         </svg>
                     </button>
-                    <button class="btn-circle" id="btnSeekForward" title="Avançar 5 segundos">
+                    <button class="btn-circle" data-i18n-title="web.player.seek_forward_title" id="btnSeekForward" title="Avançar 5 segundos">
                         <svg fill="none" height="18" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="18">
                             <path d="M13 17l5-5-5-5M6 17l5-5-5-5"/>
                         </svg>
@@ -2435,8 +2475,12 @@
                 </div>
 
                 <div class="nav-buttons-row">
-                    <button class="btn-secondary" id="btnPrevTrack" title="Faixa Anterior (Atalho: Alt + A)">◀ Faixa <u>A</u>nterior</button>
-                    <button class="btn-secondary" id="btnNextTrack" title="Próxima Faixa (Atalho: Alt + F)">Próxima <u>F</u>aixa ▶</button>
+                    <button class="btn-secondary" data-i18n-html="web.player.prev_track_html" data-i18n-title="web.player.prev_track_title" id="btnPrevTrack"
+                            title="Faixa Anterior (Atalho: Alt + A)">◀ Faixa <u>A</u>nterior
+                    </button>
+                    <button class="btn-secondary" data-i18n-html="web.player.next_track_html" data-i18n-title="web.player.next_track_title" id="btnNextTrack"
+                            title="Próxima Faixa (Atalho: Alt + F)">Próxima <u>F</u>aixa ▶
+                    </button>
                 </div>
             </div>
         </section>
@@ -2446,8 +2490,8 @@
             <div class="column-header">
                 <h3>
                     <span style="color: var(--accent-lrclib);">●</span>
-                    <span>Letra Online (Multi-API)</span>
-                    <button class="btn-offset" id="btnOpenAllApiModal" onclick="openAllApiResultsModal()"
+                    <span data-i18n="web.comparator.remote_header">Letra Online (Multi-API)</span>
+                    <button class="btn-offset" data-i18n-title="web.all_api.btn_title" id="btnOpenAllApiModal" onclick="openAllApiResultsModal()"
                             style="margin-left: 4px; display: inline-flex; align-items: center; gap: 5px; color: #38bdf8; border-color: rgba(56, 189, 248, 0.45); padding: 3px 8px;"
                             title="Abrir popup em tela cheia com todas as letras encontradas por todas as APIs (incluindo resultados não filtrados)">
                         <svg fill="none" height="13" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" width="13">
@@ -2456,7 +2500,7 @@
                             <line x1="11" x2="11" y1="8" y2="14"></line>
                             <line x1="8" x2="14" y1="11" y2="11"></line>
                         </svg>
-                        <span id="allApiModalBtnCount">Ver Todas (0)</span>
+                        <span data-i18n="web.all_api.btn_count" data-i18n-arg0="0" id="allApiModalBtnCount">Ver Todas (0)</span>
                     </button>
                 </h3>
                 <div style="display: flex; align-items: center; gap: 6px;">
@@ -2468,7 +2512,8 @@
             <!-- Seletor de Versões Candidatas (Ordenadas por Duração) -->
             <div class="candidates-box" id="candidatesBox" style="display: none;">
                 <div class="candidates-toggle" id="candidatesToggle">
-                    <span>📚 Versões Encontradas por Proximidade de Tempo (<span id="candidatesCount">0</span>)</span>
+                    <span data-i18n-arg0="0" data-i18n-html="web.candidates.toggle_html" data-i18n-preserve-id="candidatesCount">📚 Versões Encontradas por Proximidade de Tempo (<span
+                            id="candidatesCount">0</span>)</span>
                     <span id="candidatesArrow">▼</span>
                 </div>
                 <div class="candidates-list" id="candidatesList" style="display: none;"></div>
@@ -2476,30 +2521,35 @@
 
             <!-- Offset Toolbar (Online) -->
             <div class="offset-toolbar">
-                <span>Ajuste Geral:</span>
+                <span data-i18n="web.comparator.global_offset_label">Ajuste Geral:</span>
                 <div class="offset-btn-group">
                     <button class="btn-offset" onclick="applyGlobalOffset('remote', -1.0)">-1.0s</button>
                     <button class="btn-offset" onclick="applyGlobalOffset('remote', -0.5)">-0.5s</button>
                     <button class="btn-offset" onclick="applyGlobalOffset('remote', 0.5)">+0.5s</button>
                     <button class="btn-offset" onclick="applyGlobalOffset('remote', 1.0)">+1.0s</button>
                     <input class="offset-input" id="remoteOffsetInput" step="0.1" type="number" value="0.5">
-                    <button class="btn-offset" onclick="applyCustomOffset('remote')">Aplicar</button>
+                    <button class="btn-offset" data-i18n="web.comparator.apply_offset_btn" onclick="applyCustomOffset('remote')">Aplicar</button>
                 </div>
                 <div class="offset-btn-group">
-                    <button class="btn-offset" onclick="openPasteLyricsModal('remote')" style="color: #a78bfa;"
+                    <button class="btn-offset" data-i18n="web.comparator.paste_btn" data-i18n-title="web.comparator.paste_title" onclick="openPasteLyricsModal('remote')"
+                            style="color: #a78bfa;"
                             title="Colar uma letra inteira (ou pressione Ctrl+V com o mouse sobre esta coluna) com minutagens zeradas [00:00.00]">📋 Colar Letra
                     </button>
-                    <button class="btn-offset" id="btnSyncEditModeRemote" onclick="toggleSyncEditMode('remote')" style="color: #fbbf24;"
+                    <button class="btn-offset" data-i18n="web.comparator.sync_mode_btn" data-i18n-title="web.comparator.sync_mode_title" id="btnSyncEditModeRemote"
+                            onclick="toggleSyncEditMode('remote')" style="color: #fbbf24;"
                             title="Ativa o Modo Edição para ir apertando [Espaço] ou [Ctrl] e definir a minutagem da próxima linha no instante exato da música">🎯 Modo Edição
                         (Set)
                     </button>
-                    <button class="btn-offset" id="btnToggleTimestampsRemote" onclick="toggleStripTimestamps('remote')" style="color: #f87171;"
+                    <button class="btn-offset" data-i18n="web.comparator.strip_timestamps_btn" data-i18n-title="web.comparator.strip_timestamps_title"
+                            id="btnToggleTimestampsRemote" onclick="toggleStripTimestamps('remote')" style="color: #f87171;"
                             title="Retira todas as minutagens em memória (com opção de reverter). Só grava no arquivo ao clicar em Salvar [1] ou [2].">🧹 Retirar Minutagens
                     </button>
-                    <button class="btn-offset" onclick="addNewLyricLine('remote')" style="color: #60a5fa;"
+                    <button class="btn-offset" data-i18n="web.comparator.add_line_btn" data-i18n-title="web.comparator.add_line_title" onclick="addNewLyricLine('remote')"
+                            style="color: #60a5fa;"
                             title="Insere um novo verso imediatamente abaixo da linha selecionada (Atalho: N ou L)">+ Novo Verso [N/L]
                     </button>
-                    <button class="btn-offset" onclick="selectAllLines('remote')" title="Selecionar todas as linhas desta coluna para edição em bloco">☑️ Selecionar Tudo
+                    <button class="btn-offset" data-i18n="web.comparator.select_all_btn" data-i18n-title="web.comparator.select_all_title" onclick="selectAllLines('remote')"
+                            title="Selecionar todas as linhas desta coluna para edição em bloco">☑️ Selecionar Tudo
                     </button>
                 </div>
             </div>
@@ -2507,28 +2557,38 @@
             <!-- Barra de Ações em Bloco (Seleção Múltipla Online) -->
             <div class="batch-selection-bar" id="batchSelectionBarRemote">
                 <div class="batch-bar-group">
-                    <strong id="batchSelectedCountRemote">0 selecionadas</strong>
-                    <button class="btn-offset" onclick="selectAllLines('remote')" title="Selecionar todas as linhas">Todas</button>
-                    <button class="btn-offset" onclick="clearLineSelection('remote')" title="Desmarcar seleção">Limpar</button>
+                    <strong data-i18n="web.batch.selected_count_zero" id="batchSelectedCountRemote">0 selecionadas</strong>
+                    <button class="btn-offset" data-i18n="web.batch.all_btn" data-i18n-title="web.batch.all_title" onclick="selectAllLines('remote')"
+                            title="Selecionar todas as linhas">Todas
+                    </button>
+                    <button class="btn-offset" data-i18n="web.batch.clear_btn" data-i18n-title="web.batch.clear_title" onclick="clearLineSelection('remote')"
+                            title="Desmarcar seleção">Limpar
+                    </button>
                 </div>
                 <div class="batch-bar-group">
-                    <button class="btn-offset" onclick="zeroSelectedLinesTimestamps('remote')" style="color: #fbbf24; border-color: rgba(251, 191, 36, 0.45);"
+                    <button class="btn-offset" data-i18n="web.batch.zero_btn" data-i18n-title="web.batch.zero_title" onclick="zeroSelectedLinesTimestamps('remote')"
+                            style="color: #fbbf24; border-color: rgba(251, 191, 36, 0.45);"
                             title="Zera a minutagem das linhas selecionadas para [00:00.00]">⏱️ Zerar [00:00.00]
                     </button>
-                    <input class="batch-time-input" id="batchTimeInputRemote" placeholder="±1.5 ou 01:20"
+                    <input class="batch-time-input" data-i18n-placeholder="web.batch.time_input_placeholder" data-i18n-title="web.batch.time_input_title"
+                           id="batchTimeInputRemote" placeholder="±1.5 ou 01:20"
                            title="Digite segundos (ex: +1.5, -0.8) para deslocar o bloco ou um tempo mm:ss.xx (ex: 01:15.00) para iniciar o bloco nesse tempo mantendo os intervalos"
                            type="text" value="+0.5">
-                    <button class="btn-offset" onclick="shiftSelectedLinesByTime('remote')" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.45);"
+                    <button class="btn-offset" data-i18n="web.batch.shift_btn" data-i18n-title="web.batch.shift_title" onclick="shiftSelectedLinesByTime('remote')"
+                            style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.45);"
                             title="Soma/subtrai o tempo H (em segundos ou mm:ss.xx) em todas as linhas selecionadas">± Deslocar H
                     </button>
-                    <button class="btn-offset" onclick="alignSelectedBlockToStartTime('remote', false)" style="color: #34d399; border-color: rgba(52, 211, 153, 0.45);"
+                    <button class="btn-offset" data-i18n="web.batch.align_h_btn" data-i18n-title="web.batch.align_h_title"
+                            onclick="alignSelectedBlockToStartTime('remote', false)" style="color: #34d399; border-color: rgba(52, 211, 153, 0.45);"
                             title="Define o início da 1ª linha selecionada para o tempo H digitado e ajusta as demais mantendo a diferença relativa entre elas">🎯 Iniciar Bloco
                         em H
                     </button>
-                    <button class="btn-offset" onclick="alignSelectedBlockToStartTime('remote', true)" style="color: #a78bfa; border-color: rgba(167, 139, 250, 0.45);"
+                    <button class="btn-offset" data-i18n="web.batch.align_player_btn" data-i18n-title="web.batch.align_player_title"
+                            onclick="alignSelectedBlockToStartTime('remote', true)" style="color: #a78bfa; border-color: rgba(167, 139, 250, 0.45);"
                             title="Alinha a 1ª linha selecionada com o tempo atual do player de áudio e mantém os intervalos relativos do bloco">🎵 Iniciar no Player
                     </button>
-                    <button class="btn-offset" onclick="deleteSelectedLines('remote')" style="color: #f87171; border-color: rgba(248, 113, 113, 0.45);"
+                    <button class="btn-offset" data-i18n="web.batch.delete_btn" data-i18n-title="web.batch.delete_title" onclick="deleteSelectedLines('remote')"
+                            style="color: #f87171; border-color: rgba(248, 113, 113, 0.45);"
                             title="Excluir todas as linhas selecionadas (Delete)">🗑️ Deletar Bloco
                     </button>
                 </div>
@@ -2537,32 +2597,41 @@
             <!-- Banner do Modo Edição (Sincronização Rápida Online) -->
             <div class="sync-edit-banner" id="syncEditBannerRemote">
                 <div>
-                    <strong id="syncEditStatusRemote">🎯 Modo Edição Ativo (Linha 1)</strong>
-                    <div style="font-size: 0.7rem; opacity: 0.9;">Aperte <b>[Espaço]</b> ou <b>[Ctrl]</b> para marcar o tempo exato na linha destacada e avançar • <b>[Backspace
-                        / Z]</b> volta 1 linha • <b>[N / L]</b> novo verso abaixo • <b>[P]</b> Play/Pause
+                    <strong data-i18n="web.sync_edit.active_status_default" id="syncEditStatusRemote">🎯 Modo Edição Ativo (Linha 1)</strong>
+                    <div data-i18n-html="web.sync_edit.hint_html" style="font-size: 0.7rem; opacity: 0.9;">Aperte <b>[Espaço]</b> ou <b>[Ctrl]</b> para marcar o tempo exato na
+                        linha destacada e avançar • <b>[Backspace
+                            / Z]</b> volta 1 linha • <b>[N / L]</b> novo verso abaixo • <b>[P]</b> Play/Pause
                     </div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
-                    <button class="btn-offset" onclick="stampNextSyncLine()" style="color: #34d399; border-color: #10b981; font-weight: 700;">⏱️ Set Próxima [Espaço/Ctrl]
+                    <button class="btn-offset" data-i18n="web.sync_edit.set_next_btn" onclick="stampNextSyncLine()"
+                            style="color: #34d399; border-color: #10b981; font-weight: 700;">⏱️ Set Próxima [Espaço/Ctrl]
                     </button>
-                    <button class="btn-offset" onclick="stepSyncCursor(-1)" title="Voltar para a linha anterior (Atalho: Backspace ou Z)">↩️ Linha Anterior [Z]</button>
-                    <button class="btn-offset" onclick="setSyncCursor(0)" title="Voltar o cursor para a primeira linha">⏮️ Topo</button>
-                    <button class="btn-offset" onclick="toggleSyncEditMode('remote')" style="color: #f87171;" title="Sair do Modo Edição">✕ Sair</button>
+                    <button class="btn-offset" data-i18n="web.sync_edit.prev_line_btn" data-i18n-title="web.sync_edit.prev_line_title" onclick="stepSyncCursor(-1)"
+                            title="Voltar para a linha anterior (Atalho: Backspace ou Z)">↩️ Linha Anterior [Z]
+                    </button>
+                    <button class="btn-offset" data-i18n="web.sync_edit.top_btn" data-i18n-title="web.sync_edit.top_title" onclick="setSyncCursor(0)"
+                            title="Voltar o cursor para a primeira linha">⏮️ Topo
+                    </button>
+                    <button class="btn-offset" data-i18n="web.sync_edit.exit_btn" data-i18n-title="web.sync_edit.exit_title" onclick="toggleSyncEditMode('remote')"
+                            style="color: #f87171;" title="Sair do Modo Edição">✕ Sair
+                    </button>
                 </div>
             </div>
 
             <div class="lyrics-container" id="remoteLyricsScroller">
-                <p style="text-align: center; color: #777777; margin-top: 40px;">Buscando letra nas APIs online...</p>
+                <p data-i18n="web.comparator.searching_online" style="text-align: center; color: #777777; margin-top: 40px;">Buscando letra nas APIs online...</p>
             </div>
 
             <div class="column-footer">
-                <button class="btn-action btn-lrclib" id="btnSaveLrclib" title="Substituir e salvar com a letra online selecionada (Atalho: [2])">
+                <button class="btn-action btn-lrclib" data-i18n-title="web.comparator.save_online_title" id="btnSaveLrclib"
+                        title="Substituir e salvar com a letra online selecionada (Atalho: [2])">
                     <svg fill="none" height="18" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" width="18">
                         <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
                         <polyline points="17 21 17 13 7 13 7 21"></polyline>
                         <polyline points="7 3 7 8 15 8"></polyline>
                     </svg>
-                    Salvar Letra Online [2]
+                    <span data-i18n="web.comparator.save_online_btn">Salvar Letra Online [2]</span>
                 </button>
             </div>
         </section>
@@ -2578,67 +2647,69 @@
             <div class="modal-title-group">
                 <span class="modal-action-icon">⌨️</span>
                 <div>
-                    <h2>Guia de Atalhos e Recursos de Edição</h2>
-                    <div class="modal-action-subtitle">Todos os atalhos de teclado e interações rápidas do Comparador</div>
+                    <h2 data-i18n="web.shortcuts.title">Guia de Atalhos e Recursos de Edição</h2>
+                    <div class="modal-action-subtitle" data-i18n="web.shortcuts.subtitle">Todos os atalhos de teclado e interações rápidas do Comparador</div>
                 </div>
             </div>
-            <button class="btn-close-modal" onclick="closeShortcutsHelpModal()" title="Fechar (Esc)">✕</button>
+            <button class="btn-close-modal" data-i18n-title="web.modal.close_esc_title" onclick="closeShortcutsHelpModal()" title="Fechar (Esc)">✕</button>
         </div>
         <div class="modal-body">
             <div class="shortcuts-help-grid">
                 <div class="shortcut-help-row">
-                    <span><b>Play / Pause</b> da música (ou marcar tempo da linha no Modo Edição)</span>
-                    <div class="shortcut-kbd-group"><span class="shortcut-kbd">Espaço</span> <span class="shortcut-kbd">P</span></div>
+                    <span data-i18n-html="web.shortcuts.row_play_pause_html"><b>Play / Pause</b> da música (ou marcar tempo da linha no Modo Edição)</span>
+                    <div class="shortcut-kbd-group"><span class="shortcut-kbd" data-i18n="web.shortcuts.kbd_space">Espaço</span> <span class="shortcut-kbd">P</span></div>
                 </div>
                 <div class="shortcut-help-row">
-                    <span><b>Marcar tempo exato (Set)</b> na linha destacada e avançar (Modo Edição)</span>
-                    <div class="shortcut-kbd-group"><span class="shortcut-kbd">Espaço</span> <span class="shortcut-kbd">Ctrl</span></div>
+                    <span data-i18n-html="web.shortcuts.row_set_time_html"><b>Marcar tempo exato (Set)</b> na linha destacada e avançar (Modo Edição)</span>
+                    <div class="shortcut-kbd-group"><span class="shortcut-kbd" data-i18n="web.shortcuts.kbd_space">Espaço</span> <span class="shortcut-kbd">Ctrl</span></div>
                 </div>
                 <div class="shortcut-help-row">
-                    <span><b>Voltar 1 linha</b> na seleção / cursor do Modo Edição</span>
+                    <span data-i18n-html="web.shortcuts.row_prev_line_html"><b>Voltar 1 linha</b> na seleção / cursor do Modo Edição</span>
                     <div class="shortcut-kbd-group"><span class="shortcut-kbd">Z</span> <span class="shortcut-kbd">Backspace</span></div>
                 </div>
                 <div class="shortcut-help-row">
-                    <span><b>Inserir novo verso abaixo da linha selecionada</b> (pausado = abaixo da selecionada; tocando = com a minutagem do instante atual)</span>
+                    <span data-i18n-html="web.shortcuts.row_add_verse_html"><b>Inserir novo verso abaixo da linha selecionada</b> (pausado = abaixo da selecionada; tocando = com a minutagem do instante atual)</span>
                     <div class="shortcut-kbd-group"><span class="shortcut-kbd">N</span> <span class="shortcut-kbd">L</span></div>
                 </div>
                 <div class="shortcut-help-row">
-                    <span><b>Manter / Salvar Letra Local</b> e avançar para a próxima faixa</span>
+                    <span data-i18n-html="web.shortcuts.row_save_local_html"><b>Manter / Salvar Letra Local</b> e avançar para a próxima faixa</span>
                     <div class="shortcut-kbd-group"><span class="shortcut-kbd">1</span></div>
                 </div>
                 <div class="shortcut-help-row">
-                    <span><b>Salvar Letra Online</b> e avançar para a próxima faixa</span>
+                    <span data-i18n-html="web.shortcuts.row_save_online_html"><b>Salvar Letra Online</b> e avançar para a próxima faixa</span>
                     <div class="shortcut-kbd-group"><span class="shortcut-kbd">2</span></div>
                 </div>
                 <div class="shortcut-help-row">
-                    <span><b>Faixa Anterior / Próxima Faixa</b> da lista</span>
+                    <span data-i18n-html="web.shortcuts.row_prev_next_track_html"><b>Faixa Anterior / Próxima Faixa</b> da lista</span>
                     <div class="shortcut-kbd-group"><span class="shortcut-kbd">Alt + A</span> <span class="shortcut-kbd">Alt + F</span></div>
                 </div>
                 <div class="shortcut-help-row">
-                    <span><b>Voltar / Avançar 5 segundos</b> no áudio</span>
+                    <span data-i18n-html="web.shortcuts.row_seek_html"><b>Voltar / Avançar 5 segundos</b> no áudio</span>
                     <div class="shortcut-kbd-group"><span class="shortcut-kbd">←</span> <span class="shortcut-kbd">→</span></div>
                 </div>
                 <div class="shortcut-help-row">
-                    <span><b>Arrastar Verso(s) (Card Drag & Drop)</b> para outra posição sem alterar a ordem das demais linhas</span>
-                    <div class="shortcut-kbd-group"><span class="shortcut-kbd">Arrastar ⠿</span></div>
+                    <span data-i18n-html="web.shortcuts.row_drag_html"><b>Arrastar Verso(s) (Card Drag & Drop)</b> para outra posição sem alterar a ordem das demais linhas</span>
+                    <div class="shortcut-kbd-group"><span class="shortcut-kbd" data-i18n="web.shortcuts.kbd_drag">Arrastar ⠿</span></div>
                 </div>
                 <div class="shortcut-help-row">
-                    <span><b>Selecionar Múltiplas Linhas</b> (deletar, arrastar bloco, zerar minutagem ou ajustar bloco em um tempo H)</span>
-                    <div class="shortcut-kbd-group"><span class="shortcut-kbd"> Checkbox</span> <span class="shortcut-kbd">Shift + Clique</span> <span class="shortcut-kbd">Ctrl + Clique</span>
+                    <span data-i18n-html="web.shortcuts.row_multi_select_html"><b>Selecionar Múltiplas Linhas</b> (deletar, arrastar bloco, zerar minutagem ou ajustar bloco em um tempo H)</span>
+                    <div class="shortcut-kbd-group"><span class="shortcut-kbd" data-i18n="web.shortcuts.kbd_checkbox"> Checkbox</span> <span class="shortcut-kbd"
+                                                                                                                                             data-i18n="web.shortcuts.kbd_shift_click">Shift + Clique</span>
+                        <span class="shortcut-kbd" data-i18n="web.shortcuts.kbd_ctrl_click">Ctrl + Clique</span>
                     </div>
                 </div>
                 <div class="shortcut-help-row">
-                    <span><b>Excluir linhas selecionadas</b> na coluna em foco</span>
+                    <span data-i18n-html="web.shortcuts.row_delete_html"><b>Excluir linhas selecionadas</b> na coluna em foco</span>
                     <div class="shortcut-kbd-group"><span class="shortcut-kbd">Delete</span></div>
                 </div>
                 <div class="shortcut-help-row">
-                    <span><b>Colar letra completa</b> com minutagens zeradas <code>[00:00.00]</code></span>
+                    <span data-i18n-html="web.shortcuts.row_paste_html"><b>Colar letra completa</b> com minutagens zeradas <code>[00:00.00]</code></span>
                     <div class="shortcut-kbd-group"><span class="shortcut-kbd">Ctrl + V</span></div>
                 </div>
             </div>
         </div>
         <div class="modal-footer">
-            <button class="btn-action btn-primary" onclick="closeShortcutsHelpModal()">Entendi</button>
+            <button class="btn-action btn-primary" data-i18n="web.shortcuts.close_btn" onclick="closeShortcutsHelpModal()">Entendi</button>
         </div>
     </div>
 </div>
@@ -2652,45 +2723,48 @@
             <div class="modal-title-group">
                 <span class="modal-action-icon">🎵</span>
                 <div>
-                    <h2>Criar Letra Instrumental</h2>
-                    <div class="modal-action-subtitle" id="instrumentalModalSubtitle">Preenche automaticamente de [00:00.00] até o término da música</div>
+                    <h2 data-i18n="web.instrumental.title">Criar Letra Instrumental</h2>
+                    <div class="modal-action-subtitle" data-i18n="web.instrumental.subtitle" id="instrumentalModalSubtitle">Preenche automaticamente de [00:00.00] até o
+                        término da música
+                    </div>
                 </div>
             </div>
-            <button class="btn-close-modal" onclick="closeInstrumentalModal()" title="Fechar (Esc)">✕</button>
+            <button class="btn-close-modal" data-i18n-title="web.modal.close_esc_title" onclick="closeInstrumentalModal()" title="Fechar (Esc)">✕</button>
         </div>
         <div class="modal-body">
-            <p class="modal-desc">
+            <p class="modal-desc" data-i18n-html="web.instrumental.desc_html">
                 Cria um arquivo <code>.lrc</code> sincronizado do segundo <code>00:00.00</code> até a duração final da faixa (<code
                     id="instrumentalEndDurationLabel">03:00.00</code>) com a tag de instrumental. Isso evita que o verificador aponte falso positivo de <b>término
                 prematuro</b>.
             </p>
             <div class="form-group">
-                <label class="form-label">Idioma / Tag de Instrumental:</label>
+                <label class="form-label" data-i18n="web.instrumental.lang_label">Idioma / Tag de Instrumental:</label>
                 <select class="select-input" id="instrumentalLangSelect" onchange="updateInstrumentalPreview()">
-                    <option value="pt">Português / Inglês / Espanhol — ♪ Instrumental ♪</option>
-                    <option value="ja">Japonês (日本語) — ♪ インストゥルメンタル ♪</option>
-                    <option value="zh">Chinês (中文) — ♪ 纯音乐 ♪</option>
-                    <option value="ko">Coreano (한국어) — ♪ 연주곡 ♪</option>
-                    <option value="ru">Russo (Русский) — ♪ Инструментал ♪</option>
-                    <option value="custom">Personalizado...</option>
+                    <option data-i18n="web.instrumental.lang_pt" value="pt">Português / Inglês / Espanhol — ♪ Instrumental ♪</option>
+                    <option data-i18n="web.instrumental.lang_ja" value="ja">Japonês (日本語) — ♪ インストゥルメンタル ♪</option>
+                    <option data-i18n="web.instrumental.lang_zh" value="zh">Chinês (中文) — ♪ 纯音乐 ♪</option>
+                    <option data-i18n="web.instrumental.lang_ko" value="ko">Coreano (한국어) — ♪ 연주곡 ♪</option>
+                    <option data-i18n="web.instrumental.lang_ru" value="ru">Russo (Русский) — ♪ Инструментал ♪</option>
+                    <option data-i18n="web.instrumental.lang_custom" value="custom">Personalizado...</option>
                 </select>
             </div>
             <div class="form-group" id="instrumentalCustomTagGroup" style="display: none;">
-                <label class="form-label">Tag Personalizada:</label>
-                <input class="form-input" id="instrumentalCustomTagInput" oninput="updateInstrumentalPreview()" placeholder="Ex: ♪ Instrumental ♪" type="text"
+                <label class="form-label" data-i18n="web.instrumental.custom_tag_label">Tag Personalizada:</label>
+                <input class="form-input" data-i18n-placeholder="web.instrumental.custom_tag_placeholder" id="instrumentalCustomTagInput" oninput="updateInstrumentalPreview()"
+                       placeholder="Ex: ♪ Instrumental ♪" type="text"
                        value="♪ Instrumental ♪">
             </div>
             <div class="form-group">
-                <label class="form-label">Pré-visualização do .lrc gerado:</label>
+                <label class="form-label" data-i18n="web.instrumental.preview_label">Pré-visualização do .lrc gerado:</label>
                 <pre class="form-input" id="instrumentalPreviewBox" style="margin: 0; white-space: pre-wrap; line-height: 1.6; color: #38bdf8;"></pre>
             </div>
         </div>
         <div class="modal-footer">
-            <button class="btn-secondary" onclick="closeInstrumentalModal()">Cancelar</button>
-            <button class="btn-secondary" onclick="applyInstrumentalLyrics(false)" style="color: #38bdf8; border-color: #38bdf8;">
+            <button class="btn-secondary" data-i18n="web.action.cancel" onclick="closeInstrumentalModal()">Cancelar</button>
+            <button class="btn-secondary" data-i18n="web.instrumental.fill_local_btn" onclick="applyInstrumentalLyrics(false)" style="color: #38bdf8; border-color: #38bdf8;">
                 Preencher na Coluna Local
             </button>
-            <button class="btn-action btn-local" onclick="applyInstrumentalLyrics(true)">
+            <button class="btn-action btn-local" data-i18n="web.instrumental.generate_save_btn" onclick="applyInstrumentalLyrics(true)">
                 ✅ Gerar e Salvar .lrc Agora
             </button>
         </div>
@@ -2706,18 +2780,20 @@
             <div class="modal-title-group">
                 <span class="modal-action-icon">⚠️</span>
                 <div>
-                    <h2>Baixar Todas as Primeiras Mais Compatíveis</h2>
-                    <div class="modal-action-subtitle">Ação em lote • Confirmação de segurança obrigatória</div>
+                    <h2 data-i18n="web.batch_best.title">Baixar Todas as Primeiras Mais Compatíveis</h2>
+                    <div class="modal-action-subtitle" data-i18n="web.batch_best.subtitle">Ação em lote • Confirmação de segurança obrigatória</div>
                 </div>
             </div>
-            <button class="btn-close-modal" id="btnCloseBatchBestModal" onclick="closeBatchBestModal()" title="Fechar (Esc)">✕</button>
+            <button class="btn-close-modal" data-i18n-title="web.modal.close_esc_title" id="btnCloseBatchBestModal" onclick="closeBatchBestModal()" title="Fechar (Esc)">✕
+            </button>
         </div>
         <div class="modal-body">
             <div id="batchBestConfirmSection" style="display: flex; flex-direction: column; gap: 14px;">
                 <div class="issues-card"
                      style="margin: 0; padding: 12px 14px; font-size: 0.84rem; border-color: rgba(239, 68, 68, 0.45); background: rgba(239, 68, 68, 0.10); color: #fecaca;">
-                    <h4 style="color: #f87171; font-size: 0.9rem; margin-bottom: 6px;">🛑 Atenção: Esta ação substituirá/criará os arquivos .lrc automaticamente!</h4>
-                    <p style="line-height: 1.5;">
+                    <h4 data-i18n="web.batch_best.warning_title" style="color: #f87171; font-size: 0.9rem; margin-bottom: 6px;">🛑 Atenção: Esta ação substituirá/criará os
+                        arquivos .lrc automaticamente!</h4>
+                    <p data-i18n-html="web.batch_best.warning_html" style="line-height: 1.5;">
                         O sistema pesquisará cada música (usando <b>Artista + Música</b>, <b>Música + Artista</b> e <b>Só a Música</b>, respeitando automaticamente qualquer
                         limite de taxa <code>HTTP 429</code> das APIs) e salvará imediatamente a <b>primeira alternativa mais compatível por tempo</b> sem revisão manual faixa
                         a faixa.
@@ -2725,43 +2801,43 @@
                 </div>
 
                 <div class="form-group" style="margin-bottom: 0;">
-                    <label class="form-label">Quais faixas da lista deseja processar?</label>
+                    <label class="form-label" data-i18n="web.batch_best.scope_label">Quais faixas da lista deseja processar?</label>
                     <select class="select-input" id="batchBestScopeSelect">
-                        <option value="PENDING">Apenas faixas Pendentes (recomendado)</option>
-                        <option value="ALL">Todas as faixas do relatório atual</option>
+                        <option data-i18n="web.batch_best.scope_pending" value="PENDING">Apenas faixas Pendentes (recomendado)</option>
+                        <option data-i18n="web.batch_best.scope_all" value="ALL">Todas as faixas do relatório atual</option>
                     </select>
                 </div>
 
-                <div id="batchBestCountdownBanner"
+                <div data-i18n-arg0="5" data-i18n-html="web.batch_best.countdown_waiting_html" data-i18n-preserve-id="batchBestTimerSeconds" id="batchBestCountdownBanner"
                      style="padding: 10px 14px; border-radius: 8px; background: #262626; border: 1px solid #fbbf24; color: #fde68a; font-weight: 700; text-align: center; font-size: 0.88rem;">
                     ⏳ Aguarde <span id="batchBestTimerSeconds">5</span>s para liberar o botão de confirmação...
                 </div>
 
                 <label class="checkbox-group" style="border-color: rgba(239, 68, 68, 0.45);">
                     <input id="batchBestConfirmCheckbox" onchange="updateBatchBestConfirmBtnState()" type="checkbox">
-                    <span style="font-weight: 700; color: #fca5a5;">Sim, eu li e sei que é irreversível!</span>
+                    <span data-i18n="web.batch_best.checkbox_label" style="font-weight: 700; color: #fca5a5;">Sim, eu li e sei que é irreversível!</span>
                 </label>
             </div>
 
             <!-- Progresso do Download em Lote -->
             <div class="modal-progress-section" id="batchBestProgressSection" style="display: none;">
                 <div class="progress-info-row">
-                    <span class="progress-title" id="batchBestProgressTitle">Baixando letras mais compatíveis...</span>
+                    <span class="progress-title" data-i18n="web.batch_best.progress_initial_title" id="batchBestProgressTitle">Baixando letras mais compatíveis...</span>
                     <span class="progress-count" id="batchBestProgressCount">0 / 0</span>
                 </div>
                 <div class="progress-bar-wrapper">
                     <div class="progress-bar-fill" id="batchBestProgressBar" style="width: 0%;"></div>
                 </div>
-                <div class="progress-current-item" id="batchBestProgressItem">Preparando...</div>
+                <div class="progress-current-item" data-i18n="web.batch_best.progress_preparing" id="batchBestProgressItem">Preparando...</div>
                 <div class="result-details-box" style="max-height: 200px;">
-                    <h4>Progresso Faixa a Faixa:</h4>
+                    <h4 data-i18n="web.batch_best.log_header">Progresso Faixa a Faixa:</h4>
                     <div class="result-log-list" id="batchBestLogList"></div>
                 </div>
             </div>
         </div>
         <div class="modal-footer">
-            <button class="btn-secondary" id="btnCancelBatchBest" onclick="closeBatchBestModal()">Cancelar</button>
-            <button class="btn-action" disabled id="btnConfirmBatchBest" onclick="runBatchBestDownload()"
+            <button class="btn-secondary" data-i18n="web.action.cancel" id="btnCancelBatchBest" onclick="closeBatchBestModal()">Cancelar</button>
+            <button class="btn-action" data-i18n="web.batch_best.confirm_btn_timer" data-i18n-arg0="5" disabled id="btnConfirmBatchBest" onclick="runBatchBestDownload()"
                     style="background: #dc2626; color: #fff; opacity: 0.45; cursor: not-allowed;">
                 Sim (5s)
             </button>
@@ -2778,37 +2854,41 @@
             <div class="modal-title-group">
                 <span class="modal-action-icon">📋</span>
                 <div>
-                    <h2 id="pasteLyricsModalTitle">Colar Letra com Minutagens Zeradas</h2>
-                    <div class="modal-action-subtitle" id="pasteLyricsModalSubtitle">Cada quebra de linha criará um verso com minutagem [00:00.00]</div>
+                    <h2 data-i18n="web.paste.title" id="pasteLyricsModalTitle">Colar Letra com Minutagens Zeradas</h2>
+                    <div class="modal-action-subtitle" data-i18n="web.paste.subtitle" id="pasteLyricsModalSubtitle">Cada quebra de linha criará um verso com minutagem
+                        [00:00.00]
+                    </div>
                 </div>
             </div>
-            <button class="btn-close-modal" onclick="closePasteLyricsModal()" title="Fechar (Esc)">✕</button>
+            <button class="btn-close-modal" data-i18n-title="web.modal.close_esc_title" onclick="closePasteLyricsModal()" title="Fechar (Esc)">✕</button>
         </div>
         <div class="modal-body">
-            <p class="modal-desc">
+            <p class="modal-desc" data-i18n-html="web.paste.desc_html">
                 Cole abaixo a letra completa da música. Linhas em branco entre estrofes serão ignoradas automaticamente e cada verso será criado com a minutagem zerada (<code>[00:00.00]</code>)
                 para você sincronizar facilmente com o <b>Modo Edição (Espaço / Ctrl)</b>.
             </p>
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <span class="form-label">Aplicar em:</span>
+                    <span class="form-label" data-i18n="web.paste.apply_target_label">Aplicar em:</span>
                     <select class="select-input" id="pasteLyricsTargetSelect" style="padding: 5px 10px;">
-                        <option value="local">● Letra Atual (Local .lrc)</option>
-                        <option value="remote">● Letra Online (Multi-API)</option>
+                        <option data-i18n="web.paste.target_local" value="local">● Letra Atual (Local .lrc)</option>
+                        <option data-i18n="web.paste.target_remote" value="remote">● Letra Online (Multi-API)</option>
                     </select>
                 </div>
-                <button class="btn-browse" onclick="readClipboardIntoPasteTextarea()" type="button">📋 Ler da Área de Transferência</button>
+                <button class="btn-browse" data-i18n="web.paste.read_clipboard_btn" onclick="readClipboardIntoPasteTextarea()" type="button">📋 Ler da Área de Transferência
+                </button>
             </div>
-            <textarea class="form-input" id="pasteLyricsTextarea" placeholder="Cole a letra aqui (Ctrl + V)..." rows="13"
+            <textarea class="form-input" data-i18n-placeholder="web.paste.textarea_placeholder" id="pasteLyricsTextarea" placeholder="Cole a letra aqui (Ctrl + V)..."
+                      rows="13"
                       style="width: 100%; resize: vertical; line-height: 1.5; font-family: 'Inter', sans-serif;"></textarea>
             <label class="checkbox-group">
                 <input checked id="pasteAutoEnterSyncMode" type="checkbox">
-                <span>Já ativar o <b>🎯 Modo Edição (Set Rápido com Espaço / Ctrl)</b> na linha 1 após aplicar</span>
+                <span data-i18n-html="web.paste.auto_sync_label_html">Já ativar o <b>🎯 Modo Edição (Set Rápido com Espaço / Ctrl)</b> na linha 1 após aplicar</span>
             </label>
         </div>
         <div class="modal-footer">
-            <button class="btn-secondary" onclick="closePasteLyricsModal()">Cancelar</button>
-            <button class="btn-action btn-primary" onclick="applyPastedLyricsFromModal()">
+            <button class="btn-secondary" data-i18n="web.action.cancel" onclick="closePasteLyricsModal()">Cancelar</button>
+            <button class="btn-action btn-primary" data-i18n="web.paste.apply_btn" onclick="applyPastedLyricsFromModal()">
                 ✅ Criar Linhas Zeradas [00:00.00]
             </button>
         </div>
@@ -2824,23 +2904,28 @@
             <div class="modal-title-group">
                 <span class="modal-action-icon">🌐</span>
                 <div>
-                    <h2>Todos os Resultados das APIs (Sem Filtro)</h2>
-                    <div class="modal-action-subtitle" id="allApiModalSubtitle">Resultados completos de LRCLIB, AppleMusic, Spotify, YouTube, NetEase, QQMusic, KuGou,
+                    <h2 data-i18n="web.all_api.title">Todos os Resultados das APIs (Sem Filtro)</h2>
+                    <div class="modal-action-subtitle" data-i18n="web.all_api.subtitle" id="allApiModalSubtitle">Resultados completos de LRCLIB, AppleMusic, Spotify, YouTube,
+                        NetEase, QQMusic, KuGou,
                         Musixmatch, Deezer, Genius e Karalyr
                     </div>
                 </div>
             </div>
-            <button class="btn-close-modal" id="btnCloseAllApiModal" onclick="closeAllApiResultsModal()" title="Fechar (Esc)">✕</button>
+            <button class="btn-close-modal" data-i18n-title="web.modal.close_esc_title" id="btnCloseAllApiModal" onclick="closeAllApiResultsModal()" title="Fechar (Esc)">✕
+            </button>
         </div>
 
         <div class="all-api-toolbar">
             <div class="all-api-search-row">
-                <input class="form-input" id="allApiCustomQueryInput" placeholder="Pesquisar manualmente em todas as APIs (ex: Artista Título)..." style="max-width: 480px;"
+                <input class="form-input" data-i18n-placeholder="web.all_api.custom_search_placeholder" id="allApiCustomQueryInput"
+                       placeholder="Pesquisar manualmente em todas as APIs (ex: Artista Título)..." style="max-width: 480px;"
                        type="text">
-                <button class="btn-browse" id="btnRunAllApiCustomSearch" onclick="runCustomAllApiSearch()">🔍 Pesquisar em Todas as APIs</button>
-                <input class="form-input" id="allApiLocalFilterInput" oninput="renderAllApiModalList()"
+                <button class="btn-browse" data-i18n="web.all_api.custom_search_btn" id="btnRunAllApiCustomSearch" onclick="runCustomAllApiSearch()">🔍 Pesquisar em Todas as
+                    APIs
+                </button>
+                <input class="form-input" data-i18n-placeholder="web.all_api.local_filter_placeholder" id="allApiLocalFilterInput" oninput="renderAllApiModalList()"
                        placeholder="Filtrar resultados listados abaixo por título, artista, álbum ou letra..." style="max-width: 380px;" type="text">
-                <span class="badge badge-info" id="allApiTotalBadge">0 resultados</span>
+                <span class="badge badge-info" data-i18n="web.all_api.total_badge_zero" id="allApiTotalBadge">0 resultados</span>
             </div>
             <div class="all-api-provider-chips" id="allApiProviderChips"></div>
         </div>
@@ -2850,20 +2935,22 @@
             <div class="all-api-detail-pane" id="allApiDetailPane">
                 <div class="all-api-detail-header">
                     <div>
-                        <h3 id="allApiDetailTitle" style="font-size: 1.05rem; font-weight: 800;">Selecione um resultado à esquerda</h3>
+                        <h3 data-i18n="web.all_api.detail_default_title" id="allApiDetailTitle" style="font-size: 1.05rem; font-weight: 800;">Selecione um resultado à
+                            esquerda</h3>
                         <div id="allApiDetailSubtitle" style="font-size: 0.82rem; color: var(--text-muted);">-</div>
                     </div>
                     <div style="display: flex; align-items: center; gap: 8px;">
-                        <button class="btn-offset" id="btnUseSelectedApiSynced" onclick="useSelectedAllApiResult('synced')"
+                        <button class="btn-offset" data-i18n="web.all_api.use_synced_btn" id="btnUseSelectedApiSynced" onclick="useSelectedAllApiResult('synced')"
                                 style="display: none; padding: 7px 12px; color: #34d399; border-color: #10b981;">⚡ Usar Letra Sincronizada no Comparador
                         </button>
-                        <button class="btn-offset" id="btnUseSelectedApiPlain" onclick="useSelectedAllApiResult('plain')"
+                        <button class="btn-offset" data-i18n="web.all_api.use_plain_btn" id="btnUseSelectedApiPlain" onclick="useSelectedAllApiResult('plain')"
                                 style="display: none; padding: 7px 12px; color: #60a5fa; border-color: #3b82f6;">📄 Usar Letra Pura no Comparador
                         </button>
                     </div>
                 </div>
                 <div class="all-api-detail-meta-grid" id="allApiDetailMetaGrid" style="display: none;"></div>
-                <div class="all-api-lyrics-preview" id="allApiLyricsPreview">Clique em qualquer item encontrado à esquerda para inspecionar todos os metadados e o conteúdo
+                <div class="all-api-lyrics-preview" data-i18n="web.all_api.detail_default_preview" id="allApiLyricsPreview">Clique em qualquer item encontrado à esquerda para
+                    inspecionar todos os metadados e o conteúdo
                     bruto retornado pela API.
                 </div>
             </div>
@@ -2880,15 +2967,15 @@
             <div class="modal-title-group">
                 <span class="modal-action-icon" id="modalActionIcon">📁</span>
                 <div>
-                    <h2 id="modalActionTitle">Título da Operação</h2>
-                    <div class="modal-action-subtitle" id="modalActionSubtitle">Opção X</div>
+                    <h2 data-i18n="web.action.default_title" id="modalActionTitle">Título da Operação</h2>
+                    <div class="modal-action-subtitle" data-i18n="web.action.default_subtitle" id="modalActionSubtitle">Opção X</div>
                 </div>
             </div>
-            <button class="btn-close-modal" id="modalCloseBtn" title="Fechar">✕</button>
+            <button class="btn-close-modal" data-i18n-title="web.action.close_title" id="modalCloseBtn" title="Fechar">✕</button>
         </div>
 
         <div class="modal-body">
-            <p class="modal-desc" id="modalActionDesc">Descrição da operação...</p>
+            <p class="modal-desc" data-i18n="web.action.default_desc" id="modalActionDesc">Descrição da operação...</p>
 
             <!-- Formulário de Seleção de Pastas e Parâmetros -->
             <div id="modalFormSection">
@@ -2899,51 +2986,114 @@
             <!-- Seção de Progresso Ao Vivo -->
             <div class="modal-progress-section" id="modalProgressSection" style="display: none;">
                 <div class="progress-info-row">
-                    <span class="progress-title" id="modalProgressTitle">Executando operação...</span>
+                    <span class="progress-title" data-i18n="web.action.progress_title" id="modalProgressTitle">Executando operação...</span>
                     <span class="progress-count" id="modalProgressCount">0 / 0</span>
                 </div>
                 <div class="progress-bar-wrapper">
                     <div class="progress-bar-fill" id="modalProgressBar" style="width: 0%;"></div>
                 </div>
-                <div class="progress-current-item" id="modalProgressItem">Iniciando análise...</div>
+                <div class="progress-current-item" data-i18n="web.action.progress_item_starting" id="modalProgressItem">Iniciando análise...</div>
             </div>
 
             <!-- Seção de Resultados Concluídos -->
             <div class="modal-result-section" id="modalResultSection" style="display: none;">
                 <div class="result-banner success" id="modalResultBanner">
                     <span id="modalResultIcon">✅</span>
-                    <span id="modalResultSummary">Operação concluída com sucesso!</span>
+                    <span data-i18n="web.action.result_success_default" id="modalResultSummary">Operação concluída com sucesso!</span>
                 </div>
 
                 <div class="result-report-row" id="modalResultReportRow" style="display: none;">
                     <div>
-                        <div style="font-weight: 700; color: #fff;">Relatório de Inconsistências Gerado</div>
-                        <div style="color: #94a3b8; font-size: 0.78rem;">Revise cada divergência com áudio sincronizado e LRCLIB.</div>
+                        <div data-i18n="web.action.report_generated_title" style="font-weight: 700; color: #fff;">Relatório de Inconsistências Gerado</div>
+                        <div data-i18n="web.action.report_generated_desc" style="color: #94a3b8; font-size: 0.78rem;">Revise cada divergência com áudio sincronizado e
+                            LRCLIB.
+                        </div>
                     </div>
-                    <button class="btn-highlight-action" id="btnOpenInComparator">
+                    <button class="btn-highlight-action" data-i18n="web.action.open_in_comparator_btn" id="btnOpenInComparator">
                         ⚡ Abrir no Comparador ➔
                     </button>
                 </div>
 
                 <div class="result-details-box">
-                    <h4>Registro de Operações & Saída:</h4>
+                    <h4 data-i18n="web.action.result_log_header">Registro de Operações & Saída:</h4>
                     <div class="result-log-list" id="modalResultList"></div>
                 </div>
             </div>
         </div>
 
         <div class="modal-footer">
-            <button class="btn-secondary" id="modalCancelBtn">Cancelar</button>
-            <button class="btn-action btn-primary" id="modalExecuteBtn">
+            <button class="btn-secondary" data-i18n="web.action.cancel" id="modalCancelBtn">Cancelar</button>
+            <button class="btn-action btn-primary" data-i18n="web.action.execute_btn" id="modalExecuteBtn">
                 ▶️ Executar Operação
             </button>
         </div>
     </div>
 </div>
 
-<div id="toast">Operação realizada com sucesso!</div>
+<div data-i18n="web.toast.default" id="toast">Operação realizada com sucesso!</div>
 
 <script>
+    // =========================================================================
+    // I18N / LOCALIZATION ENGINE (Driven by messages*.properties on Backend)
+    // =========================================================================
+    let i18nMessages = (window.__SERVER_MESSAGES__ && typeof window.__SERVER_MESSAGES__ === 'object')
+        ? window.__SERVER_MESSAGES__
+        : {};
+
+    function t(key, ...args) {
+        let str = i18nMessages[key];
+        if (str === undefined || str === null) {
+            return key;
+        }
+        args.forEach((arg, idx) => {
+            const val = arg !== undefined && arg !== null ? String(arg) : '';
+            str = str.split(`{${idx}}`).join(val);
+        });
+        return str;
+    }
+
+    function applyI18nToDom() {
+        if (i18nMessages['web.page.title']) {
+            document.title = t('web.page.title');
+        }
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (key && i18nMessages[key] !== undefined) {
+                const arg0 = el.getAttribute('data-i18n-arg0');
+                el.textContent = arg0 !== null ? t(key, arg0) : t(key);
+            }
+        });
+        document.querySelectorAll('[data-i18n-html]').forEach(el => {
+            const key = el.getAttribute('data-i18n-html');
+            if (key && i18nMessages[key] !== undefined) {
+                const argAttr = el.getAttribute('data-i18n-arg0');
+                const childId = el.getAttribute('data-i18n-preserve-id');
+                const arg0 = childId
+                    ? (document.getElementById(childId)?.textContent || argAttr || '0')
+                    : (argAttr !== null ? argAttr : '0');
+                el.innerHTML = t(key, arg0);
+            }
+        });
+        document.querySelectorAll('[data-i18n-title]').forEach(el => {
+            const key = el.getAttribute('data-i18n-title');
+            if (key && i18nMessages[key] !== undefined) {
+                el.setAttribute('title', t(key));
+            }
+        });
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+            const key = el.getAttribute('data-i18n-placeholder');
+            if (key && i18nMessages[key] !== undefined) {
+                el.setAttribute('placeholder', t(key));
+            }
+        });
+        document.querySelectorAll('[data-i18n-alt]').forEach(el => {
+            const key = el.getAttribute('data-i18n-alt');
+            if (key && i18nMessages[key] !== undefined) {
+                el.setAttribute('alt', t(key));
+            }
+        });
+    }
+
     // State
     let currentItems = [];
     let currentIndex = -1;
@@ -3024,7 +3174,7 @@
             viewMenu.classList.remove('active');
             if (audio.src && audio.src !== window.location.href && audio.paused) {
                 audio.play().catch(err => {
-                    console.warn('Autoplay ao abrir comparador bloqueado/falhou:', err);
+                    console.warn('Autoplay blocked/failed:', err);
                 });
             }
         }
@@ -3077,12 +3227,12 @@
             const res = await fetch('/api/open-location?path=' + encodeURIComponent(targetPath));
             const json = await res.json();
             if (json.success) {
-                showToast('Pasta aberta no Explorador de Arquivos!');
+                showToast(t('web.player.open_folder_success_toast'));
             } else {
-                showToast('Não foi possível abrir o local.');
+                showToast(t('web.player.open_folder_failed_toast'));
             }
         } catch (e) {
-            showToast('Erro ao abrir pasta.');
+            showToast(t('web.player.open_folder_error_toast'));
         }
     });
 
@@ -3096,13 +3246,13 @@
     // Audio Playback Events
     btnPlayPause.addEventListener('click', () => {
         if (!audio.src || audio.src === window.location.href) {
-            showToast('Nenhum áudio disponível para esta faixa.');
+            showToast(t('web.player.no_audio_toast'));
             return;
         }
         if (audio.paused) {
             audio.play().catch(e => {
-                console.error('Erro ao reproduzir áudio:', e);
-                showToast('Erro ao reproduzir áudio.');
+                console.error('Error playing audio:', e);
+                showToast(t('web.player.audio_error_toast'));
             });
         } else {
             audio.pause();
@@ -3131,7 +3281,7 @@
         playIcon.style.display = 'block';
         pauseIcon.style.display = 'none';
         if (currentTrackDetails && (currentTrackDetails.audioUrl || currentTrackDetails.audioPath)) {
-            showToast('Não foi possível carregar ou reproduzir o áudio.');
+            showToast(t('web.player.audio_load_error_toast'));
         }
     });
 
@@ -3245,7 +3395,7 @@
             currentActionConfig = await res.json();
             renderActionModal(currentActionConfig);
         } catch (e) {
-            showToast('Erro ao carregar detalhes da opção.');
+            showToast(t('web.action.load_error_toast'));
         }
     }
 
@@ -3253,7 +3403,7 @@
         const icons = ['📁', '🔍', '⏳', '🧹', '📦', '🏷️', '📊', '🛡️', '⚡'];
         document.getElementById('modalActionIcon').textContent = icons[config.id] || '⚙️';
         document.getElementById('modalActionTitle').textContent = config.title;
-        document.getElementById('modalActionSubtitle').textContent = `Opção ${config.id}`;
+        document.getElementById('modalActionSubtitle').textContent = t('web.menu.card.option_number', config.id);
         document.getElementById('modalActionDesc').textContent = config.description || config.hint;
 
         // Reset Modal Views
@@ -3262,8 +3412,8 @@
         document.getElementById('modalResultSection').style.display = 'none';
         modalExecuteBtn.style.display = 'inline-flex';
         modalExecuteBtn.disabled = false;
-        modalExecuteBtn.textContent = '▶️ Executar Operação';
-        modalCancelBtn.textContent = 'Cancelar';
+        modalExecuteBtn.textContent = t('web.action.execute_btn');
+        modalCancelBtn.textContent = t('web.action.cancel');
 
         // Render Directories Inputs
         const inputsContainer = document.getElementById('modalInputsContainer');
@@ -3277,12 +3427,12 @@
           <div class="input-with-action">
             <input type="text" id="input_${inp.key}" class="form-input" placeholder="${inp.placeholder || ''}" value="${saved}">
             <button type="button" class="btn-browse" onclick="browseFolder('input_${inp.key}', '${inp.label}')">
-              📁 Procurar...
+              ${escapeHtml(t('web.action.browse_btn'))}
             </button>
           </div>
           <div class="quick-paths-row">
             <button type="button" class="btn-chip-path" onclick="setInputValue('input_${inp.key}', 'C:\\\\Users\\\\xiyun\\\\Music')">C:\\Users\\xiyun\\Music</button>
-            <button type="button" class="btn-chip-path" onclick="setInputValue('input_${inp.key}', '.')">Pasta Atual (.)</button>
+            <button type="button" class="btn-chip-path" onclick="setInputValue('input_${inp.key}', '.')">${escapeHtml(t('web.action.current_folder_btn'))}</button>
           </div>
         `;
             inputsContainer.appendChild(grp);
@@ -3332,16 +3482,16 @@
 
     async function browseFolder(inputId, title) {
         const input = document.getElementById(inputId);
-        showToast('Abrindo seletor de pastas na área de trabalho...');
+        showToast(t('web.action.browsing_toast'));
         try {
             const res = await fetch('/api/action/browse-dir?title=' + encodeURIComponent(title));
             const data = await res.json();
             if (data.path) {
                 input.value = data.path;
-                showToast('Pasta selecionada!');
+                showToast(t('web.action.browse_selected_toast'));
             }
         } catch (e) {
-            showToast('Não foi possível abrir o seletor.');
+            showToast(t('web.action.browse_failed_toast'));
         }
     }
 
@@ -3353,7 +3503,7 @@
             if (inp.required) {
                 const val = document.getElementById('input_' + inp.key)?.value?.trim();
                 if (!val) {
-                    showToast(`Preencha o campo obrigatório: ${inp.label}`);
+                    showToast(t('web.action.required_field_toast', inp.label));
                     document.getElementById('input_' + inp.key)?.focus();
                     return;
                 }
@@ -3376,7 +3526,7 @@
         document.getElementById('modalProgressSection').style.display = 'flex';
         document.getElementById('modalResultSection').style.display = 'none';
         modalExecuteBtn.disabled = true;
-        modalExecuteBtn.textContent = 'Processando...';
+        modalExecuteBtn.textContent = t('web.action.processing_btn');
 
         try {
             const res = await fetch('/api/action/execute', {
@@ -3389,9 +3539,9 @@
 
             actionPollInterval = setInterval(pollActionStatus, 400);
         } catch (e) {
-            showToast('Falha ao iniciar ação.');
+            showToast(t('web.action.start_failed_toast'));
             modalExecuteBtn.disabled = false;
-            modalExecuteBtn.textContent = '▶️ Tentar Novamente';
+            modalExecuteBtn.textContent = t('web.action.retry_btn');
         }
     });
 
@@ -3414,18 +3564,18 @@
     }
 
     function updateModalProgress(status) {
-        document.getElementById('modalProgressTitle').textContent = status.title || 'Processando arquivos...';
+        document.getElementById('modalProgressTitle').textContent = status.title || t('web.action.processing_files');
         document.getElementById('modalProgressCount').textContent = `${status.current} / ${status.max}`;
         const pct = status.max > 0 ? Math.min(100, Math.round((status.current / status.max) * 100)) : (status.isCompleted ? 100 : 15);
         document.getElementById('modalProgressBar').style.width = pct + '%';
-        document.getElementById('modalProgressItem').textContent = status.currentItem || 'Analisando arquivos...';
+        document.getElementById('modalProgressItem').textContent = status.currentItem || t('web.action.progress_item_starting');
     }
 
     function showModalResult(status) {
         document.getElementById('modalProgressSection').style.display = 'none';
         document.getElementById('modalResultSection').style.display = 'flex';
         modalExecuteBtn.style.display = 'none';
-        modalCancelBtn.textContent = 'Concluir & Fechar';
+        modalCancelBtn.textContent = t('web.action.finish_close_btn');
 
         const banner = document.getElementById('modalResultBanner');
         const icon = document.getElementById('modalResultIcon');
@@ -3434,11 +3584,11 @@
         if (status.success && (status.errors || []).length === 0) {
             banner.className = 'result-banner success';
             icon.textContent = '✅';
-            summary.textContent = `Operação concluída com sucesso! (${(status.changes || []).length} registros processados)`;
+            summary.textContent = t('web.action.result_success_summary', (status.changes || []).length);
         } else {
             banner.className = 'result-banner error';
             icon.textContent = '⚠️';
-            summary.textContent = `Operação finalizada com avisos/erros. (${(status.errors || []).length} erros)`;
+            summary.textContent = t('web.action.result_warn_summary', (status.errors || []).length);
         }
 
         const reportRow = document.getElementById('modalResultReportRow');
@@ -3463,7 +3613,7 @@
         ];
 
         if (allLogs.length === 0) {
-            list.innerHTML = '<div style="color: #64748b; padding: 6px 0;">Nenhuma alteração ou erro registrado.</div>';
+            list.innerHTML = `<div style="color: #64748b; padding: 6px 0;">${escapeHtml(t('web.action.no_changes_logged'))}</div>`;
         } else {
             allLogs.forEach(log => {
                 const row = document.createElement('div');
@@ -3500,13 +3650,13 @@
           <div class="option-card-header">
             <div class="option-card-icon">${icons[opt.id] || '🎵'}</div>
             <div>
-              <div class="option-card-number">Opção ${opt.id}</div>
+              <div class="option-card-number">${escapeHtml(t('web.menu.card.option_number', opt.id))}</div>
               <div class="option-card-title">${opt.title}</div>
             </div>
           </div>
           <div class="option-card-hint">${opt.hint}</div>
           <div class="option-card-footer">
-            <span>${opt.isComparator ? 'Abrir Comparador Agora' : 'Configurar & Executar'}</span>
+            <span>${escapeHtml(opt.isComparator ? t('web.menu.card.open_comparator') : t('web.menu.card.configure_run'))}</span>
             <span>➔</span>
           </div>
         `;
@@ -3530,17 +3680,6 @@
     let activeTrackRequestId = 0;
     let activeTrackAbortController = null;
 
-    const ISSUE_TAG_LABELS = {
-        'SEM_LETRA': 'Sem Letra',
-        'SEM_TIMESTAMPS': 'Sem Timestamps',
-        'TAG_LENGTH_DIVERGENTE': 'Tamanho Divergente',
-        'TERMINO_PREMATURO': 'Término Prematuro',
-        'ULTRAPASSOU_DURACAO': 'Ultrapassou Duração',
-        'TIMESTAMPS_FORA_DE_ORDEM': 'Fora de Ordem',
-        'TIMESTAMPS_ESTATICOS': 'Timestamps Estáticos',
-        'MUSICA_DIFERENTE': 'Música Diferente'
-    };
-
     function extractIssueTagsFromItem(item) {
         const tags = [];
         if (!item || !Array.isArray(item.issues)) return tags;
@@ -3552,11 +3691,11 @@
             } else {
                 const lower = String(iss || '').toLowerCase();
                 let inferred = null;
-                if (lower.includes('não encontrado') || lower.includes('sem letra')) inferred = 'SEM_LETRA';
-                else if (lower.includes('sem marcações') || lower.includes('sem timestamps')) inferred = 'SEM_TIMESTAMPS';
-                else if (lower.includes('length') || lower.includes('duração')) inferred = 'TAG_LENGTH_DIVERGENTE';
-                else if (lower.includes('prematuro') || lower.includes('acaba aos')) inferred = 'TERMINO_PREMATURO';
-                else if (lower.includes('fora de ordem')) inferred = 'TIMESTAMPS_FORA_DE_ORDEM';
+                if (lower.includes('não encontrado') || lower.includes('sem letra') || lower.includes('not found') || lower.includes('missing lyric')) inferred = 'SEM_LETRA';
+                else if (lower.includes('sem marcações') || lower.includes('sem timestamps') || lower.includes('no timestamp')) inferred = 'SEM_TIMESTAMPS';
+                else if (lower.includes('length') || lower.includes('duração') || lower.includes('duration')) inferred = 'TAG_LENGTH_DIVERGENTE';
+                else if (lower.includes('prematuro') || lower.includes('acaba aos') || lower.includes('premature') || lower.includes('ends at')) inferred = 'TERMINO_PREMATURO';
+                else if (lower.includes('fora de ordem') || lower.includes('out of order')) inferred = 'TIMESTAMPS_FORA_DE_ORDEM';
                 if (inferred && !tags.includes(inferred)) tags.push(inferred);
             }
         });
@@ -3564,7 +3703,8 @@
     }
 
     function getIssueTagFriendlyName(tagCode) {
-        return ISSUE_TAG_LABELS[tagCode] || tagCode;
+        const key = 'web.issue_tag.' + tagCode;
+        return i18nMessages[key] || tagCode;
     }
 
     function toggleIssueTagFilter(tagCode) {
@@ -3622,8 +3762,11 @@
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'issue-tag-chip' + (isActive ? ' active' : '');
-            btn.title = `${isActive ? 'Remover filtro' : 'Filtrar por'} [${tag}] (${getIssueTagFriendlyName(tag)})`;
-            btn.innerHTML = `<span>${escapeHtml(getIssueTagFriendlyName(tag))}</span><span style="opacity:0.75;">(${countsByTag[tag]})</span>`;
+            const friendly = getIssueTagFriendlyName(tag);
+            btn.title = isActive
+                ? t('web.issue_tag.chip_remove_title', tag, friendly)
+                : t('web.issue_tag.chip_add_title', tag, friendly);
+            btn.innerHTML = `<span>${escapeHtml(friendly)}</span><span style="opacity:0.75;">(${countsByTag[tag]})</span>`;
             btn.addEventListener('click', () => toggleIssueTagFilter(tag));
             container.appendChild(btn);
         });
@@ -3663,7 +3806,7 @@
             if (reports.length > 0 && !skipAutoLoad) {
                 await loadReportItems(reports[0]);
             } else if (reports.length === 0) {
-                headerProgress.textContent = 'Pronto';
+                headerProgress.textContent = t('web.header.status.ready');
             }
         } catch (err) {
             console.error('Failed to load reports', err);
@@ -3685,7 +3828,7 @@
             activeTrackAbortController = null;
         }
 
-        headerProgress.textContent = 'Carregando lista...';
+        headerProgress.textContent = t('web.header.status.loading_list');
         try {
             const res = await fetch('/api/items?report=' + encodeURIComponent(reportPath));
             currentItems = await res.json();
@@ -3693,7 +3836,7 @@
             updateFilterCounts();
             renderIssueTagFilterChips();
             renderTrackList();
-            headerProgress.textContent = `${currentItems.length} faixas para revisar`;
+            headerProgress.textContent = t('web.header.status.tracks_to_review', currentItems.length);
 
             if (currentItems.length > 0) {
                 await selectTrack(0, viewComparator.classList.contains('active'));
@@ -3701,8 +3844,8 @@
                 clearViewer();
             }
         } catch (err) {
-            headerProgress.textContent = 'Erro ao carregar';
-            showToast('Falha ao ler itens do relatório.');
+            headerProgress.textContent = t('web.header.status.error');
+            showToast(t('web.report.read_failed_toast'));
         }
     }
 
@@ -3711,9 +3854,12 @@
         const pendingCount = currentItems.filter(i => !i.status || i.status === 'PENDING').length;
         const resolvedCount = allCount - pendingCount;
 
-        document.getElementById('countAll').textContent = allCount;
-        document.getElementById('countPending').textContent = pendingCount;
-        document.getElementById('countResolved').textContent = resolvedCount;
+        const elAll = document.getElementById('countAll');
+        const elPending = document.getElementById('countPending');
+        const elResolved = document.getElementById('countResolved');
+        if (elAll) elAll.textContent = allCount;
+        if (elPending) elPending.textContent = pendingCount;
+        if (elResolved) elResolved.textContent = resolvedCount;
     }
 
     function renderTrackList() {
@@ -3727,9 +3873,9 @@
 
             let statusBadge = '';
             if (item.status === 'KEPT_LOCAL') {
-                statusBadge = '<span class="badge badge-success" style="font-size:0.65rem;">LOCAL</span>';
+                statusBadge = `<span class="badge badge-success" style="font-size:0.65rem;">${escapeHtml(t('web.sidebar.status_local'))}</span>`;
             } else if (item.status === 'SAVED_LRCLIB') {
-                statusBadge = '<span class="badge badge-info" style="font-size:0.65rem;">ONLINE</span>';
+                statusBadge = `<span class="badge badge-info" style="font-size:0.65rem;">${escapeHtml(t('web.sidebar.status_online'))}</span>`;
             }
 
             const issuesHtml = (item.issues || []).map(iss => {
@@ -3738,7 +3884,7 @@
                     const code = m[1].toUpperCase();
                     const rest = m[2] || '';
                     const isActive = activeIssueTagFilters.has(code);
-                    return `<span>• <span class="track-issue-tag-badge ${isActive ? 'active' : ''}" data-issue-tag="${escapeHtml(code)}" title="Clique para filtrar/remover filtro pela tag [${escapeHtml(code)}]">[${escapeHtml(code)}]</span>${escapeHtml(rest)}</span>`;
+                    return `<span>• <span class="track-issue-tag-badge ${isActive ? 'active' : ''}" data-issue-tag="${escapeHtml(code)}" title="${escapeHtml(t('web.issue_tag.badge_title', code))}">[${escapeHtml(code)}]</span>${escapeHtml(rest)}</span>`;
                 }
                 return `<span>• ${escapeHtml(String(iss || ''))}</span>`;
             }).join('');
@@ -3798,7 +3944,7 @@
         renderTrackList();
 
         const item = currentItems[index];
-        headerProgress.textContent = `Carregando ${item.fileName}...`;
+        headerProgress.textContent = t('web.header.status.loading_track', item.fileName);
 
         // Immediately prepare the audio for the selected track so playback starts right away without waiting for external APIs
         const shouldPlayNow = autoPlay && viewComparator.classList.contains('active');
@@ -3814,13 +3960,13 @@
             }
             if (shouldPlayNow && audio.paused) {
                 audio.play().catch(err => {
-                    console.warn('Reprodução automática bloqueada ou falhou:', err);
+                    console.warn('Autoplay blocked or failed:', err);
                 });
             }
         }
 
-        songTitle.textContent = item.fileName || 'Carregando...';
-        remoteLyricsScroller.innerHTML = '<p style="text-align: center; color: #777777; margin-top: 40px;">Buscando letras nas APIs online...</p>';
+        songTitle.textContent = item.fileName || t('web.player.loading_track');
+        remoteLyricsScroller.innerHTML = `<p style="text-align: center; color: #777777; margin-top: 40px;">${escapeHtml(t('web.comparator.searching_online'))}</p>`;
 
         try {
             const res = await fetch('/api/track?id=' + item.id, {signal: abortController.signal});
@@ -3833,13 +3979,13 @@
 
             currentTrackDetails = details;
             renderTrackDetails(details, autoPlay);
-            headerProgress.textContent = `Revisando [${index + 1}/${currentItems.length}]`;
+            headerProgress.textContent = t('web.header.status.reviewing', index + 1, currentItems.length);
         } catch (err) {
             if (err && err.name === 'AbortError') {
                 return;
             }
             if (reqId === activeTrackRequestId) {
-                showToast('Erro ao carregar detalhes da faixa.');
+                showToast(t('web.player.track_load_error_toast'));
             }
         }
     }
@@ -3878,11 +4024,11 @@
         const btn = document.getElementById(side === 'local' ? 'btnToggleTimestampsLocal' : 'btnToggleTimestampsRemote');
         if (!btn) return;
         if (isStripped) {
-            btn.textContent = '↩️ Reverter Minutagens';
+            btn.textContent = t('web.comparator.restore_timestamps_btn');
             btn.style.color = '#fbbf24';
             btn.style.borderColor = '#fbbf24';
         } else {
-            btn.textContent = '🧹 Retirar Minutagens';
+            btn.textContent = t('web.comparator.strip_timestamps_btn');
             btn.style.color = '#f87171';
             btn.style.borderColor = '';
         }
@@ -3894,7 +4040,7 @@
         let state = isLocal ? localLinesState : remoteLinesState;
 
         if (!state || state.length === 0) {
-            showToast('Nenhuma letra carregada para alterar as minutagens.');
+            showToast(t('web.comparator.strip_empty_toast'));
             return;
         }
 
@@ -3916,7 +4062,7 @@
 
             updateToggleTimestampsBtnUI(side, true);
             renderLyricLines(container, state, side);
-            showToast('Minutagens retiradas em memória! Clique em "Reverter Minutagens" para restaurar ou em Salvar [1]/[2] para gravar no arquivo.');
+            showToast(t('web.comparator.strip_success_toast'));
         } else {
             const restored = JSON.parse(JSON.stringify(existingBackup));
             if (isLocal) {
@@ -3930,13 +4076,13 @@
             updateToggleTimestampsBtnUI(side, false);
             renderLyricLines(container, restored, side);
             syncLyricsHighlight(Math.round((audio.currentTime || 0) * 1000));
-            showToast('Minutagens restauradas da memória!');
+            showToast(t('web.comparator.strip_restored_toast'));
         }
     }
 
     function renderTrackDetails(d, autoPlay = true) {
         songTitle.textContent = d.trackName || (d.metadata && d.metadata.title) || d.fileName || d.lyricFile;
-        songArtist.textContent = d.artist || (d.metadata && d.metadata.artist) || 'Artista Desconhecido';
+        songArtist.textContent = d.artist || (d.metadata && d.metadata.artist) || t('web.player.unknown_artist');
         songAlbum.textContent = d.album || (d.metadata && d.metadata.album) || '';
 
         const artUrl = d.artworkUrl || (d.metadata && d.metadata.hasArtwork && d.audioPath ? ('/api/artwork?path=' + encodeURIComponent(d.audioPath)) : null);
@@ -3989,7 +4135,7 @@
             }
             if (shouldAutoPlay && audio.paused) {
                 audio.play().catch(err => {
-                    console.warn('Reprodução automática bloqueada ou falhou:', err);
+                    console.warn('Playback error or blocked:', err);
                 });
             }
         } else {
@@ -4002,13 +4148,13 @@
         const localLines = d.localLines || (d.localLyrics && d.localLyrics.lines) || [];
         localLinesState = JSON.parse(JSON.stringify(localLines));
         renderLyricLines(localLyricsScroller, localLinesState, 'local');
-        localStatusBadge.textContent = localLinesState.length + ' versos';
+        localStatusBadge.textContent = t('web.comparator.verses_count', localLinesState.length);
 
         // Render Remote LRCLIB Lyrics
         const remoteLines = d.remoteLines || (d.lrclibLyrics && d.lrclibLyrics.lines) || [];
         remoteLinesState = JSON.parse(JSON.stringify(remoteLines));
         renderLyricLines(remoteLyricsScroller, remoteLinesState, 'remote');
-        remoteStatusBadge.textContent = remoteLinesState.length + ' versos';
+        remoteStatusBadge.textContent = t('web.comparator.verses_count', remoteLinesState.length);
 
         // Immediately sync active line to start of track
         syncLyricsHighlight(0);
@@ -4022,7 +4168,7 @@
         allApiResultsState = JSON.parse(JSON.stringify(rawAll));
         const allApiBtnCount = document.getElementById('allApiModalBtnCount');
         if (allApiBtnCount) {
-            allApiBtnCount.textContent = `Ver Todas (${allApiResultsState.length})`;
+            allApiBtnCount.textContent = t('web.all_api.btn_count', allApiResultsState.length);
         }
         const customSearchInp = document.getElementById('allApiCustomQueryInput');
         if (customSearchInp) {
@@ -4046,18 +4192,18 @@
                     const sign = diff > 0 ? '+' : '';
                     diffLabel = ` (Δ ${sign}${diff}s)`;
                 }
-                const durText = candSec ? `${formatTime(candSec)} (${candSec}s)${diffLabel}` : 'Duração N/D';
+                const durText = candSec ? `${formatTime(candSec)} (${candSec}s)${diffLabel}` : t('web.candidates.duration_nd');
 
                 const chip = document.createElement('div');
                 chip.className = 'candidate-chip' + (idx === 0 ? ' active' : '');
                 chip.innerHTML = `
-            <div class="candidate-info">
-              <span class="candidate-name">${escapeHtml(cand.trackName || 'Sem título')}</span>
-              <span class="candidate-meta">${escapeHtml(cand.artistName || '')} • ⏱️ ${durText} • ${cand.syncedLyrics ? '⚡ Sincronizada' : '📄 Pura'}</span>
+            <div class=\"candidate-info\">
+              <span class=\"candidate-name\">${escapeHtml(cand.trackName || t('web.candidates.untitled'))}</span>
+              <span class=\"candidate-meta\">${escapeHtml(cand.artistName || '')} • ⏱️ ${durText} • ${cand.syncedLyrics ? t('web.candidates.synced_badge') : t('web.candidates.plain_badge')}</span>
             </div>
-            <div style="display: flex; align-items: center; gap: 4px; flex-shrink: 0;">
-              <span class="badge ${srcClass}">${escapeHtml(srcName)}</span>
-              <span class="badge ${cand.syncedLyrics ? 'badge-success' : 'badge-warning'}">#${cand.id ?? (idx + 1)}</span>
+            <div style=\"display: flex; align-items: center; gap: 4px; flex-shrink: 0;\">
+              <span class=\"badge ${srcClass}\">${escapeHtml(srcName)}</span>
+              <span class=\"badge ${cand.syncedLyrics ? 'badge-success' : 'badge-warning'}\">#${cand.id ?? (idx + 1)}</span>
             </div>
           `;
 
@@ -4076,15 +4222,15 @@
                         });
                         remoteLinesState = await res.json();
                         renderLyricLines(remoteLyricsScroller, remoteLinesState, 'remote');
-                        remoteStatusBadge.textContent = remoteLinesState.length + ' versos';
+                        remoteStatusBadge.textContent = t('web.comparator.verses_count', remoteLinesState.length);
                         syncLyricsHighlight(Math.round((audio.currentTime || 0) * 1000));
                         if (cand.syncedLyrics) {
-                            showToast(`Versão sincronizada ${srcName} #${cand.id ?? (idx + 1)} selecionada!`);
+                            showToast(t('web.candidates.synced_selected_toast', srcName, cand.id ?? (idx + 1)));
                         } else {
-                            showToast(`Letra pura de ${srcName} carregada! Use ⏱️ Set em cada verso para sincronizar manualmente.`);
+                            showToast(t('web.candidates.plain_selected_toast', srcName));
                         }
                     } else {
-                        showToast('Esta versão não possui letra disponível.');
+                        showToast(t('web.candidates.no_lyrics_toast'));
                     }
                 });
 
@@ -4117,13 +4263,13 @@
         const inp = document.getElementById('allApiCustomQueryInput');
         const q = (inp?.value || '').trim();
         if (!q) {
-            showToast('Digite um termo para pesquisar em todas as APIs.');
+            showToast(t('web.all_api.custom_search_empty_toast'));
             return;
         }
         const btn = document.getElementById('btnRunAllApiCustomSearch');
         if (btn) {
             btn.disabled = true;
-            btn.textContent = '⏳ Buscando em todas as APIs...';
+            btn.textContent = t('web.all_api.custom_search_searching');
         }
         try {
             const res = await fetch('/api/search?q=' + encodeURIComponent(q));
@@ -4141,19 +4287,19 @@
                 });
                 const allApiBtnCount = document.getElementById('allApiModalBtnCount');
                 if (allApiBtnCount) {
-                    allApiBtnCount.textContent = `Ver Todas (${allApiResultsState.length})`;
+                    allApiBtnCount.textContent = t('web.all_api.btn_count', allApiResultsState.length);
                 }
                 selectedAllApiItemIndex = allApiResultsState.length > 0 ? 0 : -1;
                 renderAllApiProviderChips();
                 renderAllApiModalList();
-                showToast(`${batch.length} resultados retornados pelas APIs!`);
+                showToast(t('web.all_api.custom_search_results_toast', batch.length));
             }
         } catch (err) {
-            showToast('Erro ao consultar as APIs.');
+            showToast(t('web.all_api.custom_search_error_toast'));
         } finally {
             if (btn) {
                 btn.disabled = false;
-                btn.textContent = '🔍 Pesquisar em Todas as APIs';
+                btn.textContent = t('web.all_api.custom_search_btn');
             }
         }
     }
@@ -4177,7 +4323,7 @@
         });
 
         const allProviders = [
-            {key: 'ALL', label: `Todas (${allApiResultsState.length})`},
+            {key: 'ALL', label: t('web.all_api.provider_all', allApiResultsState.length)},
             ...Object.keys(countsBySource).sort().map(src => ({
                 key: src,
                 label: `${src} (${countsBySource[src]})`
@@ -4229,11 +4375,11 @@
         });
 
         if (totalBadge) {
-            totalBadge.textContent = `${filteredIndices.length} de ${allApiResultsState.length} resultados`;
+            totalBadge.textContent = t('web.all_api.results_ratio_badge', filteredIndices.length, allApiResultsState.length);
         }
 
         if (filteredIndices.length === 0) {
-            listEl.innerHTML = '<div style="padding: 30px; text-align: center; color: var(--text-muted);">Nenhum resultado encontrado para este filtro. Use a barra de pesquisa acima para buscar em todas as APIs.</div>';
+            listEl.innerHTML = `<div style=\"padding: 30px; text-align: center; color: var(--text-muted);\">${escapeHtml(t('web.all_api.empty_filter_msg'))}</div>`;
             renderAllApiDetailPane(-1);
             return;
         }
@@ -4253,40 +4399,40 @@
                 const sign = diff > 0 ? '+' : '';
                 diffLabel = ` (Δ ${sign}${diff}s)`;
             }
-            const durText = candSec ? `${formatTime(candSec)} (${candSec}s)${diffLabel}` : 'Duração N/D';
+            const durText = candSec ? `${formatTime(candSec)} (${candSec}s)${diffLabel}` : t('web.candidates.duration_nd');
             const inFiltered = isCandidateInFilteredList(cand);
             const hasSynced = !!(cand.syncedLyrics && cand.syncedLyrics.trim());
             const hasPlain = !!(cand.plainLyrics && cand.plainLyrics.trim());
 
             let statusTag = '';
             if (cand.instrumental) {
-                statusTag = '🎵 Instrumental';
+                statusTag = t('web.all_api.status_instrumental');
             } else if (hasSynced && hasPlain) {
-                statusTag = '⚡ Sincronizada + 📄 Pura';
+                statusTag = t('web.all_api.status_both');
             } else if (hasSynced) {
-                statusTag = '⚡ Sincronizada';
+                statusTag = t('web.all_api.status_synced');
             } else if (hasPlain) {
-                statusTag = '📄 Letra Pura';
+                statusTag = t('web.all_api.status_plain');
             } else {
-                statusTag = '⚠️ Sem Letra';
+                statusTag = t('web.all_api.status_none');
             }
 
             const filterBadge = inFiltered
-                ? '<span class="badge badge-success" title="Incluída nas versões filtradas">Filtrada ✓</span>'
-                : '<span class="badge badge-warning" title="Ocultada pelo filtro automático (ex: 0 versos / créditos / duplicada)">Não Filtrada</span>';
+                ? `<span class=\"badge badge-success\" title=\"${escapeHtml(t('web.all_api.filtered_badge_title'))}\">${escapeHtml(t('web.all_api.filtered_badge'))}</span>`
+                : `<span class=\"badge badge-warning\" title=\"${escapeHtml(t('web.all_api.unfiltered_badge_title'))}\">${escapeHtml(t('web.all_api.unfiltered_badge'))}</span>`;
 
             const itemDiv = document.createElement('div');
             itemDiv.className = 'candidate-chip' + (idx === selectedAllApiItemIndex ? ' active' : '');
             itemDiv.innerHTML = `
-                <div class="candidate-info">
-                    <span class="candidate-name">${escapeHtml(cand.trackName || 'Sem título')}</span>
-                    <span class="candidate-meta">${escapeHtml(cand.artistName || 'Artista N/D')} ${cand.albumName ? '• 💿 ' + escapeHtml(cand.albumName) : ''}</span>
-                    <span class="candidate-meta">⏱️ ${durText} • ${statusTag}</span>
+                <div class=\"candidate-info\">
+                    <span class=\"candidate-name\">${escapeHtml(cand.trackName || t('web.candidates.untitled'))}</span>
+                    <span class=\"candidate-meta\">${escapeHtml(cand.artistName || t('web.all_api.artist_nd'))} ${cand.albumName ? '• 💿 ' + escapeHtml(cand.albumName) : ''}</span>
+                    <span class=\"candidate-meta\">⏱️ ${durText} • ${statusTag}</span>
                 </div>
-                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;">
-                    <div style="display: flex; align-items: center; gap: 4px;">
-                        <span class="badge ${srcClass}">${escapeHtml(srcName)}</span>
-                        <span class="badge">#${cand.id ?? (idx + 1)}</span>
+                <div style=\"display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;\">
+                    <div style=\"display: flex; align-items: center; gap: 4px;\">
+                        <span class=\"badge ${srcClass}\">${escapeHtml(srcName)}</span>
+                        <span class=\"badge\">#${cand.id ?? (idx + 1)}</span>
                     </div>
                     ${filterBadge}
                 </div>
@@ -4312,10 +4458,10 @@
         const btnPlain = document.getElementById('btnUseSelectedApiPlain');
 
         if (idx < 0 || idx >= allApiResultsState.length) {
-            if (titleEl) titleEl.textContent = 'Selecione um resultado à esquerda';
+            if (titleEl) titleEl.textContent = t('web.all_api.detail_default_title');
             if (subtitleEl) subtitleEl.textContent = '-';
             if (metaGrid) metaGrid.style.display = 'none';
-            if (previewEl) previewEl.textContent = 'Nenhum resultado selecionado.';
+            if (previewEl) previewEl.textContent = t('web.all_api.detail_none_selected');
             if (btnSynced) btnSynced.style.display = 'none';
             if (btnPlain) btnPlain.style.display = 'none';
             return;
@@ -4327,18 +4473,18 @@
         const targetSec = (currentTrackDetails && currentTrackDetails.metadata && currentTrackDetails.metadata.durationSeconds)
             ? currentTrackDetails.metadata.durationSeconds
             : 0;
-        let diffStr = 'N/D';
+        let diffStr = t('web.all_api.nd');
         if (candSec && targetSec > 0) {
             const diff = candSec - targetSec;
-            diffStr = `${diff > 0 ? '+' : ''}${diff}s (Áudio local: ${formatTime(targetSec)})`;
+            diffStr = t('web.all_api.diff_local_audio', (diff > 0 ? '+' : '') + diff, formatTime(targetSec));
         }
 
         const hasSynced = !!(cand.syncedLyrics && cand.syncedLyrics.trim());
         const hasPlain = !!(cand.plainLyrics && cand.plainLyrics.trim());
         const inFiltered = isCandidateInFilteredList(cand);
 
-        if (titleEl) titleEl.textContent = `${cand.trackName || 'Sem título'} — ${cand.artistName || 'Artista Desconhecido'}`;
-        if (subtitleEl) subtitleEl.textContent = `Provedor: ${srcName} • ID: ${cand.id ?? 'N/D'} • ${inFiltered ? 'Incluída na lista filtrada' : 'Resultado bruto (não filtrado)'}`;
+        if (titleEl) titleEl.textContent = `${cand.trackName || t('web.candidates.untitled')} — ${cand.artistName || t('web.player.unknown_artist')}`;
+        if (subtitleEl) subtitleEl.textContent = t('web.all_api.detail_subtitle_format', srcName, cand.id ?? t('web.all_api.nd'), inFiltered ? t('web.all_api.detail_subtitle_filtered') : t('web.all_api.detail_subtitle_raw'));
 
         if (btnSynced) btnSynced.style.display = hasSynced ? 'inline-flex' : 'none';
         if (btnPlain) btnPlain.style.display = hasPlain ? 'inline-flex' : 'none';
@@ -4346,33 +4492,33 @@
         if (metaGrid) {
             metaGrid.style.display = 'grid';
             metaGrid.innerHTML = `
-                <div class="all-api-meta-item">
-                    <span class="all-api-meta-label">API / Fonte</span>
-                    <span class="all-api-meta-value">${escapeHtml(srcName)} (ID: ${escapeHtml(String(cand.id ?? 'N/D'))})</span>
+                <div class=\"all-api-meta-item\">
+                    <span class=\"all-api-meta-label\">${escapeHtml(t('web.all_api.meta_source'))}</span>
+                    <span class=\"all-api-meta-value\">${escapeHtml(srcName)} (ID: ${escapeHtml(String(cand.id ?? t('web.all_api.nd')))})</span>
                 </div>
-                <div class="all-api-meta-item">
-                    <span class="all-api-meta-label">Título da Faixa</span>
-                    <span class="all-api-meta-value">${escapeHtml(cand.trackName || '-')}</span>
+                <div class=\"all-api-meta-item\">
+                    <span class=\"all-api-meta-label\">${escapeHtml(t('web.all_api.meta_title'))}</span>
+                    <span class=\"all-api-meta-value\">${escapeHtml(cand.trackName || '-')}</span>
                 </div>
-                <div class="all-api-meta-item">
-                    <span class="all-api-meta-label">Artista</span>
-                    <span class="all-api-meta-value">${escapeHtml(cand.artistName || '-')}</span>
+                <div class=\"all-api-meta-item\">
+                    <span class=\"all-api-meta-label\">${escapeHtml(t('web.all_api.meta_artist'))}</span>
+                    <span class=\"all-api-meta-value\">${escapeHtml(cand.artistName || '-')}</span>
                 </div>
-                <div class="all-api-meta-item">
-                    <span class="all-api-meta-label">Álbum</span>
-                    <span class="all-api-meta-value">${escapeHtml(cand.albumName || '-')}</span>
+                <div class=\"all-api-meta-item\">
+                    <span class=\"all-api-meta-label\">${escapeHtml(t('web.all_api.meta_album'))}</span>
+                    <span class=\"all-api-meta-value\">${escapeHtml(cand.albumName || '-')}</span>
                 </div>
-                <div class="all-api-meta-item">
-                    <span class="all-api-meta-label">Duração na API</span>
-                    <span class="all-api-meta-value">${candSec ? `${formatTime(candSec)} (${candSec}s)` : 'N/D'}</span>
+                <div class=\"all-api-meta-item\">
+                    <span class=\"all-api-meta-label\">${escapeHtml(t('web.all_api.meta_duration'))}</span>
+                    <span class=\"all-api-meta-value\">${candSec ? `${formatTime(candSec)} (${candSec}s)` : t('web.all_api.nd')}</span>
                 </div>
-                <div class="all-api-meta-item">
-                    <span class="all-api-meta-label">Diferença p/ Áudio Local</span>
-                    <span class="all-api-meta-value">${escapeHtml(diffStr)}</span>
+                <div class=\"all-api-meta-item\">
+                    <span class=\"all-api-meta-label\">${escapeHtml(t('web.all_api.meta_diff'))}</span>
+                    <span class=\"all-api-meta-value\">${escapeHtml(diffStr)}</span>
                 </div>
-                <div class="all-api-meta-item">
-                    <span class="all-api-meta-label">Status / Filtro</span>
-                    <span class="all-api-meta-value">${inFiltered ? '✅ Passou no filtro de versos' : '⚠️ Retida pelo filtro (exibida aqui sem filtro)'}</span>
+                <div class=\"all-api-meta-item\">
+                    <span class=\"all-api-meta-label\">${escapeHtml(t('web.all_api.meta_status'))}</span>
+                    <span class=\"all-api-meta-value\">${escapeHtml(inFiltered ? t('web.all_api.meta_filter_passed') : t('web.all_api.meta_filter_held'))}</span>
                 </div>
             `;
         }
@@ -4380,13 +4526,13 @@
         if (previewEl) {
             const parts = [];
             if (hasSynced) {
-                parts.push(`=== LETRA SINCRONIZADA (${cand.syncedLyrics.split('\n').length} linhas) ===\n${cand.syncedLyrics}`);
+                parts.push(`${t('web.all_api.preview_synced_header', cand.syncedLyrics.split('\n').length)}\n${cand.syncedLyrics}`);
             }
             if (hasPlain && cand.plainLyrics !== cand.syncedLyrics) {
-                parts.push(`=== LETRA PURA / SEM MINUTAGEM (${cand.plainLyrics.split('\n').length} linhas) ===\n${cand.plainLyrics}`);
+                parts.push(`${t('web.all_api.preview_plain_header', cand.plainLyrics.split('\n').length)}\n${cand.plainLyrics}`);
             }
             if (parts.length === 0) {
-                parts.push(cand.instrumental ? '(Faixa marcada como Instrumental pela API)' : '(Nenhum conteúdo de letra retornado por esta entrada)');
+                parts.push(cand.instrumental ? t('web.all_api.preview_instrumental') : t('web.all_api.preview_empty'));
             }
             previewEl.textContent = parts.join('\n\n' + '='.repeat(60) + '\n\n');
         }
@@ -4399,7 +4545,7 @@
         const rawPayload = (mode === 'plain') ? (cand.plainLyrics || cand.syncedLyrics) : (cand.syncedLyrics || cand.plainLyrics);
 
         if (!rawPayload) {
-            showToast('Este resultado não possui conteúdo de letra para carregar.');
+            showToast(t('web.all_api.no_content_toast'));
             return;
         }
 
@@ -4412,7 +4558,7 @@
             if (!Array.isArray(parsedLines) || parsedLines.length === 0) {
                 // Fallback for raw lines that were filtered out by standard parser (e.g., credit-only lines)
                 parsedLines = rawPayload.split(/\r?\n/).filter(l => l.trim().length > 0).map(rawLine => {
-                    const m = rawLine.match(/^\[(\d{1,2}:\d{2}(?:\.\d{1,3})?[^[\]]*)\](.*)$/);
+                    const m = rawLine.match(/^\[(\d{1,2}:\d{2}(?:\.\d{1,3})?[^\[\]]*)\](.*)$/);
                     if (m && mode !== 'plain') {
                         const ms = parseFormattedTimeToMs(m[1]);
                         return {
@@ -4444,12 +4590,12 @@
             remoteLinesState = parsedLines;
             updateRemoteSourceBadge(srcName);
             renderLyricLines(remoteLyricsScroller, remoteLinesState, 'remote');
-            remoteStatusBadge.textContent = remoteLinesState.length + ' versos';
+            remoteStatusBadge.textContent = t('web.comparator.verses_count', remoteLinesState.length);
             syncLyricsHighlight(Math.round((audio.currentTime || 0) * 1000));
             closeAllApiResultsModal();
-            showToast(`Letra de ${srcName} (${cand.trackName || 'Sem título'}) carregada no comparador!`);
+            showToast(t('web.all_api.loaded_toast', srcName, cand.trackName || t('web.candidates.untitled')));
         } catch (err) {
-            showToast('Erro ao carregar letra selecionada.');
+            showToast(t('web.all_api.load_error_toast'));
         }
     }
 
@@ -4514,7 +4660,7 @@
     function applyPastedLyrics(side, rawText, autoEnterSyncMode = true) {
         const newLines = parseRawTextIntoZeroedLyricLines(rawText);
         if (newLines.length === 0) {
-            showToast('Nenhum verso válido encontrado no texto colado.');
+            showToast(t('web.paste.no_valid_lines_toast'));
             return false;
         }
 
@@ -4523,24 +4669,24 @@
             localTimestampsBackup = null;
             updateToggleTimestampsBtnUI('local', false);
             localLinesState = newLines;
-            localStatusBadge.textContent = localLinesState.length + ' versos';
+            localStatusBadge.textContent = t('web.comparator.verses_count', localLinesState.length);
             renderLyricLines(localLyricsScroller, localLinesState, 'local');
             localLyricsScroller.scrollTop = 0;
         } else {
             remoteTimestampsBackup = null;
             updateToggleTimestampsBtnUI('remote', false);
             remoteLinesState = newLines;
-            updateRemoteSourceBadge('Colada');
-            remoteStatusBadge.textContent = remoteLinesState.length + ' versos';
+            updateRemoteSourceBadge(t('web.comparator.source_pasted'));
+            remoteStatusBadge.textContent = t('web.comparator.verses_count', remoteLinesState.length);
             renderLyricLines(remoteLyricsScroller, remoteLinesState, 'remote');
             remoteLyricsScroller.scrollTop = 0;
         }
 
         if (autoEnterSyncMode) {
             enableSyncEditMode(side, 0);
-            showToast(`📋 ${newLines.length} linhas criadas com [00:00.00]! Modo Edição ativo: aperte [Espaço] ou [Ctrl] para sincronizar.`);
+            showToast(t('web.paste.created_with_sync_toast', newLines.length));
         } else {
-            showToast(`📋 ${newLines.length} linhas criadas com [00:00.00] na letra ${isLocal ? 'Local' : 'Online'}!`);
+            showToast(t('web.paste.created_toast', newLines.length, isLocal ? t('web.comparator.side_local') : t('web.comparator.side_online')));
         }
         return true;
     }
@@ -4580,7 +4726,7 @@
 
     async function readClipboardIntoPasteTextarea() {
         if (!navigator.clipboard || !navigator.clipboard.readText) {
-            showToast('Use Ctrl + V dentro da caixa de texto para colar.');
+            showToast(t('web.paste.clipboard_fallback_toast'));
             pasteLyricsTextarea?.focus();
             return;
         }
@@ -4589,12 +4735,12 @@
             if (clipText && clipText.trim()) {
                 pasteLyricsTextarea.value = clipText;
                 pasteLyricsTextarea.focus();
-                showToast('Texto lido da área de transferência!');
+                showToast(t('web.paste.clipboard_read_toast'));
             } else {
-                showToast('A área de transferência está vazia.');
+                showToast(t('web.paste.clipboard_empty_toast'));
             }
         } catch (_e) {
-            showToast('Use Ctrl + V dentro da caixa de texto para colar.');
+            showToast(t('web.paste.clipboard_fallback_toast'));
             pasteLyricsTextarea?.focus();
         }
     }
@@ -4631,7 +4777,7 @@
     function enableSyncEditMode(side, startIndex = 0) {
         const lines = side === 'local' ? localLinesState : remoteLinesState;
         if (!lines || lines.length === 0) {
-            showToast('Cole ou carregue uma letra primeiro para ativar o Modo Edição.');
+            showToast(t('web.sync_edit.empty_lyrics_toast'));
             return;
         }
         syncEditModeSide = side;
@@ -4648,10 +4794,10 @@
     function toggleSyncEditMode(side) {
         if (syncEditModeSide === side) {
             disableSyncEditMode();
-            showToast('Modo Edição desativado.');
+            showToast(t('web.sync_edit.disabled_toast'));
         } else {
             enableSyncEditMode(side, 0);
-            showToast(`🎯 Modo Edição ativado na letra ${side === 'local' ? 'Local' : 'Online'}! Aperte [Espaço] ou [Ctrl] para marcar cada linha.`);
+            showToast(t('web.sync_edit.enabled_toast', side === 'local' ? t('web.comparator.side_local') : t('web.comparator.side_online')));
         }
     }
 
@@ -4674,7 +4820,7 @@
             syncEditCursorIndex = Math.max(0, Math.min(syncEditCursorIndex + delta, lines.length - 1));
             focusedLineIndex[syncEditModeSide] = syncEditCursorIndex;
             updateSyncEditModeUI();
-            showToast(`🎯 Cursor movido para a linha #${syncEditCursorIndex + 1} de ${lines.length}`);
+            showToast(t('web.sync_edit.cursor_moved_toast', syncEditCursorIndex + 1, lines.length));
         } else {
             const currentFocus = (typeof focusedLineIndex[targetSide] === 'number' && focusedLineIndex[targetSide] >= 0)
                 ? focusedLineIndex[targetSide]
@@ -4696,7 +4842,7 @@
                 audio.currentTime = ms / 1000;
                 syncLyricsHighlight(ms);
             }
-            showToast(`↩️ Linha #${nextFocus + 1} selecionada (${targetSide === 'local' ? 'Local' : 'Online'})`);
+            showToast(t('web.sync_edit.line_selected_toast', nextFocus + 1, targetSide === 'local' ? t('web.comparator.side_local') : t('web.comparator.side_online')));
         }
     }
 
@@ -4711,19 +4857,19 @@
         if (btnLocal) {
             const isLocalActive = syncEditModeSide === 'local';
             btnLocal.classList.toggle('btn-sync-mode-active', isLocalActive);
-            btnLocal.textContent = isLocalActive ? '🎯 Modo Edição: ATIVO' : '🎯 Modo Edição (Set)';
+            btnLocal.textContent = isLocalActive ? t('web.comparator.sync_mode_active_btn') : t('web.comparator.sync_mode_btn');
         }
         if (btnRemote) {
             const isRemoteActive = syncEditModeSide === 'remote';
             btnRemote.classList.toggle('btn-sync-mode-active', isRemoteActive);
-            btnRemote.textContent = isRemoteActive ? '🎯 Modo Edição: ATIVO' : '🎯 Modo Edição (Set)';
+            btnRemote.textContent = isRemoteActive ? t('web.comparator.sync_mode_active_btn') : t('web.comparator.sync_mode_btn');
         }
         if (bannerLocal) {
             bannerLocal.classList.toggle('active', syncEditModeSide === 'local');
             if (syncEditModeSide === 'local' && statusLocal) {
                 const total = localLinesState.length;
                 const pos = Math.min(syncEditCursorIndex + 1, total);
-                statusLocal.textContent = `🎯 Modo Edição Ativo — Próxima Linha: #${pos} de ${total}`;
+                statusLocal.textContent = t('web.sync_edit.active_status', pos, total);
             }
         }
         if (bannerRemote) {
@@ -4731,7 +4877,7 @@
             if (syncEditModeSide === 'remote' && statusRemote) {
                 const total = remoteLinesState.length;
                 const pos = Math.min(syncEditCursorIndex + 1, total);
-                statusRemote.textContent = `🎯 Modo Edição Ativo — Próxima Linha: #${pos} de ${total}`;
+                statusRemote.textContent = t('web.sync_edit.active_status', pos, total);
             }
         }
 
@@ -4749,7 +4895,7 @@
                     if (!existingBadge) {
                         const badge = document.createElement('span');
                         badge.className = 'sync-target-badge';
-                        badge.textContent = '🎯 PRÓXIMA';
+                        badge.textContent = t('web.sync_edit.next_badge');
                         const tagEl = div.querySelector('.timestamp-tag');
                         if (tagEl && tagEl.nextSibling) {
                             div.insertBefore(badge, tagEl.nextSibling);
@@ -4811,11 +4957,11 @@
             syncEditCursorIndex = idx + 1;
             focusedLineIndex[syncEditModeSide] = syncEditCursorIndex;
             updateSyncEditModeUI();
-            showToast(`✓ Linha ${idx + 1} marcada em [${line.formattedTime}] → Próxima: #${syncEditCursorIndex + 1}`);
+            showToast(t('web.sync_edit.stamped_next_toast', idx + 1, line.formattedTime, syncEditCursorIndex + 1));
         } else {
             focusedLineIndex[syncEditModeSide] = syncEditCursorIndex;
             updateSyncEditModeUI();
-            showToast(`🎉 Última linha (#${idx + 1}) marcada em [${line.formattedTime}]! Sincronização concluída!`);
+            showToast(t('web.sync_edit.stamped_done_toast', idx + 1, line.formattedTime));
         }
     }
 
@@ -4838,7 +4984,7 @@
 
             if (currMs < prevMs) {
                 div.classList.add('out-of-order');
-                div.title = `⚠️ Problemas de sincronismo: minutagem [${curr.formattedTime || formatLrcTimestamp(currMs)}] é inferior à linha de cima [${prev.formattedTime || formatLrcTimestamp(prevMs)}]!`;
+                div.title = t('web.line.out_of_order_title', curr.formattedTime || formatLrcTimestamp(currMs), prev.formattedTime || formatLrcTimestamp(prevMs));
             } else {
                 div.classList.remove('out-of-order');
                 div.removeAttribute('title');
@@ -4875,15 +5021,15 @@
             bar.classList.toggle('active', count > 0);
         }
         if (countEl) {
-            countEl.textContent = `${count} ${count === 1 ? 'linha selecionada' : 'linhas selecionadas'}`;
+            countEl.textContent = count === 1 ? t('web.batch.selected_count_one', count) : t('web.batch.selected_count_other', count);
         }
     }
 
     function updateStatusBadgeCount(side) {
         if (side === 'local') {
-            localStatusBadge.textContent = localLinesState.length + ' versos';
+            localStatusBadge.textContent = t('web.comparator.verses_count', localLinesState.length);
         } else {
-            remoteStatusBadge.textContent = remoteLinesState.length + ' versos';
+            remoteStatusBadge.textContent = t('web.comparator.verses_count', remoteLinesState.length);
         }
     }
 
@@ -4970,7 +5116,7 @@
         updateStatusBadgeCount(side);
         renderLyricLines(container, lines, side);
         syncLyricsHighlight(Math.round((audio.currentTime || 0) * 1000));
-        showToast(`🗑️ ${removedCount} ${removedCount === 1 ? 'linha excluída' : 'linhas excluídas'}!`);
+        showToast(removedCount === 1 ? t('web.batch.deleted_toast_one', removedCount) : t('web.batch.deleted_toast_other', removedCount));
     }
 
     function zeroSelectedLinesTimestamps(side) {
@@ -4990,7 +5136,7 @@
         });
 
         renderLyricLines(container, lines, side);
-        showToast(`⏱️ Minutagem zerada [00:00.00] em ${selSet.size} ${selSet.size === 1 ? 'linha' : 'linhas'}!`);
+        showToast(selSet.size === 1 ? t('web.batch.zeroed_toast_one', selSet.size) : t('web.batch.zeroed_toast_other', selSet.size));
     }
 
     function parseBatchTimeInputToMs(rawInput) {
@@ -5015,7 +5161,7 @@
         const inputEl = document.getElementById(side === 'local' ? 'batchTimeInputLocal' : 'batchTimeInputRemote');
         const deltaMs = parseBatchTimeInputToMs(inputEl?.value);
         if (deltaMs === null) {
-            showToast('Informe um tempo válido (ex: +1.5, -0.8 ou 00:02.50).');
+            showToast(t('web.batch.invalid_time_toast'));
             return;
         }
 
@@ -5037,7 +5183,7 @@
         renderLyricLines(container, lines, side);
         syncLyricsHighlight(Math.round((audio.currentTime || 0) * 1000));
         const signLabel = deltaMs >= 0 ? '+' : '-';
-        showToast(`⏱️ Bloco de ${selSet.size} linha(s) deslocado em ${signLabel}${formatLrcTimestamp(Math.abs(deltaMs))}!`);
+        showToast(t('web.batch.shifted_toast', selSet.size, signLabel, formatLrcTimestamp(Math.abs(deltaMs))));
     }
 
     function alignSelectedBlockToStartTime(side, usePlayerTime = false) {
@@ -5053,7 +5199,7 @@
             const inputEl = document.getElementById(side === 'local' ? 'batchTimeInputLocal' : 'batchTimeInputRemote');
             const parsed = parseBatchTimeInputToMs(inputEl?.value);
             if (parsed === null || parsed < 0) {
-                showToast('Informe o tempo inicial H para o bloco (ex: 01:15.00 ou 75).');
+                showToast(t('web.batch.invalid_start_time_toast'));
                 return;
             }
             targetStartMs = parsed;
@@ -5087,7 +5233,7 @@
 
         renderLyricLines(container, lines, side);
         syncLyricsHighlight(Math.round((audio.currentTime || 0) * 1000));
-        showToast(`🎯 Bloco (${sortedIndices.length} linhas) ajustado para iniciar em [${formatLrcTimestamp(targetStartMs)}] mantendo os intervalos!`);
+        showToast(t('web.batch.aligned_toast', sortedIndices.length, formatLrcTimestamp(targetStartMs)));
     }
 
     function moveLinesCardToPosition(side, fromIndices, targetIndex, placeAfter) {
@@ -5150,15 +5296,15 @@
         renderLyricLines(container, lines, side);
         syncLyricsHighlight(Math.round((audio.currentTime || 0) * 1000));
         showToast(movingItems.length === 1
-            ? `⠿ Verso movido para a linha #${insertAtInRemaining + 1}!`
-            : `⠿ Bloco de ${movingItems.length} versos movido para a linha #${insertAtInRemaining + 1}!`);
+            ? t('web.batch.moved_toast_one', insertAtInRemaining + 1)
+            : t('web.batch.moved_toast_other', movingItems.length, insertAtInRemaining + 1));
     }
 
     function renderLyricLines(container, lines, side) {
         container.innerHTML = '';
         updateBatchSelectionBarUI(side);
         if (!lines || lines.length === 0) {
-            container.innerHTML = '<p style="text-align: center; color: #777777; margin-top: 40px;">Nenhuma letra sincronizada encontrada.</p>';
+            container.innerHTML = `<p style=\"text-align: center; color: #777777; margin-top: 40px;\">${escapeHtml(t('web.comparator.no_synced_lyrics'))}</p>`;
             return;
         }
 
@@ -5193,19 +5339,19 @@
             div.setAttribute('draggable', 'true');
 
             div.innerHTML = `
-          <input type="checkbox" class="line-select-checkbox" ${isSelected ? 'checked' : ''} title="Selecionar linha (Shift+Clique seleciona intervalo)">
-          <span class="line-drag-handle" title="Arraste para mover esta linha (ou bloco selecionado) para outra posição sem alterar a ordem das demais">⠿</span>
-          <span class="timestamp-tag" style="${line.noTimestamp ? 'opacity: 0.45;' : ''}" title="${line.noTimestamp ? 'Minutagem removida em memória' : 'Clique para reproduzir neste momento'}">[${displayTime}]</span>
-          ${isTarget ? '<span class="sync-target-badge">🎯 PRÓXIMA</span>' : ''}
-          <span class="lyric-text-span" title="${syncEditModeSide === side ? 'Clique para definir esta linha como a próxima a sincronizar (Shift/Ctrl+Clique para selecionar múltiplas)' : 'Clique para reproduzir neste momento (Shift/Ctrl+Clique para selecionar múltiplas)'}">${escapeHtml(line.text || '(instrumental)')}</span>
-          <div class="line-actions">
-            <button class="btn-line-action btn-line-offset btn-line-offset-neg" data-delta="-500" title="Retirar 0.5s apenas desta linha">-0.5s</button>
-            <button class="btn-line-action btn-line-offset btn-line-offset-neg" data-delta="-100" title="Retirar 0.1s apenas desta linha">-0.1s</button>
-            <button class="btn-line-action btn-line-offset btn-line-offset-pos" data-delta="100" title="Adicionar 0.1s apenas desta linha">+0.1s</button>
-            <button class="btn-line-action btn-line-offset btn-line-offset-pos" data-delta="500" title="Adicionar 0.5s apenas desta linha">+0.5s</button>
-            <button class="btn-line-action btn-sync-time" title="Ajustar para o segundo atual da música">⏱️ Set</button>
-            <button class="btn-line-action btn-edit-line" title="Editar verso e tempo">✏️</button>
-            <button class="btn-line-action btn-delete-line" title="Excluir verso" style="color: #f87171;">✕</button>
+          <input type=\"checkbox\" class=\"line-select-checkbox\" ${isSelected ? 'checked' : ''} title=\"${escapeHtml(t('web.line.checkbox_title'))}\">
+          <span class=\"line-drag-handle\" title=\"${escapeHtml(t('web.line.drag_handle_title'))}\">⠿</span>
+          <span class=\"timestamp-tag\" style=\"${line.noTimestamp ? 'opacity: 0.45;' : ''}\" title=\"${escapeHtml(line.noTimestamp ? t('web.line.timestamp_stripped_title') : t('web.line.click_play_title'))}\">[${displayTime}]</span>
+          ${isTarget ? `<span class=\"sync-target-badge\">${escapeHtml(t('web.sync_edit.next_badge'))}</span>` : ''}
+          <span class=\"lyric-text-span\" title=\"${escapeHtml(syncEditModeSide === side ? t('web.line.click_sync_target_title') : t('web.line.click_play_with_multi_title'))}\">${escapeHtml(line.text || t('web.line.empty_instrumental'))}</span>
+          <div class=\"line-actions\">
+            <button class=\"btn-line-action btn-line-offset btn-line-offset-neg\" data-delta=\"-500\" title=\"${escapeHtml(t('web.line.sub_05_title'))}\">-0.5s</button>
+            <button class=\"btn-line-action btn-line-offset btn-line-offset-neg\" data-delta=\"-100\" title=\"${escapeHtml(t('web.line.sub_01_title'))}\">-0.1s</button>
+            <button class=\"btn-line-action btn-line-offset btn-line-offset-pos\" data-delta=\"100\" title=\"${escapeHtml(t('web.line.add_01_title'))}\">+0.1s</button>
+            <button class=\"btn-line-action btn-line-offset btn-line-offset-pos\" data-delta=\"500\" title=\"${escapeHtml(t('web.line.add_05_title'))}\">+0.5s</button>
+            <button class=\"btn-line-action btn-sync-time\" title=\"${escapeHtml(t('web.line.set_title'))}\">${escapeHtml(t('web.line.set_btn'))}</button>
+            <button class=\"btn-line-action btn-edit-line\" title=\"${escapeHtml(t('web.line.edit_title'))}\">✏️</button>
+            <button class=\"btn-line-action btn-delete-line\" title=\"${escapeHtml(t('web.line.delete_title'))}\" style=\"color: #f87171;\">✕</button>
           </div>
         `;
 
@@ -5294,11 +5440,11 @@
                 const clickedTimestampTag = e.target.closest('.timestamp-tag');
                 if (syncEditModeSide === side && !clickedTimestampTag) {
                     setSyncCursor(index);
-                    showToast(`🎯 Linha #${index + 1} selecionada como próxima para o Set [Espaço / Ctrl]`);
+                    showToast(t('web.sync_edit.line_selected_for_set_toast', index + 1));
                     return;
                 }
                 if (!audio.src || audio.src === window.location.href) {
-                    showToast('Nenhum áudio disponível para esta faixa.');
+                    showToast(t('web.player.no_audio_toast'));
                     return;
                 }
                 const currentLineMs = typeof line.timestampMs === 'number' ? line.timestampMs : ms;
@@ -5307,7 +5453,7 @@
                 if (audio.paused) {
                     audio.play().catch(err => {
                         console.error(err);
-                        showToast('Erro ao reproduzir áudio.');
+                        showToast(t('web.player.audio_error_toast'));
                     });
                 }
                 // Highlight and center both sides immediately
@@ -5334,7 +5480,7 @@
                     div.setAttribute('data-ms', newMs);
                     updateOutOfOrderLines(container, lines);
                     const secLabel = (deltaMs > 0 ? '+' : '') + (deltaMs / 1000).toFixed(1) + 's';
-                    showToast(`Linha ${index + 1}: ${secLabel} → [${line.formattedTime}]`);
+                    showToast(t('web.line.offset_toast', index + 1, secLabel, line.formattedTime));
                 });
             });
 
@@ -5359,7 +5505,7 @@
                     focusedLineIndex[side] = syncEditCursorIndex;
                     updateSyncEditModeUI();
                 }
-                showToast(`Tempo atualizado para [${line.formattedTime}]`);
+                showToast(t('web.line.time_updated_toast', line.formattedTime));
                 syncLyricsHighlight(currentMs);
             });
 
@@ -5422,7 +5568,7 @@
         const saveBtn = document.createElement('button');
         saveBtn.className = 'btn-line-action';
         saveBtn.style.color = '#34d399';
-        saveBtn.textContent = 'Salvar';
+        saveBtn.textContent = t('web.line.save_btn');
 
         const commitEdit = (e) => {
             if (e) e.stopPropagation();
@@ -5519,7 +5665,7 @@
             timestampMs: newLineMs,
             timeMs: newLineMs,
             formattedTime: formatLrcTimestamp(newLineMs),
-            text: 'Novo verso...'
+            text: t('web.line.new_verse_default_text')
         };
 
         state.splice(insertIndex, 0, newLine);
@@ -5552,8 +5698,8 @@
         }
 
         showToast(isPlaying
-            ? `✨ Novo verso inserido na linha #${insertIndex + 1} no tempo [${newLine.formattedTime}]!`
-            : `✨ Novo verso inserido na linha #${insertIndex + 1} (abaixo da linha #${anchorIndex + 1})!`);
+            ? t('web.line.inserted_playing_toast', insertIndex + 1, newLine.formattedTime)
+            : t('web.line.inserted_paused_toast', insertIndex + 1, anchorIndex + 1));
     }
 
     // Shortcuts Help Modal
@@ -5592,7 +5738,7 @@
 
         renderLyricLines(container, state, side);
         syncLyricsHighlight(Math.round((audio.currentTime || 0) * 1000));
-        showToast(`Ajuste global de ${seconds > 0 ? '+' : ''}${seconds}s aplicado!`);
+        showToast(t('web.comparator.global_offset_toast', (seconds > 0 ? '+' : '') + seconds));
     }
 
     function applyCustomOffset(side) {
@@ -5647,16 +5793,16 @@
             const result = await res.json();
 
             if (result.success) {
-                showToast(result.message || (choice === 'LRCLIB' ? 'Letra online salva com sucesso!' : 'Letra local mantida / atualizada!'));
+                showToast(result.message || (choice === 'LRCLIB' ? t('web.comparator.save_online_default_toast') : t('web.comparator.save_local_default_toast')));
                 currentItems[currentIndex].status = (choice === 'LRCLIB') ? 'SAVED_LRCLIB' : 'KEPT_LOCAL';
                 updateFilterCounts();
                 renderTrackList();
                 nextTrack();
             } else {
-                showToast('Erro ao salvar letra: ' + result.message);
+                showToast(t('web.comparator.save_error_toast', result.message));
             }
         } catch (err) {
-            showToast('Falha na requisição de salvamento.');
+            showToast(t('web.comparator.save_request_failed_toast'));
         }
     }
 
@@ -5723,7 +5869,7 @@
 
     function openInstrumentalModal() {
         if (!currentTrackDetails) {
-            showToast('Selecione uma faixa primeiro para criar a letra instrumental.');
+            showToast(t('web.instrumental.no_track_toast'));
             return;
         }
         const docLang = (document.documentElement.lang || navigator.language || 'pt').toLowerCase();
@@ -5778,13 +5924,13 @@
                 updateToggleTimestampsBtnUI('local', false);
                 localLinesState = data.lines;
                 renderLyricLines(localLyricsScroller, localLinesState, 'local');
-                localStatusBadge.textContent = localLinesState.length + ' versos';
+                localStatusBadge.textContent = t('web.comparator.verses_count', localLinesState.length);
             }
             closeInstrumentalModal();
 
             if (autoSave) {
                 if (data.success) {
-                    showToast(data.message || '🎵 Letra instrumental criada e salva com sucesso!');
+                    showToast(data.message || t('web.instrumental.saved_toast'));
                     if (currentItems[currentIndex]) {
                         currentItems[currentIndex].status = 'KEPT_LOCAL';
                     }
@@ -5792,13 +5938,13 @@
                     renderTrackList();
                     nextTrack();
                 } else {
-                    showToast('Erro ao salvar instrumental: ' + (data.message || 'Falha desconhecida'));
+                    showToast(t('web.instrumental.save_error_toast', data.message || t('web.instrumental.unknown_error')));
                 }
             } else {
-                showToast('🎵 Letra instrumental carregada na coluna Local! Clique em Salvar Local [1] para gravar.');
+                showToast(t('web.instrumental.filled_local_toast'));
             }
         } catch (err) {
-            showToast('Falha ao gerar letra instrumental.');
+            showToast(t('web.instrumental.generate_error_toast'));
         }
     }
 
@@ -5827,12 +5973,12 @@
         btnConfirmBatchBest.disabled = !canConfirm;
         btnConfirmBatchBest.style.opacity = canConfirm ? '1' : '0.45';
         btnConfirmBatchBest.style.cursor = canConfirm ? 'pointer' : 'not-allowed';
-        btnConfirmBatchBest.textContent = timerDone ? 'Sim' : `Sim (${batchBestSecondsRemaining}s)`;
+        btnConfirmBatchBest.textContent = timerDone ? t('web.batch_best.confirm_btn') : t('web.batch_best.confirm_btn_timer', batchBestSecondsRemaining);
     }
 
     function openBatchBestModal() {
         if (!currentItems || currentItems.length === 0) {
-            showToast('Nenhuma faixa carregada no comparador para baixar em lote.');
+            showToast(t('web.batch_best.no_tracks_toast'));
             return;
         }
         if (batchBestTimerInterval) {
@@ -5847,7 +5993,7 @@
         if (batchBestConfirmSection) batchBestConfirmSection.style.display = 'flex';
         if (batchBestProgressSection) batchBestProgressSection.style.display = 'none';
         if (btnConfirmBatchBest) btnConfirmBatchBest.style.display = 'inline-flex';
-        if (btnCancelBatchBest) btnCancelBatchBest.textContent = 'Cancelar';
+        if (btnCancelBatchBest) btnCancelBatchBest.textContent = t('web.action.cancel');
 
         if (batchBestConfirmCheckbox) {
             batchBestConfirmCheckbox.checked = false;
@@ -5857,7 +6003,7 @@
         if (batchBestCountdownBanner) {
             batchBestCountdownBanner.style.borderColor = '#fbbf24';
             batchBestCountdownBanner.style.color = '#fde68a';
-            batchBestCountdownBanner.innerHTML = '⏳ Aguarde <span id="batchBestTimerSeconds">5</span>s para liberar o botão de confirmação...';
+            batchBestCountdownBanner.innerHTML = t('web.batch_best.countdown_waiting_html', '<span id="batchBestTimerSeconds">5</span>');
         }
 
         updateBatchBestConfirmBtnState();
@@ -5877,7 +6023,7 @@
                 if (batchBestCountdownBanner) {
                     batchBestCountdownBanner.style.borderColor = '#10b981';
                     batchBestCountdownBanner.style.color = '#34d399';
-                    batchBestCountdownBanner.textContent = '✅ Tempo de segurança de 5s concluído! Marque a caixa abaixo para habilitar o botão "Sim".';
+                    batchBestCountdownBanner.textContent = t('web.batch_best.countdown_ready');
                 }
             }
             updateBatchBestConfirmBtnState();
@@ -5891,7 +6037,7 @@
         }
         if (isBatchBestRunning) {
             cancelBatchBestRequested = true;
-            showToast('Interrompendo download em lote após a faixa atual...');
+            showToast(t('web.batch_best.cancel_toast'));
             return;
         }
         if (batchBestConfirmModal) {
@@ -5910,7 +6056,7 @@
             : currentItems.filter(i => !i.status || i.status === 'PENDING');
 
         if (targetItems.length === 0) {
-            showToast('Não há faixas pendentes para baixar!');
+            showToast(t('web.batch_best.no_pending_toast'));
             closeBatchBestModal();
             return;
         }
@@ -5921,7 +6067,7 @@
         if (batchBestConfirmSection) batchBestConfirmSection.style.display = 'none';
         if (batchBestProgressSection) batchBestProgressSection.style.display = 'flex';
         if (btnConfirmBatchBest) btnConfirmBatchBest.style.display = 'none';
-        if (btnCancelBatchBest) btnCancelBatchBest.textContent = 'Parar / Cancelar';
+        if (btnCancelBatchBest) btnCancelBatchBest.textContent = t('web.batch_best.stop_cancel_btn');
 
         const titleEl = document.getElementById('batchBestProgressTitle');
         const countEl = document.getElementById('batchBestProgressCount');
@@ -5939,10 +6085,10 @@
             }
             const item = targetItems[i];
             const pct = Math.round(((i) / targetItems.length) * 100);
-            if (titleEl) titleEl.textContent = 'Baixando e salvando primeiras mais compatíveis...';
+            if (titleEl) titleEl.textContent = t('web.batch_best.progress_downloading');
             if (countEl) countEl.textContent = `${i + 1} / ${targetItems.length}`;
             if (barEl) barEl.style.width = `${pct}%`;
-            if (itemEl) itemEl.textContent = `🔍 Buscando: ${item.fileName}`;
+            if (itemEl) itemEl.textContent = t('web.batch_best.progress_searching_item', item.fileName);
 
             try {
                 const res = await fetch('/api/save-best', {
@@ -5963,7 +6109,7 @@
                 } else {
                     notFoundCount++;
                     row.style.color = '#fbbf24';
-                    row.textContent = `⚠️ [Sem letra] ${item.fileName} — ${data.message || 'Nenhuma letra encontrada'}`;
+                    row.textContent = t('web.batch_best.log_no_lyric', item.fileName, data.message || t('web.batch_best.log_not_found_fallback'));
                 }
                 if (logList) {
                     logList.prepend(row);
@@ -5975,7 +6121,7 @@
                 const row = document.createElement('div');
                 row.className = 'result-log-item';
                 row.style.color = '#f87171';
-                row.textContent = `❌ [Erro] ${item.fileName}`;
+                row.textContent = t('web.batch_best.log_error', item.fileName);
                 if (logList) {
                     logList.prepend(row);
                 }
@@ -5986,16 +6132,16 @@
         if (barEl) barEl.style.width = '100%';
         if (titleEl) {
             titleEl.textContent = cancelBatchBestRequested
-                ? `Processo interrompido (${savedCount} salvas, ${notFoundCount} não encontradas)`
-                : `Concluído! ${savedCount} letras salvas (${notFoundCount} sem correspondência)`;
+                ? t('web.batch_best.progress_stopped_title', savedCount, notFoundCount)
+                : t('web.batch_best.progress_done_title', savedCount, notFoundCount);
         }
         if (itemEl) {
-            itemEl.textContent = 'Processo finalizado.';
+            itemEl.textContent = t('web.batch_best.progress_done_item');
         }
         if (btnCancelBatchBest) {
-            btnCancelBatchBest.textContent = 'Concluir & Fechar';
+            btnCancelBatchBest.textContent = t('web.action.finish_close_btn');
         }
-        showToast(`Download em lote finalizado: ${savedCount} letras salvas!`);
+        showToast(t('web.batch_best.done_toast', savedCount));
 
         if (currentIndex >= 0 && currentIndex < currentItems.length) {
             selectTrack(currentIndex, false);
@@ -6031,7 +6177,7 @@
             }
             if (syncEditModeSide !== null) {
                 disableSyncEditMode();
-                showToast('Modo Edição desativado.');
+                showToast(t('web.sync_edit.disabled_toast'));
                 return;
             }
         }
@@ -6162,13 +6308,13 @@
     });
 
     function clearViewer() {
-        songTitle.textContent = 'Nenhuma faixa selecionada';
+        songTitle.textContent = t('web.player.no_track_selected');
         songArtist.textContent = '-';
         songAlbum.textContent = '-';
         albumArtImg.style.display = 'none';
         vinylFallback.style.display = 'block';
-        localLyricsScroller.innerHTML = '<p style="text-align: center; color: #777777; margin-top: 40px;">Nenhuma faixa disponível</p>';
-        remoteLyricsScroller.innerHTML = '<p style="text-align: center; color: #777777; margin-top: 40px;">Nenhuma faixa disponível</p>';
+        localLyricsScroller.innerHTML = `<p style=\"text-align: center; color: #777777; margin-top: 40px;\">${escapeHtml(t('web.comparator.no_tracks_available'))}</p>`;
+        remoteLyricsScroller.innerHTML = `<p style=\"text-align: center; color: #777777; margin-top: 40px;\">${escapeHtml(t('web.comparator.no_tracks_available'))}</p>`;
     }
 
     // Theme management (System Auto + AMOLED #000000 + Neutral 0-Saturation Dark + Light)
@@ -6215,13 +6361,18 @@
             if (data && data.locale) {
                 document.documentElement.lang = data.locale;
             }
+            if (data && data.messages && Object.keys(data.messages).length > 0) {
+                i18nMessages = data.messages;
+                applyI18nToDom();
+            }
         } catch (_e) {
         }
     }
 
     // Start application
-    syncSystemLocale();
-    init();
+    syncSystemLocale().finally(() => {
+        init();
+    });
 </script>
 </body>
 </html>
