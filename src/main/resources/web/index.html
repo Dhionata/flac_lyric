@@ -2334,6 +2334,14 @@
                     <button class="btn-offset" data-i18n="web.batch.clear_btn" data-i18n-title="web.batch.clear_title" onclick="clearLineSelection('local')"
                             title="Desmarcar seleção">Limpar
                     </button>
+                    <button class="btn-offset" data-i18n="web.batch.copy_btn" data-i18n-title="web.batch.copy_title" onclick="copySelectedLyricLines('local')"
+                            style="color: #60a5fa; border-color: rgba(96, 165, 250, 0.45);"
+                            title="Copiar versos selecionados mantendo intervalos (Ctrl + C)">📋 Copiar [Ctrl+C]
+                    </button>
+                    <button class="btn-offset" data-i18n="web.batch.paste_btn" data-i18n-title="web.batch.paste_title" onclick="pasteLyricLines('local')"
+                            style="color: #a78bfa; border-color: rgba(167, 139, 250, 0.45);"
+                            title="Colar versos abaixo da seleção, no tempo da música ou no final (Ctrl + V)">📋 Colar [Ctrl+V]
+                    </button>
                 </div>
                 <div class="batch-bar-group">
                     <button class="btn-offset" data-i18n="web.batch.zero_btn" data-i18n-title="web.batch.zero_title" onclick="zeroSelectedLinesTimestamps('local')"
@@ -2564,6 +2572,14 @@
                     <button class="btn-offset" data-i18n="web.batch.clear_btn" data-i18n-title="web.batch.clear_title" onclick="clearLineSelection('remote')"
                             title="Desmarcar seleção">Limpar
                     </button>
+                    <button class="btn-offset" data-i18n="web.batch.copy_btn" data-i18n-title="web.batch.copy_title" onclick="copySelectedLyricLines('remote')"
+                            style="color: #60a5fa; border-color: rgba(96, 165, 250, 0.45);"
+                            title="Copiar versos selecionados mantendo intervalos (Ctrl + C)">📋 Copiar [Ctrl+C]
+                    </button>
+                    <button class="btn-offset" data-i18n="web.batch.paste_btn" data-i18n-title="web.batch.paste_title" onclick="pasteLyricLines('remote')"
+                            style="color: #a78bfa; border-color: rgba(167, 139, 250, 0.45);"
+                            title="Colar versos abaixo da seleção, no tempo da música ou no final (Ctrl + V)">📋 Colar [Ctrl+V]
+                    </button>
                 </div>
                 <div class="batch-bar-group">
                     <button class="btn-offset" data-i18n="web.batch.zero_btn" data-i18n-title="web.batch.zero_title" onclick="zeroSelectedLinesTimestamps('remote')"
@@ -2699,12 +2715,20 @@
                     </div>
                 </div>
                 <div class="shortcut-help-row">
+                    <span data-i18n-html="web.shortcuts.row_copy_html"><b>Copiar versos selecionados</b> mantendo os intervalos relativos</span>
+                    <div class="shortcut-kbd-group"><span class="shortcut-kbd">Ctrl + C</span></div>
+                </div>
+                <div class="shortcut-help-row">
+                    <span data-i18n-html="web.shortcuts.row_paste_repeat_html"><b>Colar versos copiados</b> abaixo da seleção, no tempo da música ou no final mantendo os intervalos</span>
+                    <div class="shortcut-kbd-group"><span class="shortcut-kbd">Ctrl + V</span></div>
+                </div>
+                <div class="shortcut-help-row">
                     <span data-i18n-html="web.shortcuts.row_delete_html"><b>Excluir linhas selecionadas</b> na coluna em foco</span>
                     <div class="shortcut-kbd-group"><span class="shortcut-kbd">Delete</span></div>
                 </div>
                 <div class="shortcut-help-row">
                     <span data-i18n-html="web.shortcuts.row_paste_html"><b>Colar letra completa</b> com minutagens zeradas <code>[00:00.00]</code></span>
-                    <div class="shortcut-kbd-group"><span class="shortcut-kbd">Ctrl + V</span></div>
+                    <div class="shortcut-kbd-group"><span class="shortcut-kbd" data-i18n="web.comparator.paste_btn">📋 Colar Letra</span></div>
                 </div>
             </div>
         </div>
@@ -4044,6 +4068,22 @@
             return;
         }
 
+        const selSet = selectedLineIndices[side];
+        if (selSet && selSet.size > 0) {
+            selSet.forEach(idx => {
+                const l = state[idx];
+                if (l) {
+                    l.noTimestamp = true;
+                    l.formattedTime = '';
+                    l.timestampMs = 0;
+                    l.timeMs = 0;
+                }
+            });
+            renderLyricLines(container, state, side);
+            showToast(t('web.comparator.strip_selected_toast', selSet.size));
+            return;
+        }
+
         const existingBackup = isLocal ? localTimestampsBackup : remoteTimestampsBackup;
         if (!existingBackup) {
             const backupCopy = JSON.parse(JSON.stringify(state));
@@ -4754,24 +4794,259 @@
         }
     }
 
-    // Direct Ctrl+V paste support when hovering over Local or Online panel in Comparator view
+    let copiedLyricsBuffer = [];
+    let lastPasteEventTimestamp = 0;
+
+    function parseTextToLyricLines(text) {
+        if (!text) return [];
+        const rawLines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+        const parsed = [];
+        const lrcRegex = /^\[(\d{1,2}:\d{2}(?:\.\d{1,3})?)\](.*)$/;
+
+        rawLines.forEach(l => {
+            const match = l.match(lrcRegex);
+            if (match) {
+                const timeMs = parseFormattedTimeToMs(match[1]);
+                parsed.push({
+                    noTimestamp: false,
+                    timestampMs: timeMs,
+                    timeMs: timeMs,
+                    formattedTime: formatLrcTimestamp(timeMs),
+                    text: match[2].trim()
+                });
+            } else {
+                parsed.push({
+                    noTimestamp: false,
+                    timestampMs: 0,
+                    timeMs: 0,
+                    formattedTime: '00:00.00',
+                    text: l
+                });
+            }
+        });
+        return parsed;
+    }
+
+    function resolveTargetActiveSide(explicitSide = null) {
+        if (explicitSide) return explicitSide;
+        if (hoveredColumnSide && (hoveredColumnSide === 'local' || hoveredColumnSide === 'remote')) {
+            return hoveredColumnSide;
+        }
+        if (syncEditModeSide) return syncEditModeSide;
+        if (selectedLineIndices.remote.size > 0 && selectedLineIndices.local.size === 0) return 'remote';
+        if (selectedLineIndices.local.size > 0 && selectedLineIndices.remote.size === 0) return 'local';
+        return 'local';
+    }
+
+    function copySelectedLyricLines(explicitSide = null) {
+        const side = resolveTargetActiveSide(explicitSide);
+        const state = side === 'local' ? localLinesState : remoteLinesState;
+        if (!state || state.length === 0) {
+            showToast(t('web.batch.no_lines_to_copy_toast'));
+            return;
+        }
+
+        const selSet = selectedLineIndices[side];
+        let linesToCopy = [];
+
+        if (selSet && selSet.size > 0) {
+            const sortedIndices = Array.from(selSet).sort((a, b) => a - b);
+            linesToCopy = sortedIndices
+                .filter(i => i >= 0 && i < state.length)
+                .map(i => JSON.parse(JSON.stringify(state[i])));
+        } else if (typeof focusedLineIndex[side] === 'number' && focusedLineIndex[side] >= 0 && focusedLineIndex[side] < state.length) {
+            linesToCopy = [JSON.parse(JSON.stringify(state[focusedLineIndex[side]]))];
+        }
+
+        if (linesToCopy.length === 0) {
+            showToast(t('web.batch.no_lines_to_copy_toast'));
+            return;
+        }
+
+        copiedLyricsBuffer = linesToCopy;
+
+        const textLines = linesToCopy.map(l => {
+            if (l.noTimestamp) return l.text || '';
+            const ts = l.formattedTime || formatLrcTimestamp(l.timestampMs || 0);
+            return `[${ts}] ${l.text || ''}`;
+        }).join('\n');
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(textLines).catch(() => {});
+        }
+
+        showToast(linesToCopy.length === 1
+            ? t('web.batch.copied_toast_one', linesToCopy.length)
+            : t('web.batch.copied_toast_other', linesToCopy.length));
+    }
+
+    async function pasteLyricLines(explicitSide = null, rawClipboardText = null) {
+        const now = Date.now();
+        if (now - lastPasteEventTimestamp < 200) {
+            return;
+        }
+        lastPasteEventTimestamp = now;
+
+        const side = resolveTargetActiveSide(explicitSide);
+        const state = side === 'local' ? localLinesState : remoteLinesState;
+        const container = side === 'local' ? localLyricsScroller : remoteLyricsScroller;
+
+        let linesToPaste = [];
+
+        if (copiedLyricsBuffer && copiedLyricsBuffer.length > 0) {
+            linesToPaste = copiedLyricsBuffer;
+        } else if (rawClipboardText && rawClipboardText.trim()) {
+            linesToPaste = parseTextToLyricLines(rawClipboardText);
+        } else if (navigator.clipboard && navigator.clipboard.readText) {
+            try {
+                const clipText = await navigator.clipboard.readText();
+                if (clipText && clipText.trim()) {
+                    linesToPaste = parseTextToLyricLines(clipText);
+                }
+            } catch (_err) {}
+        }
+
+        if (!linesToPaste || linesToPaste.length === 0) {
+            showToast(t('web.batch.clipboard_empty_toast'));
+            return;
+        }
+
+        if (!state || state.length === 0) {
+            const cloned = linesToPaste.map(l => ({
+                noTimestamp: Boolean(l.noTimestamp),
+                timestampMs: l.timestampMs || 0,
+                timeMs: l.timeMs || l.timestampMs || 0,
+                formattedTime: l.noTimestamp ? '' : (l.formattedTime || formatLrcTimestamp(l.timestampMs || 0)),
+                text: l.text || ''
+            }));
+            if (side === 'local') {
+                localLinesState = cloned;
+            } else {
+                remoteLinesState = cloned;
+            }
+            selectedLineIndices[side].clear();
+            for (let i = 0; i < cloned.length; i++) {
+                selectedLineIndices[side].add(i);
+            }
+            focusedLineIndex[side] = 0;
+            updateStatusBadgeCount(side);
+            updateBatchSelectionBarUI(side);
+            renderLyricLines(container, cloned, side);
+            showToast(t('web.batch.pasted_toast_other', cloned.length, 1, '00:00.00'));
+            return;
+        }
+
+        const selSet = selectedLineIndices[side];
+        let anchorIndex = -1;
+        if (selSet && selSet.size > 0) {
+            anchorIndex = Math.max(...Array.from(selSet));
+        } else if (typeof focusedLineIndex[side] === 'number' && focusedLineIndex[side] >= 0 && focusedLineIndex[side] < state.length) {
+            anchorIndex = focusedLineIndex[side];
+        }
+
+        let insertIndex;
+        if (anchorIndex >= 0 && anchorIndex < state.length) {
+            insertIndex = anchorIndex + 1;
+        } else {
+            insertIndex = state.length;
+        }
+
+        const isPlaying = !audio.paused && audio.src && audio.src !== window.location.href;
+        const audioMs = Math.round((audio.currentTime || 0) * 1000);
+
+        let targetStartMs = 0;
+        if (isPlaying) {
+            targetStartMs = audioMs;
+        } else if (audio.src && audio.src !== window.location.href && audioMs > 0) {
+            targetStartMs = audioMs;
+        } else if (anchorIndex >= 0 && anchorIndex < state.length) {
+            const anchorLine = state[anchorIndex];
+            targetStartMs = (anchorLine && !anchorLine.noTimestamp && typeof anchorLine.timestampMs === 'number')
+                ? anchorLine.timestampMs
+                : 0;
+        } else if (state.length > 0) {
+            const lastLine = state[state.length - 1];
+            targetStartMs = (lastLine && !lastLine.noTimestamp && typeof lastLine.timestampMs === 'number')
+                ? lastLine.timestampMs + 2000
+                : 0;
+        }
+
+        const firstTimedLine = linesToPaste.find(l => !l.noTimestamp && typeof l.timestampMs === 'number');
+        const baseSourceMs = firstTimedLine ? firstTimedLine.timestampMs : 0;
+
+        const clonedLines = linesToPaste.map(srcLine => {
+            const hasTs = !srcLine.noTimestamp && typeof srcLine.timestampMs === 'number';
+            let finalMs = targetStartMs;
+            let isNoTs = Boolean(srcLine.noTimestamp);
+
+            if (hasTs) {
+                const relativeOffset = srcLine.timestampMs - baseSourceMs;
+                finalMs = Math.max(0, targetStartMs + relativeOffset);
+                isNoTs = false;
+            } else if (targetStartMs > 0) {
+                finalMs = targetStartMs;
+                isNoTs = false;
+            }
+
+            return {
+                noTimestamp: isNoTs,
+                timestampMs: finalMs,
+                timeMs: finalMs,
+                formattedTime: isNoTs ? '' : formatLrcTimestamp(finalMs),
+                text: srcLine.text || ''
+            };
+        });
+
+        state.splice(insertIndex, 0, ...clonedLines);
+
+        selectedLineIndices[side].clear();
+        for (let i = 0; i < clonedLines.length; i++) {
+            selectedLineIndices[side].add(insertIndex + i);
+        }
+        focusedLineIndex[side] = insertIndex;
+        lastClickedLineIndex[side] = insertIndex;
+        if (syncEditModeSide === side) {
+            syncEditCursorIndex = insertIndex;
+        }
+
+        updateStatusBadgeCount(side);
+        updateBatchSelectionBarUI(side);
+        renderLyricLines(container, state, side);
+        syncLyricsHighlight(Math.round((audio.currentTime || 0) * 1000));
+
+        const lineDivs = container.querySelectorAll('.lyric-line');
+        const insertedDiv = lineDivs[insertIndex];
+        if (insertedDiv) {
+            const containerRect = container.getBoundingClientRect();
+            const lineRect = insertedDiv.getBoundingClientRect();
+            const scrollOffset = (lineRect.top - containerRect.top) - (container.clientHeight / 2) + (insertedDiv.clientHeight / 2);
+            container.scrollBy({top: scrollOffset, behavior: 'smooth'});
+        }
+
+        showToast(clonedLines.length === 1
+            ? t('web.batch.pasted_toast_one', insertIndex + 1, formatLrcTimestamp(targetStartMs))
+            : t('web.batch.pasted_toast_other', clonedLines.length, insertIndex + 1, formatLrcTimestamp(targetStartMs)));
+    }
+
+    // Direct Ctrl+V paste support when hovering over or viewing Comparator
     window.addEventListener('paste', (e) => {
         if (
             e.target.tagName === 'INPUT' ||
             e.target.tagName === 'TEXTAREA' ||
             !viewComparator.classList.contains('active') ||
             actionModal.style.display === 'flex' ||
+            (shortcutsHelpModal && shortcutsHelpModal.style.display === 'flex') ||
             (allApiResultsModal && allApiResultsModal.style.display === 'flex') ||
-            (pasteLyricsModal && pasteLyricsModal.style.display === 'flex')
+            (pasteLyricsModal && pasteLyricsModal.style.display === 'flex') ||
+            (instrumentalModal && instrumentalModal.style.display === 'flex') ||
+            (batchBestConfirmModal && batchBestConfirmModal.style.display === 'flex')
         ) {
             return;
         }
         const clipText = e.clipboardData ? e.clipboardData.getData('text/plain') : '';
-        if (!clipText || !clipText.trim()) return;
-
         e.preventDefault();
-        const targetSide = syncEditModeSide || hoveredColumnSide || 'local';
-        applyPastedLyrics(targetSide, clipText, true);
+        const targetSide = resolveTargetActiveSide();
+        pasteLyricLines(targetSide, clipText);
     });
 
     function enableSyncEditMode(side, startIndex = 0) {
@@ -5123,7 +5398,20 @@
         const lines = side === 'local' ? localLinesState : remoteLinesState;
         const container = side === 'local' ? localLyricsScroller : remoteLyricsScroller;
         const selSet = selectedLineIndices[side];
-        if (selSet.size === 0) return;
+        if (selSet.size === 0) {
+            if (typeof focusedLineIndex[side] === 'number' && focusedLineIndex[side] >= 0 && focusedLineIndex[side] < lines.length) {
+                const line = lines[focusedLineIndex[side]];
+                if (line) {
+                    line.noTimestamp = false;
+                    line.timestampMs = 0;
+                    line.timeMs = 0;
+                    line.formattedTime = '00:00.00';
+                    renderLyricLines(container, lines, side);
+                    showToast(t('web.batch.zeroed_toast_one', 1));
+                }
+            }
+            return;
+        }
 
         selSet.forEach(idx => {
             const line = lines[idx];
@@ -5466,21 +5754,40 @@
                     e.stopPropagation();
                     focusedLineIndex[side] = index;
                     const deltaMs = parseInt(btn.getAttribute('data-delta'), 10) || 0;
-                    const baseMs = typeof line.timestampMs === 'number' ? line.timestampMs : 0;
-                    const newMs = Math.max(0, baseMs + deltaMs);
-                    line.noTimestamp = false;
-                    line.timestampMs = newMs;
-                    line.timeMs = newMs;
-                    line.formattedTime = formatLrcTimestamp(newMs);
-                    const tagEl = div.querySelector('.timestamp-tag');
-                    if (tagEl) {
-                        tagEl.textContent = `[${line.formattedTime}]`;
-                        tagEl.style.opacity = '1';
+                    const isSelected = selSet.has(index);
+
+                    if (isSelected && selSet.size > 1) {
+                        selSet.forEach(sIdx => {
+                            const l = lines[sIdx];
+                            if (!l || l.noTimestamp) return;
+                            const baseMs = typeof l.timestampMs === 'number' ? l.timestampMs : 0;
+                            const newMs = Math.max(0, baseMs + deltaMs);
+                            l.noTimestamp = false;
+                            l.timestampMs = newMs;
+                            l.timeMs = newMs;
+                            l.formattedTime = formatLrcTimestamp(newMs);
+                        });
+                        renderLyricLines(container, lines, side);
+                        syncLyricsHighlight(Math.round((audio.currentTime || 0) * 1000));
+                        const secLabel = (deltaMs > 0 ? '+' : '') + (deltaMs / 1000).toFixed(1) + 's';
+                        showToast(t('web.comparator.selected_offset_toast', secLabel, selSet.size));
+                    } else {
+                        const baseMs = typeof line.timestampMs === 'number' ? line.timestampMs : 0;
+                        const newMs = Math.max(0, baseMs + deltaMs);
+                        line.noTimestamp = false;
+                        line.timestampMs = newMs;
+                        line.timeMs = newMs;
+                        line.formattedTime = formatLrcTimestamp(newMs);
+                        const tagEl = div.querySelector('.timestamp-tag');
+                        if (tagEl) {
+                            tagEl.textContent = `[${line.formattedTime}]`;
+                            tagEl.style.opacity = '1';
+                        }
+                        div.setAttribute('data-ms', newMs);
+                        updateOutOfOrderLines(container, lines);
+                        const secLabel = (deltaMs > 0 ? '+' : '') + (deltaMs / 1000).toFixed(1) + 's';
+                        showToast(t('web.line.offset_toast', index + 1, secLabel, line.formattedTime));
                     }
-                    div.setAttribute('data-ms', newMs);
-                    updateOutOfOrderLines(container, lines);
-                    const secLabel = (deltaMs > 0 ? '+' : '') + (deltaMs / 1000).toFixed(1) + 's';
-                    showToast(t('web.line.offset_toast', index + 1, secLabel, line.formattedTime));
                 });
             });
 
@@ -5717,13 +6024,19 @@
         }
     }
 
-    // Global Offset Adjustment
+    // Global or Selected Offset Adjustment
     function applyGlobalOffset(side, seconds) {
         const deltaMs = Math.round(seconds * 1000);
         const state = side === 'local' ? localLinesState : remoteLinesState;
         const container = side === 'local' ? localLyricsScroller : remoteLyricsScroller;
+        const selSet = selectedLineIndices[side];
+        const hasSelection = selSet && selSet.size > 0;
 
-        state.forEach(l => {
+        const targetLines = hasSelection
+            ? Array.from(selSet).sort((a, b) => a - b).map(idx => state[idx]).filter(Boolean)
+            : state;
+
+        targetLines.forEach(l => {
             if (l.noTimestamp) return;
             const currentMs = (typeof l.timestampMs === 'number')
                 ? l.timestampMs
@@ -5738,7 +6051,12 @@
 
         renderLyricLines(container, state, side);
         syncLyricsHighlight(Math.round((audio.currentTime || 0) * 1000));
-        showToast(t('web.comparator.global_offset_toast', (seconds > 0 ? '+' : '') + seconds));
+        const signLabel = seconds > 0 ? '+' : '';
+        if (hasSelection) {
+            showToast(t('web.comparator.selected_offset_toast', signLabel + seconds, targetLines.length));
+        } else {
+            showToast(t('web.comparator.global_offset_toast', signLabel + seconds));
+        }
     }
 
     function applyCustomOffset(side) {
@@ -6209,6 +6527,24 @@
         ) return;
 
         // Global Comparator Shortcuts:
+        // Ctrl + C / Cmd + C: Copy selected lines maintaining relative timing
+        if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && (e.code === 'KeyC' || e.key === 'c' || e.key === 'C')) {
+            const sel = window.getSelection();
+            if (sel && sel.toString().trim().length > 0) {
+                return;
+            }
+            e.preventDefault();
+            copySelectedLyricLines();
+            return;
+        }
+
+        // Ctrl + V / Cmd + V: Paste copied lines below selection, at song time, or at end
+        if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && (e.code === 'KeyV' || e.key === 'v' || e.key === 'V')) {
+            e.preventDefault();
+            pasteLyricLines();
+            return;
+        }
+
         // [Z] and [Backspace]: Go back 1 line
         if ((e.code === 'KeyZ' || e.code === 'Backspace') && !e.ctrlKey && !e.altKey && !e.metaKey) {
             e.preventDefault();
