@@ -3208,10 +3208,18 @@
     tabComparatorBtn.addEventListener('click', () => switchView('comparator'));
     logoBtn.addEventListener('click', () => switchView('menu'));
 
+    let toastTimeout = null;
     function showToast(msg) {
+        if (!toast) return;
         toast.textContent = msg;
         toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 3000);
+        if (toastTimeout) {
+            clearTimeout(toastTimeout);
+        }
+        toastTimeout = setTimeout(() => {
+            toast.classList.remove('show');
+            toastTimeout = null;
+        }, 3000);
     }
 
     function formatTime(seconds) {
@@ -4650,12 +4658,23 @@
     let syncEditModeSide = null; // 'local' | 'remote' | null
     let syncEditCursorIndex = 0;
     let hoveredColumnSide = 'local';
+    let lastActiveSide = 'local';
 
     document.getElementById('columnLeftPanel')?.addEventListener('mouseenter', () => {
         hoveredColumnSide = 'local';
+        lastActiveSide = 'local';
+    });
+    document.getElementById('columnLeftPanel')?.addEventListener('click', () => {
+        hoveredColumnSide = 'local';
+        lastActiveSide = 'local';
     });
     document.getElementById('columnRightPanel')?.addEventListener('mouseenter', () => {
         hoveredColumnSide = 'remote';
+        lastActiveSide = 'remote';
+    });
+    document.getElementById('columnRightPanel')?.addEventListener('click', () => {
+        hoveredColumnSide = 'remote';
+        lastActiveSide = 'remote';
     });
 
     function parseRawTextIntoZeroedLyricLines(rawText) {
@@ -4795,7 +4814,23 @@
     }
 
     let copiedLyricsBuffer = [];
+    let lastCopiedLyricsText = '';
     let lastPasteEventTimestamp = 0;
+
+    function copyToClipboardFallback(text) {
+        try {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            ta.style.left = '-9999px';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+        } catch (_err) {}
+    }
 
     function parseTextToLyricLines(text) {
         if (!text) return [];
@@ -4828,18 +4863,45 @@
     }
 
     function resolveTargetActiveSide(explicitSide = null) {
-        if (explicitSide) return explicitSide;
+        if (explicitSide && (explicitSide === 'local' || explicitSide === 'remote')) {
+            return explicitSide;
+        }
+
+        // 1. Prioridade absoluta: se apenas UM dos lados tem linhas selecionadas via checkbox, esse lado e o alvo garantido
+        const localHasSel = selectedLineIndices.local && selectedLineIndices.local.size > 0;
+        const remoteHasSel = selectedLineIndices.remote && selectedLineIndices.remote.size > 0;
+
+        if (localHasSel && !remoteHasSel) return 'local';
+        if (remoteHasSel && !localHasSel) return 'remote';
+
+        // 2. Se ambos tiverem selecao de checkboxes, desempata pela ultima coluna com a qual o usuario interagiu
+        if (localHasSel && remoteHasSel) {
+            if (lastActiveSide && (lastActiveSide === 'local' || lastActiveSide === 'remote')) {
+                return lastActiveSide;
+            }
+            if (hoveredColumnSide && (hoveredColumnSide === 'local' || hoveredColumnSide === 'remote')) {
+                return hoveredColumnSide;
+            }
+            return 'local';
+        }
+
+        // 3. Nenhuma checkbox selecionada: prioriza a coluna onde o usuario clicou/focou/passou o mouse
+        if (lastActiveSide && (lastActiveSide === 'local' || lastActiveSide === 'remote')) {
+            return lastActiveSide;
+        }
         if (hoveredColumnSide && (hoveredColumnSide === 'local' || hoveredColumnSide === 'remote')) {
             return hoveredColumnSide;
         }
-        if (syncEditModeSide) return syncEditModeSide;
-        if (selectedLineIndices.remote.size > 0 && selectedLineIndices.local.size === 0) return 'remote';
-        if (selectedLineIndices.local.size > 0 && selectedLineIndices.remote.size === 0) return 'local';
+        if (syncEditModeSide && (syncEditModeSide === 'local' || syncEditModeSide === 'remote')) {
+            return syncEditModeSide;
+        }
         return 'local';
     }
 
     function copySelectedLyricLines(explicitSide = null) {
         const side = resolveTargetActiveSide(explicitSide);
+        lastActiveSide = side;
+        hoveredColumnSide = side;
         const state = side === 'local' ? localLinesState : remoteLinesState;
         if (!state || state.length === 0) {
             showToast(t('web.batch.no_lines_to_copy_toast'));
@@ -4856,6 +4918,12 @@
                 .map(i => JSON.parse(JSON.stringify(state[i])));
         } else if (typeof focusedLineIndex[side] === 'number' && focusedLineIndex[side] >= 0 && focusedLineIndex[side] < state.length) {
             linesToCopy = [JSON.parse(JSON.stringify(state[focusedLineIndex[side]]))];
+        } else if (state.length > 0) {
+            const scroller = side === 'local' ? localLyricsScroller : remoteLyricsScroller;
+            const activeDiv = scroller ? scroller.querySelector('.lyric-line.active') : null;
+            const activeIdx = activeDiv ? parseInt(activeDiv.getAttribute('data-index'), 10) : 0;
+            const validIdx = (!isNaN(activeIdx) && activeIdx >= 0 && activeIdx < state.length) ? activeIdx : 0;
+            linesToCopy = [JSON.parse(JSON.stringify(state[validIdx]))];
         }
 
         if (linesToCopy.length === 0) {
@@ -4871,9 +4939,19 @@
             return `[${ts}] ${l.text || ''}`;
         }).join('\n');
 
+        lastCopiedLyricsText = textLines;
+
         if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(textLines).catch(() => {});
+            navigator.clipboard.writeText(textLines).catch(() => {
+                copyToClipboardFallback(textLines);
+            });
+        } else {
+            copyToClipboardFallback(textLines);
         }
+
+        try {
+            window.getSelection()?.removeAllRanges();
+        } catch (_e) {}
 
         showToast(linesToCopy.length === 1
             ? t('web.batch.copied_toast_one', linesToCopy.length)
@@ -4882,18 +4960,22 @@
 
     async function pasteLyricLines(explicitSide = null, rawClipboardText = null) {
         const now = Date.now();
-        if (now - lastPasteEventTimestamp < 200) {
+        if (now - lastPasteEventTimestamp < 150) {
             return;
         }
         lastPasteEventTimestamp = now;
 
         const side = resolveTargetActiveSide(explicitSide);
+        lastActiveSide = side;
+        hoveredColumnSide = side;
         const state = side === 'local' ? localLinesState : remoteLinesState;
         const container = side === 'local' ? localLyricsScroller : remoteLyricsScroller;
 
         let linesToPaste = [];
 
-        if (copiedLyricsBuffer && copiedLyricsBuffer.length > 0) {
+        if (rawClipboardText && rawClipboardText.trim() && rawClipboardText.trim() !== lastCopiedLyricsText.trim()) {
+            linesToPaste = parseTextToLyricLines(rawClipboardText);
+        } else if (copiedLyricsBuffer && copiedLyricsBuffer.length > 0) {
             linesToPaste = copiedLyricsBuffer;
         } else if (rawClipboardText && rawClipboardText.trim()) {
             linesToPaste = parseTextToLyricLines(rawClipboardText);
@@ -5028,6 +5110,25 @@
             : t('web.batch.pasted_toast_other', clonedLines.length, insertIndex + 1, formatLrcTimestamp(targetStartMs)));
     }
 
+    // Direct Ctrl+C native event listener fallback
+    window.addEventListener('copy', (e) => {
+        if (
+            e.target.tagName === 'INPUT' ||
+            e.target.tagName === 'TEXTAREA' ||
+            !viewComparator.classList.contains('active') ||
+            actionModal.style.display === 'flex' ||
+            (shortcutsHelpModal && shortcutsHelpModal.style.display === 'flex') ||
+            (allApiResultsModal && allApiResultsModal.style.display === 'flex') ||
+            (pasteLyricsModal && pasteLyricsModal.style.display === 'flex') ||
+            (instrumentalModal && instrumentalModal.style.display === 'flex') ||
+            (batchBestConfirmModal && batchBestConfirmModal.style.display === 'flex')
+        ) {
+            return;
+        }
+        e.preventDefault();
+        copySelectedLyricLines();
+    });
+
     // Direct Ctrl+V paste support when hovering over or viewing Comparator
     window.addEventListener('paste', (e) => {
         if (
@@ -5086,7 +5187,7 @@
     }
 
     function stepSyncCursor(delta) {
-        const targetSide = syncEditModeSide || hoveredColumnSide || 'local';
+        const targetSide = syncEditModeSide || resolveTargetActiveSide();
         const lines = targetSide === 'local' ? localLinesState : remoteLinesState;
         const container = targetSide === 'local' ? localLyricsScroller : remoteLyricsScroller;
         if (!lines || lines.length === 0) return;
@@ -5309,6 +5410,8 @@
     }
 
     function toggleLineSelection(side, index, isShift = false, forceState = null) {
+        lastActiveSide = side;
+        hoveredColumnSide = side;
         const lines = side === 'local' ? localLinesState : remoteLinesState;
         const container = side === 'local' ? localLyricsScroller : remoteLyricsScroller;
         const selSet = selectedLineIndices[side];
@@ -5441,10 +5544,18 @@
     }
 
     function shiftSelectedLinesByTime(side) {
+        lastActiveSide = side;
+        hoveredColumnSide = side;
         const lines = side === 'local' ? localLinesState : remoteLinesState;
         const container = side === 'local' ? localLyricsScroller : remoteLyricsScroller;
         const selSet = selectedLineIndices[side];
-        if (selSet.size === 0) return;
+        if (selSet.size === 0) {
+            if (typeof focusedLineIndex[side] === 'number' && focusedLineIndex[side] >= 0 && focusedLineIndex[side] < lines.length) {
+                selSet.add(focusedLineIndex[side]);
+            } else {
+                return;
+            }
+        }
 
         const inputEl = document.getElementById(side === 'local' ? 'batchTimeInputLocal' : 'batchTimeInputRemote');
         const deltaMs = parseBatchTimeInputToMs(inputEl?.value);
@@ -5475,10 +5586,18 @@
     }
 
     function alignSelectedBlockToStartTime(side, usePlayerTime = false) {
+        lastActiveSide = side;
+        hoveredColumnSide = side;
         const lines = side === 'local' ? localLinesState : remoteLinesState;
         const container = side === 'local' ? localLyricsScroller : remoteLyricsScroller;
         const selSet = selectedLineIndices[side];
-        if (selSet.size === 0) return;
+        if (selSet.size === 0) {
+            if (typeof focusedLineIndex[side] === 'number' && focusedLineIndex[side] >= 0 && focusedLineIndex[side] < lines.length) {
+                selSet.add(focusedLineIndex[side]);
+            } else {
+                return;
+            }
+        }
 
         let targetStartMs = 0;
         if (usePlayerTime) {
@@ -5648,6 +5767,8 @@
             if (checkbox) {
                 checkbox.addEventListener('click', (e) => {
                     e.stopPropagation();
+                    lastActiveSide = side;
+                    hoveredColumnSide = side;
                     toggleLineSelection(side, index, e.shiftKey, checkbox.checked);
                 });
             }
@@ -5703,6 +5824,8 @@
 
             // Clicking on line: supports Shift+Click / Ctrl+Click selection, Sync Edit Mode cursor, or audio seek
             div.addEventListener('click', (e) => {
+                lastActiveSide = side;
+                hoveredColumnSide = side;
                 if (
                     e.target.closest('.line-actions') ||
                     e.target.closest('.line-select-checkbox') ||
@@ -5945,7 +6068,7 @@
     }
 
     function addNewLyricLine(side) {
-        const targetSide = side || syncEditModeSide || hoveredColumnSide || 'local';
+        const targetSide = resolveTargetActiveSide(side);
         const container = targetSide === 'local' ? localLyricsScroller : remoteLyricsScroller;
         const state = targetSide === 'local' ? localLinesState : remoteLinesState;
 
@@ -6090,6 +6213,7 @@
     btnSaveLrclib.addEventListener('click', () => saveChoice('LRCLIB'));
 
     async function saveChoice(choice) {
+        if (!viewComparator || !viewComparator.classList.contains('active')) return;
         if (!currentTrackDetails) return;
 
         const linesToSave = (choice === 'LRCLIB') ? remoteLinesState : localLinesState;
@@ -6500,6 +6624,21 @@
             }
         }
 
+        // Don't trigger standard single-key shortcuts when typing in inputs or modals
+        if (
+            e.target.tagName === 'INPUT' ||
+            e.target.tagName === 'TEXTAREA' ||
+            actionModal.style.display === 'flex' ||
+            (shortcutsHelpModal && shortcutsHelpModal.style.display === 'flex') ||
+            (allApiResultsModal && allApiResultsModal.style.display === 'flex') ||
+            (pasteLyricsModal && pasteLyricsModal.style.display === 'flex') ||
+            (instrumentalModal && instrumentalModal.style.display === 'flex') ||
+            (batchBestConfirmModal && batchBestConfirmModal.style.display === 'flex')
+        ) return;
+
+        // All comparator shortcuts must strictly and only work when the comparator view is active
+        if (!viewComparator || !viewComparator.classList.contains('active')) return;
+
         // Alt + A (Faixa Anterior) and Alt + F (Próxima Faixa)
         if (e.altKey && !e.ctrlKey && !e.metaKey) {
             if (e.code === 'KeyA' || e.key === 'a' || e.key === 'A') {
@@ -6514,25 +6653,9 @@
             }
         }
 
-        // Don't trigger standard single-key shortcuts when typing in inputs or modals
-        if (
-            e.target.tagName === 'INPUT' ||
-            e.target.tagName === 'TEXTAREA' ||
-            actionModal.style.display === 'flex' ||
-            (shortcutsHelpModal && shortcutsHelpModal.style.display === 'flex') ||
-            (allApiResultsModal && allApiResultsModal.style.display === 'flex') ||
-            (pasteLyricsModal && pasteLyricsModal.style.display === 'flex') ||
-            (instrumentalModal && instrumentalModal.style.display === 'flex') ||
-            (batchBestConfirmModal && batchBestConfirmModal.style.display === 'flex')
-        ) return;
-
         // Global Comparator Shortcuts:
         // Ctrl + C / Cmd + C: Copy selected lines maintaining relative timing
         if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && (e.code === 'KeyC' || e.key === 'c' || e.key === 'C')) {
-            const sel = window.getSelection();
-            if (sel && sel.toString().trim().length > 0) {
-                return;
-            }
             e.preventDefault();
             copySelectedLyricLines();
             return;
@@ -6540,8 +6663,12 @@
 
         // Ctrl + V / Cmd + V: Paste copied lines below selection, at song time, or at end
         if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && (e.code === 'KeyV' || e.key === 'v' || e.key === 'V')) {
-            e.preventDefault();
-            pasteLyricLines();
+            if (copiedLyricsBuffer && copiedLyricsBuffer.length > 0) {
+                e.preventDefault();
+                pasteLyricLines();
+                return;
+            }
+            // If internal buffer is empty, let the native 'paste' event fire to grab clipboard text
             return;
         }
 
@@ -6555,18 +6682,26 @@
         // [N] and [L]: Insert a new verse immediately below the selected line (with current time if playing, or below selected line if paused)
         if ((e.code === 'KeyN' || e.code === 'KeyL') && !e.ctrlKey && !e.altKey && !e.metaKey) {
             e.preventDefault();
-            const targetSide = syncEditModeSide || hoveredColumnSide || 'local';
+            const targetSide = resolveTargetActiveSide();
             addNewLyricLine(targetSide);
             return;
         }
 
-        // [Delete]: Delete selected lines if any are checked/selected
+        // [Delete]: Delete selected lines or focused line
         if (e.code === 'Delete' && !e.ctrlKey && !e.altKey && !e.metaKey) {
-            const targetSide = syncEditModeSide || hoveredColumnSide || 'local';
+            const targetSide = resolveTargetActiveSide();
             if (selectedLineIndices[targetSide] && selectedLineIndices[targetSide].size > 0) {
                 e.preventDefault();
                 deleteSelectedLines(targetSide);
                 return;
+            } else if (typeof focusedLineIndex[targetSide] === 'number' && focusedLineIndex[targetSide] >= 0) {
+                const lines = targetSide === 'local' ? localLinesState : remoteLinesState;
+                if (lines && lines.length > 0 && focusedLineIndex[targetSide] < lines.length) {
+                    e.preventDefault();
+                    selectedLineIndices[targetSide].add(focusedLineIndex[targetSide]);
+                    deleteSelectedLines(targetSide);
+                    return;
+                }
             }
         }
 
@@ -6607,38 +6742,49 @@
 
         switch (e.code) {
             case 'Space':
-                e.preventDefault();
-                btnPlayPause.click();
-                break;
             case 'KeyP':
-                e.preventDefault();
-                btnPlayPause.click();
+                if (!e.ctrlKey && !e.altKey && !e.metaKey) {
+                    e.preventDefault();
+                    btnPlayPause.click();
+                }
                 break;
             case 'Digit1':
             case 'Numpad1':
-                e.preventDefault();
-                btnKeepLocal.click();
+                if (!e.ctrlKey && !e.altKey && !e.metaKey && !e.shiftKey) {
+                    e.preventDefault();
+                    btnKeepLocal.click();
+                }
                 break;
             case 'Digit2':
             case 'Numpad2':
-                e.preventDefault();
-                btnSaveLrclib.click();
+                if (!e.ctrlKey && !e.altKey && !e.metaKey && !e.shiftKey) {
+                    e.preventDefault();
+                    btnSaveLrclib.click();
+                }
                 break;
             case 'ArrowLeft':
-                e.preventDefault();
-                btnSeekBack.click();
+                if (!e.ctrlKey && !e.altKey && !e.metaKey) {
+                    e.preventDefault();
+                    btnSeekBack.click();
+                }
                 break;
             case 'ArrowRight':
-                e.preventDefault();
-                btnSeekForward.click();
+                if (!e.ctrlKey && !e.altKey && !e.metaKey) {
+                    e.preventDefault();
+                    btnSeekForward.click();
+                }
                 break;
             case 'ArrowUp':
-                e.preventDefault();
-                prevTrack();
+                if (!e.ctrlKey && !e.altKey && !e.metaKey) {
+                    e.preventDefault();
+                    prevTrack();
+                }
                 break;
             case 'ArrowDown':
-                e.preventDefault();
-                nextTrack();
+                if (!e.ctrlKey && !e.altKey && !e.metaKey) {
+                    e.preventDefault();
+                    nextTrack();
+                }
                 break;
         }
     });
