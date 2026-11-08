@@ -24,12 +24,27 @@ class LyricLineParserImplTest {
         assertEquals(3, lines.size)
 
         assertEquals(66570L, lines[0].timestampMs)
-        assertEquals("01:06", lines[0].formattedTime)
+        assertEquals("01:06.57", lines[0].formattedTime)
         assertEquals("You, you can do anything you want to", lines[0].text)
 
         assertEquals(74330L, lines[1].timestampMs)
-        assertEquals("01:14", lines[1].formattedTime)
+        assertEquals("01:14.33", lines[1].formattedTime)
         assertEquals("You, you can do anything", lines[1].text)
+    }
+
+    @Test
+    fun `test always formats subseconds including zeroed and 3-digit millisecond tags`() {
+        val lrc = """
+            [01:06] Line without subsecond in file
+            [01:06.573] Line with 3-digit milliseconds
+        """.trimIndent()
+
+        val lines = parser.parse(lrc)
+        assertEquals(2, lines.size)
+        assertEquals(66000L, lines[0].timestampMs)
+        assertEquals("01:06.00", lines[0].formattedTime)
+        assertEquals(66573L, lines[1].timestampMs)
+        assertEquals("01:06.573", lines[1].formattedTime)
     }
 
     @Test
@@ -57,7 +72,7 @@ class LyricLineParserImplTest {
     }
 
     @Test
-    fun `test parsePlain converts unsynchronized lyrics into manual-sync lines at 00_00`() {
+    fun `test parsePlain converts unsynchronized lyrics into manual-sync lines at 00_00_00`() {
         val plain = """
             [Verse 1]
             Eu queria dizer que não ligo
@@ -70,7 +85,7 @@ class LyricLineParserImplTest {
         val lines = parser.parsePlain(plain)
         assertEquals(3, lines.size)
         assertEquals(0L, lines[0].timestampMs)
-        assertEquals("00:00", lines[0].formattedTime)
+        assertEquals("00:00.00", lines[0].formattedTime)
         assertEquals("Eu queria dizer que não ligo", lines[0].text)
         assertEquals("Marceline, volta pra mim", lines[2].text)
     }
@@ -86,8 +101,10 @@ class LyricLineParserImplTest {
         val lines = parser.parse(lrc)
         assertEquals(2, lines.size)
         assertEquals(12400L, lines[0].timestampMs)
+        assertEquals("00:12.40", lines[0].formattedTime)
         assertEquals("Eu queria dizer", lines[0].text)
         assertEquals(15500L, lines[1].timestampMs)
+        assertEquals("00:15.50", lines[1].formattedTime)
         assertEquals("Segunda linha", lines[1].text)
     }
 
@@ -98,8 +115,10 @@ class LyricLineParserImplTest {
 
         assertEquals(2, lines.size)
         assertEquals(10000L, lines[0].timestampMs)
+        assertEquals("00:10.00", lines[0].formattedTime)
         assertEquals("Repeated Chorus", lines[0].text)
         assertEquals(20500L, lines[1].timestampMs)
+        assertEquals("00:20.50", lines[1].formattedTime)
         assertEquals("Repeated Chorus", lines[1].text)
     }
 

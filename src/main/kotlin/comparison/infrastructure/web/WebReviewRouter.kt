@@ -16,6 +16,7 @@ import comparison.domain.models.SaveLyricRequest
 import comparison.domain.ports.AudioMetadataExtractor
 import comparison.infrastructure.io.SystemFileOpenerImpl
 import comparison.infrastructure.parsers.LyricLineParserImpl
+import comparison.infrastructure.parsers.ReportIssueLocalizer
 import comparison.infrastructure.services.WebActionRunnerService
 import java.io.File
 import java.net.URLDecoder
@@ -331,7 +332,9 @@ class WebReviewRouter(
             services.AppOutputDirectories.findAllSyncIssueReports().firstOrNull() ?: File("LyricsSyncIssues_331299062.txt")
         }
 
-        val items = parseReportUseCase.execute(reportFile)
+        val items = parseReportUseCase.execute(reportFile).map { item ->
+            item.copy(issues = ReportIssueLocalizer.localizeIssues(item.issues))
+        }
         cachedItems.clear()
         items.forEach { cachedItems[it.id] = it }
 
@@ -354,7 +357,8 @@ class WebReviewRouter(
         }
 
         val item = cachedItems[id] ?: return
-        val details = extractDetailsUseCase.execute(item)
+        val localizedItem = item.copy(issues = ReportIssueLocalizer.localizeIssues(item.issues))
+        val details = extractDetailsUseCase.execute(localizedItem)
         sendJsonResponse(exchange, 200, details)
     }
 

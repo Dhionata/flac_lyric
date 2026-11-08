@@ -8,9 +8,11 @@ import services.AudioAnalysisServiceImpl
 import services.CleanTitleNomenclatureValidator
 import services.DirectoryServiceImpl
 import services.FileServiceImpl
+import services.JdkLogService
 import services.LoggingInitializer
 import services.LyricSyncValidatorImpl
 import services.MatchServiceImpl
+import services.Messages
 import services.MusicLyricsService
 import ui.UserInterfaceImpl
 
@@ -32,19 +34,11 @@ fun main() {
     val audioAnalysisService = AudioAnalysisServiceImpl()
     val lyricSyncValidator = LyricSyncValidatorImpl()
 
-    val musicLyricsService = MusicLyricsService(
-        userInterface,
-        directoryService,
-        audioFileHandler,
-        lyricFileHandler,
-        matchService,
-        fileService,
-        nomenclatureValidator,
-        audioAnalysisService,
-        lyricSyncValidator
+    MusicLyricsService(
+        userInterface, directoryService, audioFileHandler, lyricFileHandler, matchService, fileService, nomenclatureValidator, audioAnalysisService, lyricSyncValidator
     )
 
-    val logService = services.JdkLogService(object {}.javaClass)
+    val logService = JdkLogService(object {}.javaClass)
     val webActionRunner = WebActionRunnerService(fileService, directoryService)
     val coordinatorService = LyricReviewCoordinatorService(actionRunner = webActionRunner, logService = logService)
 
@@ -53,8 +47,8 @@ fun main() {
     logService.info("log.web.started", webUrl)
     logService.info("log.web.press_ctrl_c")
     println("=================================================================")
-    println(services.Messages.get("log.web.started", webUrl))
-    println(services.Messages.get("log.web.press_ctrl_c"))
+    println(Messages.get("log.web.started", webUrl))
+    println(Messages.get("log.web.press_ctrl_c"))
     println("=================================================================")
 
     // Keep server running

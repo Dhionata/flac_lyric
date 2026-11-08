@@ -2,6 +2,7 @@ package comparison.infrastructure.parsers
 
 import comparison.domain.models.ParsedLyricLine
 import comparison.domain.ports.LyricLineParser
+import java.util.Locale
 
 /**
  * Robust parser for synchronized LRC file lines and unsynchronized plain lyrics.
@@ -19,6 +20,19 @@ class LyricLineParserImpl : LyricLineParser {
         """^(?:作词|作曲|编曲|制作人|混音|母带|录音|吉他|贝斯|鼓|和声|词|曲|Lyrics\s*by|Composed\s*by|Arranged\s*by|Produced\s*by)\s*[:：].*$""",
         RegexOption.IGNORE_CASE
     )
+
+    private fun formatTimestampMs(totalMs: Long): String {
+        val clamped = totalMs.coerceAtLeast(0L)
+        val totalSeconds = clamped / 1000L
+        val mins = totalSeconds / 60L
+        val secs = totalSeconds % 60L
+        val remMs = clamped % 1000L
+        return if (remMs % 10L != 0L) {
+            String.format(Locale.ROOT, "%02d:%02d.%03d", mins, secs, remMs)
+        } else {
+            String.format(Locale.ROOT, "%02d:%02d.%02d", mins, secs, remMs / 10L)
+        }
+    }
 
     override fun parse(content: String): List<ParsedLyricLine> {
         if (content.isBlank()) return emptyList()
@@ -60,7 +74,7 @@ class LyricLineParserImpl : LyricLineParser {
                 }
 
                 val totalMs = (minutes * 60 + seconds) * 1000 + millis
-                val formattedTime = String.format("%02d:%02d", minutes, seconds)
+                val formattedTime = formatTimestampMs(totalMs)
 
                 parsedLines.add(ParsedLyricLine(totalMs, formattedTime, text))
             }
@@ -93,7 +107,7 @@ class LyricLineParserImpl : LyricLineParser {
             plainLines.add(
                 ParsedLyricLine(
                     timestampMs = 0L,
-                    formattedTime = "00:00",
+                    formattedTime = "00:00.00",
                     text = cleaned
                 )
             )

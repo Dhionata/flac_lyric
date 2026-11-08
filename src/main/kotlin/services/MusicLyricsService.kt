@@ -430,7 +430,10 @@ class MusicLyricsService(
                     if (!hasMatchingLrc) {
                         allIssues.add(
                             LyricValidationIssue(
-                                lyricFile = siblingLrc, audioFile = audioFile, issueType = "SEM_LETRA", description = Messages.get("lyric.issue.missing_lyric")
+                                lyricFile = siblingLrc,
+                                audioFile = audioFile,
+                                issueType = Messages.get("lyric.issue.type.missing_lyric"),
+                                description = Messages.get("lyric.issue.missing_lyric")
                             )
                         )
                     }

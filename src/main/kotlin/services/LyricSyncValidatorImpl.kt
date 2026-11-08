@@ -38,7 +38,7 @@ class LyricSyncValidatorImpl : LyricSyncValidator {
                     LyricValidationIssue(
                         lyricFile,
                         audioFile,
-                        "ERRO_LEITURA",
+                        Messages.get("lyric.issue.type.read_error"),
                         Messages.get("lyric.issue.read_error")
                     )
                 )
@@ -90,7 +90,7 @@ class LyricSyncValidatorImpl : LyricSyncValidator {
                 LyricValidationIssue(
                     lyricFile,
                     audioFile,
-                    "SEM_TIMESTAMPS",
+                    Messages.get("lyric.issue.type.no_timestamps"),
                     Messages.get("lyric.issue.no_timestamps")
                 )
             )
@@ -106,7 +106,7 @@ class LyricSyncValidatorImpl : LyricSyncValidator {
                         LyricValidationIssue(
                             lyricFile,
                             audioFile,
-                            "TIMESTAMPS_FORA_DE_ORDEM",
+                            Messages.get("lyric.issue.type.out_of_order"),
                             Messages.get("lyric.issue.out_of_order", currLineNum, formatTime(currTs), formatTime(prevTs))
                         )
                     )
@@ -124,7 +124,7 @@ class LyricSyncValidatorImpl : LyricSyncValidator {
                 LyricValidationIssue(
                     lyricFile,
                     audioFile,
-                    "TIMESTAMPS_ESTATICOS",
+                    Messages.get("lyric.issue.type.static_timestamps"),
                     Messages.get("lyric.issue.static_timestamps", formatTime(firstTs))
                 )
             )
@@ -147,7 +147,7 @@ class LyricSyncValidatorImpl : LyricSyncValidator {
                     LyricValidationIssue(
                         lyricFile,
                         audioFile,
-                        "MUSICA_DIFERENTE",
+                        Messages.get("lyric.issue.type.wrong_song"),
                         Messages.get("lyric.issue.wrong_song", lrcInfo)
                     )
                 )
@@ -161,7 +161,7 @@ class LyricSyncValidatorImpl : LyricSyncValidator {
                         LyricValidationIssue(
                             lyricFile,
                             audioFile,
-                            "ULTRAPASSOU_DURACAO",
+                            Messages.get("lyric.issue.type.exceeds_duration"),
                             Messages.get("lyric.issue.exceeds_duration", formatTime(lastTs), formatTime(audioDuration))
                         )
                     )
@@ -175,7 +175,7 @@ class LyricSyncValidatorImpl : LyricSyncValidator {
                             LyricValidationIssue(
                                 lyricFile,
                                 audioFile,
-                                "TAG_LENGTH_DIVERGENTE",
+                                Messages.get("lyric.issue.type.length_mismatch"),
                                 Messages.get("lyric.issue.length_mismatch", formatTime(lrcLength), diff.toInt(), formatTime(audioDuration))
                             )
                         )
@@ -188,7 +188,7 @@ class LyricSyncValidatorImpl : LyricSyncValidator {
                         LyricValidationIssue(
                             lyricFile,
                             audioFile,
-                            "TERMINO_PREMATURO",
+                            Messages.get("lyric.issue.type.premature_end"),
                             Messages.get("lyric.issue.premature_end", formatTime(lastTs), formatTime(audioDuration))
                         )
                     )

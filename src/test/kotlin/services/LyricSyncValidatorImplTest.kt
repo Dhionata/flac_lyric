@@ -53,7 +53,7 @@ class LyricSyncValidatorImplTest {
 
         val issues = validator.validate(lrc, null)
         assertEquals(1, issues.size)
-        assertEquals("SEM_TIMESTAMPS", issues[0].issueType)
+        assertEquals(Messages.get("lyric.issue.type.no_timestamps"), issues[0].issueType)
     }
 
     @Test
@@ -70,7 +70,7 @@ class LyricSyncValidatorImplTest {
 
         val issues = validator.validate(lrc, null)
         assertEquals(1, issues.size)
-        assertEquals("TIMESTAMPS_ESTATICOS", issues[0].issueType)
+        assertEquals(Messages.get("lyric.issue.type.static_timestamps"), issues[0].issueType)
     }
 
     @Test
@@ -88,7 +88,7 @@ class LyricSyncValidatorImplTest {
         val dummyAudio = File(tempDir, "Claudia Leitte - Bola De Sabao.flac")
 
         val issues = validator.validate(lrc, dummyAudio)
-        assertTrue(issues.any { it.issueType == "MUSICA_DIFERENTE" })
+        assertTrue(issues.any { it.issueType == Messages.get("lyric.issue.type.wrong_song") })
     }
 
     @Test
@@ -106,7 +106,7 @@ class LyricSyncValidatorImplTest {
         val dummyAudio = File(tempDir, "Etta Marcus - Let It Happen, Let It Go.opus")
 
         val issues = validator.validate(lrc, dummyAudio)
-        assertTrue(issues.any { it.issueType == "MUSICA_DIFERENTE" })
+        assertTrue(issues.any { it.issueType == Messages.get("lyric.issue.type.wrong_song") })
     }
 
     @Test
@@ -123,7 +123,7 @@ class LyricSyncValidatorImplTest {
         val dummyAudio = File(tempDir, "Holly Humberstone - Embers In The Sky.opus")
 
         val issues = validator.validate(lrc, dummyAudio)
-        assertTrue(issues.any { it.issueType == "MUSICA_DIFERENTE" })
+        assertTrue(issues.any { it.issueType == Messages.get("lyric.issue.type.wrong_song") })
     }
 
     @Test
@@ -151,7 +151,7 @@ class LyricSyncValidatorImplTest {
 
         val issues = validator.validate(lrc, null)
         assertEquals(1, issues.size)
-        assertEquals("SEM_TIMESTAMPS", issues[0].issueType)
+        assertEquals("NO_TIMESTAMPS", issues[0].issueType)
         assertTrue(
             issues[0].description.contains("no [mm:ss] timestamps"),
             "Expected English description, got: ${issues[0].description}"

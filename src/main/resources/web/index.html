@@ -792,7 +792,7 @@
         }
 
         .line-input-time {
-            width: 72px;
+            width: 82px;
             background: #212121;
             border: 1px solid #38bdf8;
             color: #38bdf8;
@@ -801,6 +801,121 @@
             border-radius: 4px;
             font-size: 0.75rem;
             text-align: center;
+        }
+
+        .btn-text-mode-active {
+            background: rgba(16, 185, 129, 0.22) !important;
+            border-color: #10b981 !important;
+            color: #6ee7b7 !important;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.28) !important;
+        }
+
+        .inline-text-editor-banner {
+            padding: 8px 14px;
+            background: rgba(16, 185, 129, 0.13);
+            border-bottom: 1px solid rgba(16, 185, 129, 0.42);
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            flex-wrap: wrap;
+            font-size: 0.76rem;
+            color: #a7f3d0;
+            flex-shrink: 0;
+        }
+
+        .inline-text-editor-banner.active {
+            display: flex;
+        }
+
+        .inline-text-editor-wrapper {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            padding: 12px 14px;
+            overflow: hidden;
+        }
+
+        .inline-text-editor-wrapper.active {
+            display: flex;
+        }
+
+        .inline-text-editor-textarea {
+            flex: 1;
+            width: 100%;
+            resize: none;
+            background: #141414;
+            border: 1px solid rgba(16, 185, 129, 0.45);
+            border-radius: 8px;
+            color: var(--text-main);
+            padding: 12px 14px;
+            font-family: 'Inter', -apple-system, sans-serif;
+            font-size: 0.90rem;
+            line-height: 1.6;
+        }
+
+        .inline-text-editor-textarea:focus {
+            outline: none;
+            border-color: #34d399;
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.18);
+        }
+
+        .paste-mode-tabs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            background: #141414;
+            padding: 5px;
+            border-radius: 8px;
+            border: 1px solid var(--bg-card-border);
+        }
+
+        .paste-mode-tab {
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 0.79rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-align: center;
+        }
+
+        .paste-mode-tab:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .paste-mode-tab.active {
+            background: rgba(56, 189, 248, 0.16);
+            border-color: #38bdf8;
+            color: #7dd3fc;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+        }
+
+        [data-theme="light"] .inline-text-editor-banner {
+            background: #ecfdf5;
+            border-bottom-color: #6ee7b7;
+            color: #065f46;
+        }
+
+        [data-theme="light"] .inline-text-editor-textarea {
+            background: #ffffff;
+            color: #0f172a;
+            border-color: #34d399;
+        }
+
+        [data-theme="light"] .paste-mode-tabs {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        [data-theme="light"] .paste-mode-tab.active {
+            background: #e0f2fe;
+            border-color: #0284c7;
+            color: #0369a1;
         }
 
         /* Column Bottom Action Footer */
@@ -2303,7 +2418,11 @@
                     </button>
                     <button class="btn-offset" data-i18n="web.comparator.paste_btn" data-i18n-title="web.comparator.paste_title" onclick="openPasteLyricsModal('local')"
                             style="color: #a78bfa;"
-                            title="Colar uma letra inteira (ou pressione Ctrl+V com o mouse sobre esta coluna) com minutagens zeradas [00:00.00]">📋 Colar Letra
+                            title="Colar, inserir versos faltantes ou editar texto da letra (com opção de manter minutagens ou zerar tudo [00:00.00])">📋 Colar Letra
+                    </button>
+                    <button class="btn-offset" data-i18n="web.comparator.edit_text_btn" data-i18n-title="web.comparator.edit_text_title" id="btnInlineTextEditLocal"
+                            onclick="toggleInlineTextEditMode('local')" style="color: #34d399;"
+                            title="Editar somente o texto da música livremente (colar/remover/alterar versos) preservando as minutagens existentes e deixando linhas novas com [00:00.00]">📝 Editar Texto
                     </button>
                     <button class="btn-offset" data-i18n="web.comparator.sync_mode_btn" data-i18n-title="web.comparator.sync_mode_title" id="btnSyncEditModeLocal"
                             onclick="toggleSyncEditMode('local')" style="color: #fbbf24;"
@@ -2340,7 +2459,7 @@
                     </button>
                     <button class="btn-offset" data-i18n="web.batch.paste_btn" data-i18n-title="web.batch.paste_title" onclick="pasteLyricLines('local')"
                             style="color: #a78bfa; border-color: rgba(167, 139, 250, 0.45);"
-                            title="Colar versos abaixo da seleção, no tempo da música ou no final (Ctrl + V)">📋 Colar [Ctrl+V]
+                            title="Colar versos abaixo da linha selecionada (texto externo entra zerado [00:00.00]) (Ctrl + V)">📋 Colar [Ctrl+V]
                     </button>
                 </div>
                 <div class="batch-bar-group">
@@ -2395,6 +2514,26 @@
                             style="color: #f87171;" title="Sair do Modo Edição">✕ Sair
                     </button>
                 </div>
+            </div>
+
+            <!-- Editor Livre de Texto Inline (Local) -->
+            <div class="inline-text-editor-banner" id="inlineTextBannerLocal">
+                <div>
+                    <strong id="inlineTextTitleLocal">📝 Editor Livre de Texto (Local)</strong>
+                    <div data-i18n="web.text_edit.banner_hint" style="font-size: 0.7rem; opacity: 0.9;">Edite, remova ou cole versos em qualquer ponto (1 por linha). As minutagens existentes são mantidas; linhas novas entram com [00:00.00].</div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                    <button class="btn-offset" data-i18n="web.text_edit.apply_btn" onclick="commitInlineTextEdit('local')"
+                            style="color: #34d399; border-color: #10b981; font-weight: 700;">✅ Aplicar Texto (Manter Tempos)
+                    </button>
+                    <button class="btn-offset" data-i18n="web.text_edit.cancel_btn" onclick="exitInlineTextEditMode('local', true)"
+                            style="color: #f87171;">✕ Cancelar
+                    </button>
+                </div>
+            </div>
+            <div class="inline-text-editor-wrapper" id="inlineTextWrapperLocal">
+                <textarea class="inline-text-editor-textarea" data-i18n-placeholder="web.text_edit.placeholder" id="inlineTextAreaLocal"
+                          placeholder="Digite ou cole os versos da música aqui (um verso por linha)..."></textarea>
             </div>
 
             <div class="lyrics-container" id="localLyricsScroller">
@@ -2541,7 +2680,11 @@
                 <div class="offset-btn-group">
                     <button class="btn-offset" data-i18n="web.comparator.paste_btn" data-i18n-title="web.comparator.paste_title" onclick="openPasteLyricsModal('remote')"
                             style="color: #a78bfa;"
-                            title="Colar uma letra inteira (ou pressione Ctrl+V com o mouse sobre esta coluna) com minutagens zeradas [00:00.00]">📋 Colar Letra
+                            title="Colar, inserir versos faltantes ou editar texto da letra (com opção de manter minutagens ou zerar tudo [00:00.00])">📋 Colar Letra
+                    </button>
+                    <button class="btn-offset" data-i18n="web.comparator.edit_text_btn" data-i18n-title="web.comparator.edit_text_title" id="btnInlineTextEditRemote"
+                            onclick="toggleInlineTextEditMode('remote')" style="color: #34d399;"
+                            title="Editar somente o texto da música livremente (colar/remover/alterar versos) preservando as minutagens existentes e deixando linhas novas com [00:00.00]">📝 Editar Texto
                     </button>
                     <button class="btn-offset" data-i18n="web.comparator.sync_mode_btn" data-i18n-title="web.comparator.sync_mode_title" id="btnSyncEditModeRemote"
                             onclick="toggleSyncEditMode('remote')" style="color: #fbbf24;"
@@ -2578,7 +2721,7 @@
                     </button>
                     <button class="btn-offset" data-i18n="web.batch.paste_btn" data-i18n-title="web.batch.paste_title" onclick="pasteLyricLines('remote')"
                             style="color: #a78bfa; border-color: rgba(167, 139, 250, 0.45);"
-                            title="Colar versos abaixo da seleção, no tempo da música ou no final (Ctrl + V)">📋 Colar [Ctrl+V]
+                            title="Colar versos abaixo da linha selecionada (texto externo entra zerado [00:00.00]) (Ctrl + V)">📋 Colar [Ctrl+V]
                     </button>
                 </div>
                 <div class="batch-bar-group">
@@ -2633,6 +2776,26 @@
                             style="color: #f87171;" title="Sair do Modo Edição">✕ Sair
                     </button>
                 </div>
+            </div>
+
+            <!-- Editor Livre de Texto Inline (Online) -->
+            <div class="inline-text-editor-banner" id="inlineTextBannerRemote">
+                <div>
+                    <strong id="inlineTextTitleRemote">📝 Editor Livre de Texto (Online)</strong>
+                    <div data-i18n="web.text_edit.banner_hint" style="font-size: 0.7rem; opacity: 0.9;">Edite, remova ou cole versos em qualquer ponto (1 por linha). As minutagens existentes são mantidas; linhas novas entram com [00:00.00].</div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                    <button class="btn-offset" data-i18n="web.text_edit.apply_btn" onclick="commitInlineTextEdit('remote')"
+                            style="color: #34d399; border-color: #10b981; font-weight: 700;">✅ Aplicar Texto (Manter Tempos)
+                    </button>
+                    <button class="btn-offset" data-i18n="web.text_edit.cancel_btn" onclick="exitInlineTextEditMode('remote', true)"
+                            style="color: #f87171;">✕ Cancelar
+                    </button>
+                </div>
+            </div>
+            <div class="inline-text-editor-wrapper" id="inlineTextWrapperRemote">
+                <textarea class="inline-text-editor-textarea" data-i18n-placeholder="web.text_edit.placeholder" id="inlineTextAreaRemote"
+                          placeholder="Digite ou cole os versos da música aqui (um verso por linha)..."></textarea>
             </div>
 
             <div class="lyrics-container" id="remoteLyricsScroller">
@@ -2870,13 +3033,50 @@
 </div>
 
 <!-- =========================================================================
+     MODAL DE CONFIRMAÇÃO DE ALTERAÇÕES PENDENTES (5 SEGUNDOS DE TRAVA NO SIM)
+     ========================================================================= -->
+<div class="modal-backdrop" id="unsavedChangesModal" style="display: none; z-index: 3500;">
+    <div class="modal-card" style="max-width: 560px; border-color: rgba(245, 158, 11, 0.55);">
+        <div class="modal-header" style="background: rgba(245, 158, 11, 0.08);">
+            <div class="modal-title-group">
+                <span class="modal-action-icon">⚠️</span>
+                <div>
+                    <h2 data-i18n="web.unsaved.title" style="color: #fcd34d;">⚠️ Alterações Pendentes Não Salvas!</h2>
+                    <div class="modal-action-subtitle" data-i18n="web.unsaved.subtitle" style="color: #fde68a;">Proteção contra perda acidental de edição • Trava de segurança de 5 segundos</div>
+                </div>
+            </div>
+            <button class="btn-close-modal" data-i18n-title="web.modal.close_esc_title" onclick="closeUnsavedChangesModal()" title="Fechar (Esc)">✕</button>
+        </div>
+        <div class="modal-body" style="gap: 14px;">
+            <div data-i18n-html="web.unsaved.desc_html" style="padding: 14px; border-radius: 10px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.35); color: var(--text-main); font-size: 0.92rem; line-height: 1.55;">
+                Você possui <b>alterações pendentes não salvas</b> na música atual.<br>Deseja realmente descartar as edições e sair/trocar de música?
+            </div>
+            <div data-i18n-arg0="5" data-i18n-html="web.unsaved.countdown_waiting_html" data-i18n-preserve-id="unsavedTimerSeconds" id="unsavedCountdownBanner"
+                 style="padding: 10px 14px; border-radius: 8px; background: #262626; border: 1px solid #fbbf24; color: #fde68a; font-weight: 700; text-align: center; font-size: 0.88rem;">
+                ⏳ Aguarde <span id="unsavedTimerSeconds">5</span>s para liberar o botão "Sim"...
+            </div>
+        </div>
+        <div class="modal-footer" style="justify-content: space-between; gap: 12px;">
+            <button class="btn-action" data-i18n="web.unsaved.no_btn" id="btnCancelUnsavedNo" onclick="closeUnsavedChangesModal()"
+                    style="background: #10b981; color: #052e16; font-weight: 800; border: 2px solid #6ee7b7; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.28); flex: 1; justify-content: center;">
+                🛡️ Não, Continuar Editando (Padrão)
+            </button>
+            <button class="btn-action" data-i18n="web.unsaved.yes_btn_timer" data-i18n-arg0="5" disabled id="btnConfirmUnsavedYes" onclick="confirmUnsavedChangesProceed()"
+                    style="background: #dc2626; color: #fff; opacity: 0.45; cursor: not-allowed; min-width: 170px; justify-content: center;">
+                Sim (5s)
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- =========================================================================
      MODAL PARA COLAR LETRA COM MINUTAGENS ZERADAS
      ========================================================================= -->
 <div class="modal-backdrop" id="pasteLyricsModal" style="display: none;">
-    <div class="modal-card" style="max-width: 720px;">
+    <div class="modal-card" style="max-width: 760px;">
         <div class="modal-header">
             <div class="modal-title-group">
-                <span class="modal-action-icon">📋</span>
+                <span class="modal-action-icon" id="pasteLyricsModalIcon">📋</span>
                 <div>
                     <h2 data-i18n="web.paste.title" id="pasteLyricsModalTitle">Colar Letra com Minutagens Zeradas</h2>
                     <div class="modal-action-subtitle" data-i18n="web.paste.subtitle" id="pasteLyricsModalSubtitle">Cada quebra de linha criará um verso com minutagem
@@ -2887,32 +3087,58 @@
             <button class="btn-close-modal" data-i18n-title="web.modal.close_esc_title" onclick="closePasteLyricsModal()" title="Fechar (Esc)">✕</button>
         </div>
         <div class="modal-body">
-            <p class="modal-desc" data-i18n-html="web.paste.desc_html">
+            <div class="paste-mode-tabs" id="pasteModeTabs">
+                <button class="paste-mode-tab" data-i18n="web.paste.mode_edit_text" data-paste-mode="edit_text" onclick="setPasteModalMode('edit_text', true)" type="button">
+                    📝 Só Editar Texto (Manter Tempos)
+                </button>
+                <button class="paste-mode-tab" data-i18n="web.paste.mode_insert_after" data-paste-mode="insert_after" onclick="setPasteModalMode('insert_after', true)" type="button">
+                    ➕ Inserir Trecho [00:00.00]
+                </button>
+                <button class="paste-mode-tab active" data-i18n="web.paste.mode_replace_all" data-paste-mode="replace_all" onclick="setPasteModalMode('replace_all', true)" type="button">
+                    🔄 Substituir Tudo [00:00.00]
+                </button>
+            </div>
+            <p class="modal-desc" data-i18n-html="web.paste.desc_html" id="pasteLyricsModalDesc">
                 Cole abaixo a letra completa da música. Linhas em branco entre estrofes serão ignoradas automaticamente e cada verso será criado com a minutagem zerada (<code>[00:00.00]</code>)
                 para você sincronizar facilmente com o <b>Modo Edição (Espaço / Ctrl)</b>.
             </p>
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <span class="form-label" data-i18n="web.paste.apply_target_label">Aplicar em:</span>
-                    <select class="select-input" id="pasteLyricsTargetSelect" style="padding: 5px 10px;">
-                        <option data-i18n="web.paste.target_local" value="local">● Letra Atual (Local .lrc)</option>
-                        <option data-i18n="web.paste.target_remote" value="remote">● Letra Online (Multi-API)</option>
-                    </select>
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span class="form-label" data-i18n="web.paste.apply_target_label">Aplicar em:</span>
+                        <select class="select-input" id="pasteLyricsTargetSelect" onchange="handlePasteModalTargetChange()" style="padding: 5px 10px;">
+                            <option data-i18n="web.paste.target_local" value="local">● Letra Atual (Local .lrc)</option>
+                            <option data-i18n="web.paste.target_remote" value="remote">● Letra Online (Multi-API)</option>
+                        </select>
+                    </div>
+                    <div id="pasteInsertPosGroup" style="display: none; align-items: center; gap: 6px;">
+                        <span class="form-label" data-i18n="web.paste.insert_pos_label">Inserir em:</span>
+                        <select class="select-input" id="pasteInsertPosSelect" style="padding: 5px 10px;">
+                            <option data-i18n="web.paste.insert_pos_after_selected" data-i18n-arg0="1" value="after_selected">Após a linha selecionada (#1)</option>
+                            <option data-i18n="web.paste.insert_pos_end" value="end">No final da música</option>
+                            <option data-i18n="web.paste.insert_pos_start" value="start">No início (antes da linha #1)</option>
+                        </select>
+                    </div>
                 </div>
-                <button class="btn-browse" data-i18n="web.paste.read_clipboard_btn" onclick="readClipboardIntoPasteTextarea()" type="button">📋 Ler da Área de Transferência
-                </button>
+                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                    <button class="btn-browse" data-i18n="web.paste.load_current_text_btn" id="btnLoadCurrentTextPasteModal" onclick="loadCurrentSideTextIntoPasteModal()" type="button">
+                        📄 Carregar Texto Atual
+                    </button>
+                    <button class="btn-browse" data-i18n="web.paste.read_clipboard_btn" onclick="readClipboardIntoPasteTextarea()" type="button">📋 Ler da Área de Transferência
+                    </button>
+                </div>
             </div>
             <textarea class="form-input" data-i18n-placeholder="web.paste.textarea_placeholder" id="pasteLyricsTextarea" placeholder="Cole a letra aqui (Ctrl + V)..."
                       rows="13"
                       style="width: 100%; resize: vertical; line-height: 1.5; font-family: 'Inter', sans-serif;"></textarea>
             <label class="checkbox-group">
                 <input checked id="pasteAutoEnterSyncMode" type="checkbox">
-                <span data-i18n-html="web.paste.auto_sync_label_html">Já ativar o <b>🎯 Modo Edição (Set Rápido com Espaço / Ctrl)</b> na linha 1 após aplicar</span>
+                <span data-i18n-html="web.paste.auto_sync_label_html" id="pasteAutoSyncLabelSpan">Já ativar o <b>🎯 Modo Edição (Set Rápido com Espaço / Ctrl)</b> na linha 1 após aplicar</span>
             </label>
         </div>
         <div class="modal-footer">
             <button class="btn-secondary" data-i18n="web.action.cancel" onclick="closePasteLyricsModal()">Cancelar</button>
-            <button class="btn-action btn-primary" data-i18n="web.paste.apply_btn" onclick="applyPastedLyricsFromModal()">
+            <button class="btn-action btn-primary" data-i18n="web.paste.apply_btn" id="btnApplyPasteModal" onclick="applyPastedLyricsFromModal()">
                 ✅ Criar Linhas Zeradas [00:00.00]
             </button>
         </div>
@@ -3118,6 +3344,13 @@
         });
     }
 
+    if (window.__SERVER_LOCALE__ && typeof window.__SERVER_LOCALE__ === 'string') {
+        document.documentElement.lang = window.__SERVER_LOCALE__;
+    }
+    if (Object.keys(i18nMessages).length > 0) {
+        applyI18nToDom();
+    }
+
     // State
     let currentItems = [];
     let currentIndex = -1;
@@ -3184,8 +3417,14 @@
     const modalCancelBtn = document.getElementById('modalCancelBtn');
     const modalExecuteBtn = document.getElementById('modalExecuteBtn');
 
-    function switchView(viewName) {
+    function switchView(viewName, forceSkipUnsavedCheck = false) {
         if (viewName === 'menu') {
+            if (!forceSkipUnsavedCheck && viewComparator && viewComparator.classList.contains('active') && typeof hasUnsavedChanges === 'function' && hasUnsavedChanges()) {
+                requestUnsavedChangesConfirmation(() => {
+                    switchView('menu', true);
+                });
+                return;
+            }
             tabMenuBtn.classList.add('active');
             tabComparatorBtn.classList.remove('active');
             viewMenu.classList.add('active');
@@ -3230,15 +3469,22 @@
     }
 
     function formatLrcTimestamp(ms) {
-        const totalSeconds = Math.max(0, ms / 1000);
-        const mins = Math.floor(totalSeconds / 60);
-        const secs = Math.floor(totalSeconds % 60);
-        const hundredths = Math.floor((totalSeconds - Math.floor(totalSeconds)) * 100);
-        return (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs + '.' + (hundredths < 10 ? '0' : '') + hundredths;
+        const safeMs = Math.max(0, Math.round(Number(ms) || 0));
+        const totalSecs = Math.floor(safeMs / 1000);
+        const mins = Math.floor(totalSecs / 60);
+        const secs = totalSecs % 60;
+        const remMs = safeMs % 1000;
+        const mm = String(mins).padStart(2, '0');
+        const ss = String(secs).padStart(2, '0');
+        if (remMs % 10 !== 0) {
+            return `${mm}:${ss}.${String(remMs).padStart(3, '0')}`;
+        }
+        return `${mm}:${ss}.${String(Math.floor(remMs / 10)).padStart(2, '0')}`;
     }
 
     function parseFormattedTimeToMs(timeStr) {
-        const match = timeStr.trim().match(/(\d{1,2}):(\d{2})(?:\.(\d{1,3}))?/);
+        if (!timeStr) return 0;
+        const match = String(timeStr).trim().match(/(\d{1,2}):(\d{2})(?:[.,:](\d{1,3}))?/);
         if (!match) return 0;
         const mins = parseInt(match[1], 10);
         const secs = parseInt(match[2], 10);
@@ -3715,6 +3961,7 @@
     function extractIssueTagsFromItem(item) {
         const tags = [];
         if (!item || !Array.isArray(item.issues)) return tags;
+        const isPt = (document.documentElement.lang || '').toLowerCase().startsWith('pt');
         item.issues.forEach(iss => {
             const m = String(iss || '').match(/^\[([A-Z0-9_]+)\]/i);
             if (m && m[1]) {
@@ -3723,11 +3970,17 @@
             } else {
                 const lower = String(iss || '').toLowerCase();
                 let inferred = null;
-                if (lower.includes('não encontrado') || lower.includes('sem letra') || lower.includes('not found') || lower.includes('missing lyric')) inferred = 'SEM_LETRA';
-                else if (lower.includes('sem marcações') || lower.includes('sem timestamps') || lower.includes('no timestamp')) inferred = 'SEM_TIMESTAMPS';
-                else if (lower.includes('length') || lower.includes('duração') || lower.includes('duration')) inferred = 'TAG_LENGTH_DIVERGENTE';
-                else if (lower.includes('prematuro') || lower.includes('acaba aos') || lower.includes('premature') || lower.includes('ends at')) inferred = 'TERMINO_PREMATURO';
-                else if (lower.includes('fora de ordem') || lower.includes('out of order')) inferred = 'TIMESTAMPS_FORA_DE_ORDEM';
+                if (lower.includes('não encontrado') || lower.includes('sem letra') || lower.includes('not found') || lower.includes('missing lyric')) {
+                    inferred = isPt ? 'SEM_LETRA' : 'MISSING_LYRICS';
+                } else if (lower.includes('sem marcações') || lower.includes('sem timestamps') || lower.includes('no timestamp')) {
+                    inferred = isPt ? 'SEM_TIMESTAMPS' : 'NO_TIMESTAMPS';
+                } else if (lower.includes('length') || lower.includes('duração') || lower.includes('duration')) {
+                    inferred = isPt ? 'TAG_LENGTH_DIVERGENTE' : 'LENGTH_MISMATCH';
+                } else if (lower.includes('prematuro') || lower.includes('acaba aos') || lower.includes('premature') || lower.includes('ends at')) {
+                    inferred = isPt ? 'TERMINO_PREMATURO' : 'PREMATURE_END';
+                } else if (lower.includes('fora de ordem') || lower.includes('out of order')) {
+                    inferred = isPt ? 'TIMESTAMPS_FORA_DE_ORDEM' : 'OUT_OF_ORDER';
+                }
                 if (inferred && !tags.includes(inferred)) tags.push(inferred);
             }
         });
@@ -3845,11 +4098,35 @@
         }
     }
 
+    let currentLoadedReportPath = '';
+    let initialLocalSnapshot = null;
+    let initialRemoteSnapshot = null;
+    let lastCandidateRemoteSnapshot = null;
+    let isTrackLoading = false;
+
     reportSelect.addEventListener('change', () => {
-        loadReportItems(reportSelect.value);
+        const nextReportPath = reportSelect.value;
+        if (typeof hasUnsavedChanges === 'function' && hasUnsavedChanges()) {
+            reportSelect.value = currentLoadedReportPath;
+            requestUnsavedChangesConfirmation(() => {
+                reportSelect.value = nextReportPath;
+                loadReportItems(nextReportPath, true);
+            });
+            return;
+        }
+        loadReportItems(nextReportPath, true);
     });
 
-    async function loadReportItems(reportPath) {
+    async function loadReportItems(reportPath, forceSkipUnsavedCheck = false) {
+        if (!forceSkipUnsavedCheck && currentIndex >= 0 && typeof hasUnsavedChanges === 'function' && hasUnsavedChanges()) {
+            requestUnsavedChangesConfirmation(() => {
+                loadReportItems(reportPath, true);
+            });
+            return;
+        }
+        currentLoadedReportPath = reportPath || '';
+        resetTrackCleanBaseline();
+
         // Cancel any in-flight track request from previous report/track
         activeTrackRequestId++;
         if (activeTrackAbortController) {
@@ -3871,7 +4148,7 @@
             headerProgress.textContent = t('web.header.status.tracks_to_review', currentItems.length);
 
             if (currentItems.length > 0) {
-                await selectTrack(0, viewComparator.classList.contains('active'));
+                await selectTrack(0, viewComparator.classList.contains('active'), true);
             } else {
                 clearViewer();
             }
@@ -3958,8 +4235,18 @@
 
     trackSearchInput.addEventListener('input', () => renderTrackList());
 
-    async function selectTrack(index, autoPlay = true) {
+    async function selectTrack(index, autoPlay = true, forceSkipUnsavedCheck = false) {
         if (index < 0 || index >= currentItems.length) return;
+
+        if (!forceSkipUnsavedCheck && currentIndex >= 0 && typeof hasUnsavedChanges === 'function' && hasUnsavedChanges()) {
+            requestUnsavedChangesConfirmation(() => {
+                selectTrack(index, autoPlay, true);
+            });
+            return;
+        }
+
+        isTrackLoading = true;
+        resetTrackCleanBaseline();
 
         // Cancel any previous in-flight /api/track request so its late response never overwrites the current song
         const reqId = ++activeTrackRequestId;
@@ -4017,6 +4304,7 @@
                 return;
             }
             if (reqId === activeTrackRequestId) {
+                isTrackLoading = false;
                 showToast(t('web.player.track_load_error_toast'));
             }
         }
@@ -4150,11 +4438,23 @@
             issuesBox.style.display = 'none';
         }
 
-        // Reset in-memory timestamp backups, multi-line selection, and Sync Edit Mode when switching tracks
+        // Reset in-memory timestamp backups, multi-line selection, inline text editor, and Sync Edit Mode when switching tracks
         localTimestampsBackup = null;
         remoteTimestampsBackup = null;
         updateToggleTimestampsBtnUI('local', false);
         updateToggleTimestampsBtnUI('remote', false);
+        if (typeof focusedLineIndex === 'object' && focusedLineIndex) {
+            focusedLineIndex.local = -1;
+            focusedLineIndex.remote = -1;
+        }
+        if (typeof lastClickedLineIndex === 'object' && lastClickedLineIndex) {
+            lastClickedLineIndex.local = -1;
+            lastClickedLineIndex.remote = -1;
+        }
+        if (typeof exitInlineTextEditMode === 'function') {
+            exitInlineTextEditMode('local', false);
+            exitInlineTextEditMode('remote', false);
+        }
         if (typeof clearLineSelection === 'function') {
             clearLineSelection('local', false);
             clearLineSelection('remote', false);
@@ -4203,6 +4503,11 @@
         remoteLinesState = JSON.parse(JSON.stringify(remoteLines));
         renderLyricLines(remoteLyricsScroller, remoteLinesState, 'remote');
         remoteStatusBadge.textContent = t('web.comparator.verses_count', remoteLinesState.length);
+
+        initialLocalSnapshot = serializeLinesToLrc(localLinesState);
+        initialRemoteSnapshot = serializeLinesToLrc(remoteLinesState);
+        lastCandidateRemoteSnapshot = initialRemoteSnapshot;
+        isTrackLoading = false;
 
         // Immediately sync active line to start of track
         syncLyricsHighlight(0);
@@ -4255,7 +4560,10 @@
             </div>
           `;
 
-                chip.addEventListener('click', async () => {
+                const applyCandidateSelection = async () => {
+                    if (inlineTextEditActive.remote) {
+                        exitInlineTextEditMode('remote', false);
+                    }
                     candidatesList.querySelectorAll('.candidate-chip').forEach(c => c.classList.remove('active'));
                     chip.classList.add('active');
                     updateRemoteSourceBadge(srcName);
@@ -4270,6 +4578,8 @@
                         });
                         remoteLinesState = await res.json();
                         renderLyricLines(remoteLyricsScroller, remoteLinesState, 'remote');
+                        lastCandidateRemoteSnapshot = serializeLinesToLrc(remoteLinesState);
+                        initialRemoteSnapshot = lastCandidateRemoteSnapshot;
                         remoteStatusBadge.textContent = t('web.comparator.verses_count', remoteLinesState.length);
                         syncLyricsHighlight(Math.round((audio.currentTime || 0) * 1000));
                         if (cand.syncedLyrics) {
@@ -4280,6 +4590,16 @@
                     } else {
                         showToast(t('web.candidates.no_lyrics_toast'));
                     }
+                };
+
+                chip.addEventListener('click', () => {
+                    if (typeof hasRemoteManualEdits === 'function' && hasRemoteManualEdits()) {
+                        requestUnsavedChangesConfirmation(() => {
+                            applyCandidateSelection();
+                        });
+                        return;
+                    }
+                    applyCandidateSelection();
                 });
 
                 candidatesList.appendChild(chip);
@@ -4586,7 +4906,7 @@
         }
     }
 
-    async function useSelectedAllApiResult(mode) {
+    async function useSelectedAllApiResult(mode, forceSkipUnsavedCheck = false) {
         if (selectedAllApiItemIndex < 0 || selectedAllApiItemIndex >= allApiResultsState.length) return;
         const cand = allApiResultsState[selectedAllApiItemIndex];
         const srcName = cand.source || 'LRCLIB';
@@ -4594,6 +4914,13 @@
 
         if (!rawPayload) {
             showToast(t('web.all_api.no_content_toast'));
+            return;
+        }
+
+        if (!forceSkipUnsavedCheck && typeof hasRemoteManualEdits === 'function' && hasRemoteManualEdits()) {
+            requestUnsavedChangesConfirmation(() => {
+                useSelectedAllApiResult(mode, true);
+            });
             return;
         }
 
@@ -4633,11 +4960,15 @@
                 });
             }
 
+            if (inlineTextEditActive.remote) {
+                exitInlineTextEditMode('remote', false);
+            }
             remoteTimestampsBackup = null;
             updateToggleTimestampsBtnUI('remote', false);
             remoteLinesState = parsedLines;
             updateRemoteSourceBadge(srcName);
             renderLyricLines(remoteLyricsScroller, remoteLinesState, 'remote');
+            lastCandidateRemoteSnapshot = serializeLinesToLrc(remoteLinesState);
             remoteStatusBadge.textContent = t('web.comparator.verses_count', remoteLinesState.length);
             syncLyricsHighlight(Math.round((audio.currentTime || 0) * 1000));
             closeAllApiResultsModal();
@@ -4648,7 +4979,7 @@
     }
 
     // =========================================================================
-    // PASTE LYRICS (WITH ZEROED TIMESTAMPS) & SYNC EDIT MODE (SPACE / CTRL)
+    // PASTE LYRICS, INLINE TEXT EDITOR (KEEP TIMES) & SYNC EDIT MODE (SPACE / CTRL)
     // =========================================================================
     const pasteLyricsModal = document.getElementById('pasteLyricsModal');
     const pasteLyricsTextarea = document.getElementById('pasteLyricsTextarea');
@@ -4659,6 +4990,12 @@
     let syncEditCursorIndex = 0;
     let hoveredColumnSide = 'local';
     let lastActiveSide = 'local';
+    let currentPasteModalMode = 'replace_all'; // 'edit_text' | 'insert_after' | 'replace_all'
+    let lastOpenedPasteModalClipText = '';
+    const inlineTextEditActive = {
+        local: false,
+        remote: false
+    };
 
     document.getElementById('columnLeftPanel')?.addEventListener('mouseenter', () => {
         hoveredColumnSide = 'local';
@@ -4677,14 +5014,28 @@
         lastActiveSide = 'remote';
     });
 
-    function parseRawTextIntoZeroedLyricLines(rawText) {
+    ['local', 'remote'].forEach(side => {
+        const ta = document.getElementById(side === 'local' ? 'inlineTextAreaLocal' : 'inlineTextAreaRemote');
+        ta?.addEventListener('keydown', (ev) => {
+            if ((ev.ctrlKey || ev.metaKey) && ev.key === 'Enter') {
+                ev.preventDefault();
+                commitInlineTextEdit(side);
+            } else if (ev.key === 'Escape') {
+                ev.preventDefault();
+                exitInlineTextEditMode(side, true);
+            }
+        });
+    });
+
+    function parseRawTextLinesWithOptionalTime(rawText) {
         if (!rawText) return [];
         const rawLines = rawText.split(/\r?\n/);
         const parsed = [];
+        const lrcTagRegex = /^\[(\d{1,2}:\d{2}(?:[.,:]\d{1,3})?)\](.*)$/;
 
         rawLines.forEach(rawLine => {
             const trimmed = rawLine.trim();
-            if (!trimmed) return; // Ignore blank lines between stanzas
+            if (!trimmed) return;
 
             // Skip pure LRC metadata tags like [ar:...], [ti:...], [al:...], [by:...], [offset:...]
             if (/^\[(ar|ti|al|by|offset|re|ve|length):.*\]$/i.test(trimmed)) {
@@ -4696,24 +5047,467 @@
                 return;
             }
 
-            // Strip any existing [mm:ss.xx] or inline <mm:ss.xx> tags so the verse text is clean
+            const tsMatch = trimmed.match(lrcTagRegex);
+            let explicitMs = null;
+            if (tsMatch) {
+                explicitMs = parseFormattedTimeToMs(tsMatch[1]);
+            }
+
+            // Strip leading [mm:ss.xx] tags and inline <mm:ss.xx> tags so verse text is clean
             const cleanText = trimmed
-                .replace(/^(\[\d{1,2}:\d{2}(?:[.:]\d{1,3})?(?:-\d+)?\])+\s*/, '')
-                .replace(/<\d{1,2}:\d{2}(?:[.:]\d{1,3})?>/g, '')
+                .replace(/^(\[\d{1,2}:\d{2}(?:[.,:]\d{1,3})?(?:-\d+)?\])+\s*/, '')
+                .replace(/<\d{1,2}:\d{2}(?:[.,:]\d{1,3})?>/g, '')
                 .trim();
 
-            if (!cleanText) return;
+            if (!cleanText && explicitMs === null) return;
 
             parsed.push({
-                noTimestamp: false,
-                timestampMs: 0,
-                timeMs: 0,
-                formattedTime: '00:00.00',
+                explicitMs: explicitMs,
                 text: cleanText
             });
         });
 
         return parsed;
+    }
+
+    function parseRawTextIntoZeroedLyricLines(rawText) {
+        return parseRawTextLinesWithOptionalTime(rawText)
+            .filter(item => Boolean(item.text))
+            .map(item => ({
+                noTimestamp: false,
+                timestampMs: 0,
+                timeMs: 0,
+                formattedTime: '00:00.00',
+                text: item.text
+            }));
+    }
+
+    function normalizeVerseForAlign(str) {
+        return String(str || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    function computeBigramDiceSimilarity(a, b) {
+        if (!a || !b) return 0;
+        if (a === b) return 1;
+        if (a.length < 2 || b.length < 2) return a === b ? 1 : 0;
+        const counts = new Map();
+        for (let i = 0; i < a.length - 1; i++) {
+            const bg = a.slice(i, i + 2);
+            counts.set(bg, (counts.get(bg) || 0) + 1);
+        }
+        let intersection = 0;
+        for (let j = 0; j < b.length - 1; j++) {
+            const bg = b.slice(j, j + 2);
+            const c = counts.get(bg) || 0;
+            if (c > 0) {
+                counts.set(bg, c - 1);
+                intersection++;
+            }
+        }
+        return (2 * intersection) / ((a.length - 1) + (b.length - 1));
+    }
+
+    function alignEditedLinesWithExisting(existingLines, editedItems) {
+        const oldArr = Array.isArray(existingLines) ? existingLines : [];
+        const n = oldArr.length;
+        const m = editedItems.length;
+
+        if (n === 0) {
+            const created = editedItems.map(item => {
+                const ms = item.explicitMs !== null ? item.explicitMs : 0;
+                return {
+                    noTimestamp: false,
+                    timestampMs: ms,
+                    timeMs: ms,
+                    formattedTime: formatLrcTimestamp(ms),
+                    text: item.text
+                };
+            });
+            return {
+                lines: created,
+                preservedCount: 0,
+                addedZeroedCount: created.length,
+                firstAddedIndex: created.length > 0 ? 0 : -1
+            };
+        }
+
+        const oldNorm = oldArr.map(l => normalizeVerseForAlign(l.text));
+        const newNorm = editedItems.map(it => normalizeVerseForAlign(it.text));
+
+        // Suffix LCS DP table to anchor identical verses in order
+        const width = m + 1;
+        const dp = new Int32Array((n + 1) * width);
+        for (let i = n - 1; i >= 0; i--) {
+            for (let j = m - 1; j >= 0; j--) {
+                if (oldNorm[i] && oldNorm[i] === newNorm[j]) {
+                    dp[i * width + j] = dp[(i + 1) * width + (j + 1)] + 1;
+                } else {
+                    const down = dp[(i + 1) * width + j];
+                    const right = dp[i * width + (j + 1)];
+                    dp[i * width + j] = down >= right ? down : right;
+                }
+            }
+        }
+
+        const matchedOldForNew = new Int32Array(m).fill(-1);
+        const anchors = [];
+        let ci = 0;
+        let cj = 0;
+        while (ci < n && cj < m) {
+            if (oldNorm[ci] && oldNorm[ci] === newNorm[cj]) {
+                matchedOldForNew[cj] = ci;
+                anchors.push({oldIdx: ci, newIdx: cj});
+                ci++;
+                cj++;
+            } else if (dp[(ci + 1) * width + cj] >= dp[ci * width + (cj + 1)]) {
+                ci++;
+            } else {
+                cj++;
+            }
+        }
+
+        // Monotonic similarity matching inside gaps (handles typo fixes and in-place word edits)
+        const fullAnchors = [{oldIdx: -1, newIdx: -1}, ...anchors, {oldIdx: n, newIdx: m}];
+        for (let a = 0; a < fullAnchors.length - 1; a++) {
+            const oldStart = fullAnchors[a].oldIdx + 1;
+            const oldEnd = fullAnchors[a + 1].oldIdx;
+            const newStart = fullAnchors[a].newIdx + 1;
+            const newEnd = fullAnchors[a + 1].newIdx;
+            const oldGapLen = oldEnd - oldStart;
+            const newGapLen = newEnd - newStart;
+            if (oldGapLen <= 0 || newGapLen <= 0) continue;
+
+            let minOldCursor = oldStart;
+            for (let nj = newStart; nj < newEnd; nj++) {
+                let bestOld = -1;
+                let bestScore = 0;
+                const sameSmallCount = (oldGapLen === newGapLen && oldGapLen <= 3);
+                const threshold = sameSmallCount ? 0.25 : 0.45;
+                for (let oi = minOldCursor; oi < oldEnd; oi++) {
+                    const sim = computeBigramDiceSimilarity(oldNorm[oi], newNorm[nj]);
+                    if (sim >= threshold && sim > bestScore) {
+                        bestScore = sim;
+                        bestOld = oi;
+                    }
+                }
+                if (bestOld !== -1) {
+                    matchedOldForNew[nj] = bestOld;
+                    minOldCursor = bestOld + 1;
+                }
+            }
+        }
+
+        let preservedCount = 0;
+        let addedZeroedCount = 0;
+        let firstAddedIndex = -1;
+
+        const mergedLines = editedItems.map((item, newIdx) => {
+            const oldIdx = matchedOldForNew[newIdx];
+            if (oldIdx >= 0 && oldIdx < oldArr.length) {
+                const src = oldArr[oldIdx];
+                preservedCount++;
+                if (item.explicitMs !== null) {
+                    return {
+                        noTimestamp: false,
+                        timestampMs: item.explicitMs,
+                        timeMs: item.explicitMs,
+                        formattedTime: formatLrcTimestamp(item.explicitMs),
+                        text: item.text
+                    };
+                }
+                if (src.noTimestamp) {
+                    return {
+                        noTimestamp: true,
+                        timestampMs: 0,
+                        timeMs: 0,
+                        formattedTime: '',
+                        text: item.text
+                    };
+                }
+                const preservedMs = (typeof src.timestampMs === 'number')
+                    ? src.timestampMs
+                    : ((typeof src.timeMs === 'number')
+                        ? src.timeMs
+                        : parseFormattedTimeToMs(src.formattedTime || '00:00.00'));
+                return {
+                    noTimestamp: false,
+                    timestampMs: preservedMs,
+                    timeMs: preservedMs,
+                    formattedTime: formatLrcTimestamp(preservedMs),
+                    text: item.text
+                };
+            }
+
+            // Newly added / pasted line -> [00:00.00] (unless explicit [mm:ss.xx] was provided)
+            const newMs = item.explicitMs !== null ? item.explicitMs : 0;
+            if (item.explicitMs === null) {
+                addedZeroedCount++;
+                if (firstAddedIndex === -1) {
+                    firstAddedIndex = newIdx;
+                }
+            }
+            return {
+                noTimestamp: false,
+                timestampMs: newMs,
+                timeMs: newMs,
+                formattedTime: formatLrcTimestamp(newMs),
+                text: item.text
+            };
+        });
+
+        return {
+            lines: mergedLines,
+            preservedCount,
+            addedZeroedCount,
+            firstAddedIndex
+        };
+    }
+
+    function getPlainTextFromSideState(side) {
+        const state = side === 'local' ? localLinesState : remoteLinesState;
+        if (!state || state.length === 0) return '';
+        return state.map(l => l.text || '').join('\n');
+    }
+
+    function applyEditedTextPreservingTimestamps(side, rawText, autoEnterSyncOnAdded = false) {
+        const editedItems = parseRawTextLinesWithOptionalTime(rawText).filter(it => Boolean(it.text));
+        if (editedItems.length === 0) {
+            showToast(t('web.paste.no_valid_lines_toast'));
+            return false;
+        }
+
+        const isLocal = side === 'local';
+        const currentState = isLocal ? localLinesState : remoteLinesState;
+        const container = isLocal ? localLyricsScroller : remoteLyricsScroller;
+        const result = alignEditedLinesWithExisting(currentState, editedItems);
+
+        if (isLocal) {
+            localTimestampsBackup = null;
+            updateToggleTimestampsBtnUI('local', false);
+            localLinesState = result.lines;
+        } else {
+            remoteTimestampsBackup = null;
+            updateToggleTimestampsBtnUI('remote', false);
+            remoteLinesState = result.lines;
+        }
+
+        selectedLineIndices[side].clear();
+        if (result.firstAddedIndex >= 0) {
+            focusedLineIndex[side] = result.firstAddedIndex;
+        } else {
+            focusedLineIndex[side] = Math.min(Math.max(0, focusedLineIndex[side]), result.lines.length - 1);
+        }
+
+        updateStatusBadgeCount(side);
+        updateBatchSelectionBarUI(side);
+        renderLyricLines(container, result.lines, side);
+        syncLyricsHighlight(Math.round((audio.currentTime || 0) * 1000));
+
+        if (result.firstAddedIndex >= 0) {
+            const lineDivs = container.querySelectorAll('.lyric-line');
+            const targetDiv = lineDivs[result.firstAddedIndex];
+            if (targetDiv) {
+                const containerRect = container.getBoundingClientRect();
+                const lineRect = targetDiv.getBoundingClientRect();
+                const scrollOffset = (lineRect.top - containerRect.top) - (container.clientHeight / 2) + (targetDiv.clientHeight / 2);
+                container.scrollBy({top: scrollOffset, behavior: 'smooth'});
+            }
+        }
+
+        if (autoEnterSyncOnAdded && result.firstAddedIndex >= 0) {
+            enableSyncEditMode(side, result.firstAddedIndex);
+        } else if (syncEditModeSide === side) {
+            syncEditCursorIndex = Math.min(syncEditCursorIndex, Math.max(0, result.lines.length - 1));
+            updateSyncEditModeUI();
+        }
+
+        const sideLabel = isLocal ? t('web.comparator.side_local') : t('web.comparator.side_online');
+        showToast(t('web.paste.edited_toast', sideLabel, result.preservedCount, result.addedZeroedCount));
+        return true;
+    }
+
+    function resolveInsertionAnchorForSide(side) {
+        const state = side === 'local' ? localLinesState : remoteLinesState;
+        const container = side === 'local' ? localLyricsScroller : remoteLyricsScroller;
+        if (!state || state.length === 0) return -1;
+
+        const selSet = selectedLineIndices[side];
+        if (selSet && selSet.size > 0) {
+            return Math.min(state.length - 1, Math.max(...Array.from(selSet)));
+        }
+        if (typeof focusedLineIndex[side] === 'number' && focusedLineIndex[side] >= 0 && focusedLineIndex[side] < state.length) {
+            return focusedLineIndex[side];
+        }
+        if (syncEditModeSide === side && syncEditCursorIndex >= 0 && syncEditCursorIndex < state.length) {
+            return syncEditCursorIndex;
+        }
+        const activeDiv = container ? container.querySelector('.lyric-line.active') : null;
+        if (activeDiv) {
+            const idx = parseInt(activeDiv.getAttribute('data-index'), 10);
+            if (!isNaN(idx) && idx >= 0 && idx < state.length) return idx;
+        }
+        return state.length - 1;
+    }
+
+    function applyInsertedZeroedSnippet(side, rawText, positionMode = 'after_selected', autoEnterSyncMode = true) {
+        const parsedItems = parseRawTextLinesWithOptionalTime(rawText).filter(it => Boolean(it.text));
+        if (parsedItems.length === 0) {
+            showToast(t('web.paste.no_valid_lines_toast'));
+            return false;
+        }
+
+        const isLocal = side === 'local';
+        const state = isLocal ? localLinesState : remoteLinesState;
+        const container = isLocal ? localLyricsScroller : remoteLyricsScroller;
+
+        const newLines = parsedItems.map(it => {
+            const ms = it.explicitMs !== null ? it.explicitMs : 0;
+            return {
+                noTimestamp: false,
+                timestampMs: ms,
+                timeMs: ms,
+                formattedTime: formatLrcTimestamp(ms),
+                text: it.text
+            };
+        });
+
+        let insertIndex = state.length;
+        if (state.length === 0 || positionMode === 'start') {
+            insertIndex = 0;
+        } else if (positionMode === 'end') {
+            insertIndex = state.length;
+        } else {
+            const anchor = resolveInsertionAnchorForSide(side);
+            insertIndex = (anchor >= 0 && anchor < state.length) ? (anchor + 1) : state.length;
+        }
+
+        state.splice(insertIndex, 0, ...newLines);
+
+        selectedLineIndices[side].clear();
+        for (let i = 0; i < newLines.length; i++) {
+            selectedLineIndices[side].add(insertIndex + i);
+        }
+        focusedLineIndex[side] = insertIndex + newLines.length - 1;
+        lastClickedLineIndex[side] = focusedLineIndex[side];
+
+        updateStatusBadgeCount(side);
+        updateBatchSelectionBarUI(side);
+        renderLyricLines(container, state, side);
+        syncLyricsHighlight(Math.round((audio.currentTime || 0) * 1000));
+
+        const lineDivs = container.querySelectorAll('.lyric-line');
+        const insertedDiv = lineDivs[insertIndex];
+        if (insertedDiv) {
+            const containerRect = container.getBoundingClientRect();
+            const lineRect = insertedDiv.getBoundingClientRect();
+            const scrollOffset = (lineRect.top - containerRect.top) - (container.clientHeight / 2) + (insertedDiv.clientHeight / 2);
+            container.scrollBy({top: scrollOffset, behavior: 'smooth'});
+        }
+
+        if (autoEnterSyncMode) {
+            enableSyncEditMode(side, insertIndex);
+        } else if (syncEditModeSide === side) {
+            syncEditCursorIndex = insertIndex;
+            updateSyncEditModeUI();
+        }
+
+        const sideLabel = isLocal ? t('web.comparator.side_local') : t('web.comparator.side_online');
+        showToast(t('web.paste.inserted_toast', newLines.length, insertIndex + 1, sideLabel));
+        return true;
+    }
+
+    function enterInlineTextEditMode(side) {
+        const isLocal = side === 'local';
+        if (syncEditModeSide === side) {
+            disableSyncEditMode();
+        }
+        inlineTextEditActive[side] = true;
+
+        const btn = document.getElementById(isLocal ? 'btnInlineTextEditLocal' : 'btnInlineTextEditRemote');
+        const banner = document.getElementById(isLocal ? 'inlineTextBannerLocal' : 'inlineTextBannerRemote');
+        const titleEl = document.getElementById(isLocal ? 'inlineTextTitleLocal' : 'inlineTextTitleRemote');
+        const wrapper = document.getElementById(isLocal ? 'inlineTextWrapperLocal' : 'inlineTextWrapperRemote');
+        const textarea = document.getElementById(isLocal ? 'inlineTextAreaLocal' : 'inlineTextAreaRemote');
+        const scroller = isLocal ? localLyricsScroller : remoteLyricsScroller;
+        const sideLabel = isLocal ? t('web.comparator.side_local') : t('web.comparator.side_online');
+
+        if (btn) {
+            btn.classList.add('btn-text-mode-active');
+            btn.textContent = t('web.comparator.edit_text_active_btn');
+        }
+        if (titleEl) {
+            titleEl.textContent = t('web.text_edit.banner_title', sideLabel);
+        }
+        if (banner) {
+            banner.classList.add('active');
+        }
+        if (wrapper) {
+            wrapper.classList.add('active');
+        }
+        if (scroller) {
+            scroller.style.display = 'none';
+        }
+        if (textarea) {
+            textarea.value = getPlainTextFromSideState(side);
+            setTimeout(() => {
+                textarea.focus();
+            }, 30);
+        }
+    }
+
+    function exitInlineTextEditMode(side, showCanceledToast = false) {
+        const isLocal = side === 'local';
+        const wasActive = inlineTextEditActive[side];
+        inlineTextEditActive[side] = false;
+
+        const btn = document.getElementById(isLocal ? 'btnInlineTextEditLocal' : 'btnInlineTextEditRemote');
+        const banner = document.getElementById(isLocal ? 'inlineTextBannerLocal' : 'inlineTextBannerRemote');
+        const wrapper = document.getElementById(isLocal ? 'inlineTextWrapperLocal' : 'inlineTextWrapperRemote');
+        const scroller = isLocal ? localLyricsScroller : remoteLyricsScroller;
+
+        if (btn) {
+            btn.classList.remove('btn-text-mode-active');
+            btn.textContent = t('web.comparator.edit_text_btn');
+        }
+        if (banner) {
+            banner.classList.remove('active');
+        }
+        if (wrapper) {
+            wrapper.classList.remove('active');
+        }
+        if (scroller) {
+            scroller.style.display = '';
+        }
+        if (wasActive && showCanceledToast) {
+            showToast(t('web.text_edit.canceled_toast'));
+        }
+    }
+
+    function toggleInlineTextEditMode(side) {
+        lastActiveSide = side;
+        hoveredColumnSide = side;
+        if (inlineTextEditActive[side]) {
+            exitInlineTextEditMode(side, true);
+        } else {
+            enterInlineTextEditMode(side);
+        }
+    }
+
+    function commitInlineTextEdit(side) {
+        const isLocal = side === 'local';
+        const textarea = document.getElementById(isLocal ? 'inlineTextAreaLocal' : 'inlineTextAreaRemote');
+        const rawText = textarea ? textarea.value : '';
+        if (applyEditedTextPreservingTimestamps(side, rawText, false)) {
+            exitInlineTextEditMode(side, false);
+            return true;
+        }
+        return false;
     }
 
     function applyPastedLyrics(side, rawText, autoEnterSyncMode = true) {
@@ -4724,6 +5518,7 @@
         }
 
         const isLocal = side === 'local';
+        exitInlineTextEditMode(side, false);
         if (isLocal) {
             localTimestampsBackup = null;
             updateToggleTimestampsBtnUI('local', false);
@@ -4750,29 +5545,127 @@
         return true;
     }
 
-    async function openPasteLyricsModal(side) {
-        if (pasteLyricsTargetSelect) {
-            pasteLyricsTargetSelect.value = side || 'local';
-        }
-        if (pasteLyricsTextarea) {
-            pasteLyricsTextarea.value = '';
-            // Try reading clipboard automatically for convenience
-            if (navigator.clipboard && navigator.clipboard.readText) {
-                try {
-                    const clipText = await navigator.clipboard.readText();
-                    if (clipText && clipText.trim()) {
-                        pasteLyricsTextarea.value = clipText;
-                    }
-                } catch (_e) {
-                    // User can press Ctrl+V directly inside the focused textarea
-                }
+    function updatePasteModalInsertAnchorOption(side) {
+        const posSelect = document.getElementById('pasteInsertPosSelect');
+        if (!posSelect) return;
+        const afterOpt = posSelect.querySelector('option[value="after_selected"]');
+        if (!afterOpt) return;
+        const state = side === 'local' ? localLinesState : remoteLinesState;
+        const anchorIdx = resolveInsertionAnchorForSide(side);
+        const lineNum = (state && state.length > 0 && anchorIdx >= 0) ? (anchorIdx + 1) : 1;
+        afterOpt.setAttribute('data-i18n-arg0', String(lineNum));
+        afterOpt.textContent = t('web.paste.insert_pos_after_selected', lineNum);
+    }
+
+    function setPasteModalMode(mode, populateDefaultContent = false) {
+        currentPasteModalMode = mode;
+        const side = pasteLyricsTargetSelect?.value || 'local';
+        const tabs = document.querySelectorAll('#pasteModeTabs .paste-mode-tab');
+        tabs.forEach(tab => {
+            tab.classList.toggle('active', tab.getAttribute('data-paste-mode') === mode);
+        });
+
+        const iconEl = document.getElementById('pasteLyricsModalIcon');
+        const titleEl = document.getElementById('pasteLyricsModalTitle');
+        const subEl = document.getElementById('pasteLyricsModalSubtitle');
+        const descEl = document.getElementById('pasteLyricsModalDesc');
+        const insertGroup = document.getElementById('pasteInsertPosGroup');
+        const loadBtn = document.getElementById('btnLoadCurrentTextPasteModal');
+        const autoSyncSpan = document.getElementById('pasteAutoSyncLabelSpan');
+        const applyBtn = document.getElementById('btnApplyPasteModal');
+
+        updatePasteModalInsertAnchorOption(side);
+
+        if (mode === 'edit_text') {
+            if (iconEl) iconEl.textContent = '📝';
+            if (titleEl) titleEl.textContent = t('web.paste.title_edit_text');
+            if (subEl) subEl.textContent = t('web.paste.subtitle_edit_text');
+            if (descEl) descEl.innerHTML = t('web.paste.desc_edit_text_html');
+            if (insertGroup) insertGroup.style.display = 'none';
+            if (loadBtn) loadBtn.style.display = 'inline-flex';
+            if (pasteLyricsTextarea) pasteLyricsTextarea.placeholder = t('web.paste.textarea_edit_placeholder');
+            if (autoSyncSpan) autoSyncSpan.innerHTML = t('web.paste.auto_sync_new_label_html');
+            if (pasteAutoEnterSyncMode && populateDefaultContent) pasteAutoEnterSyncMode.checked = false;
+            if (applyBtn) applyBtn.textContent = t('web.paste.apply_edit_text_btn');
+            if (populateDefaultContent && pasteLyricsTextarea) {
+                pasteLyricsTextarea.value = getPlainTextFromSideState(side);
+            }
+        } else if (mode === 'insert_after') {
+            if (iconEl) iconEl.textContent = '➕';
+            if (titleEl) titleEl.textContent = t('web.paste.title_insert');
+            if (subEl) subEl.textContent = t('web.paste.subtitle_insert');
+            if (descEl) descEl.innerHTML = t('web.paste.desc_insert_html');
+            if (insertGroup) insertGroup.style.display = 'flex';
+            if (loadBtn) loadBtn.style.display = 'none';
+            if (pasteLyricsTextarea) pasteLyricsTextarea.placeholder = t('web.paste.textarea_insert_placeholder');
+            if (autoSyncSpan) autoSyncSpan.innerHTML = t('web.paste.auto_sync_new_label_html');
+            if (pasteAutoEnterSyncMode && populateDefaultContent) pasteAutoEnterSyncMode.checked = false;
+            if (applyBtn) applyBtn.textContent = t('web.paste.apply_insert_btn');
+            if (populateDefaultContent && pasteLyricsTextarea) {
+                pasteLyricsTextarea.value = lastOpenedPasteModalClipText || '';
+            }
+        } else {
+            if (iconEl) iconEl.textContent = '📋';
+            if (titleEl) titleEl.textContent = t('web.paste.title');
+            if (subEl) subEl.textContent = t('web.paste.subtitle');
+            if (descEl) descEl.innerHTML = t('web.paste.desc_html');
+            if (insertGroup) insertGroup.style.display = 'none';
+            if (loadBtn) loadBtn.style.display = 'none';
+            if (pasteLyricsTextarea) pasteLyricsTextarea.placeholder = t('web.paste.textarea_placeholder');
+            if (autoSyncSpan) autoSyncSpan.innerHTML = t('web.paste.auto_sync_label_html');
+            if (pasteAutoEnterSyncMode && populateDefaultContent) pasteAutoEnterSyncMode.checked = true;
+            if (applyBtn) applyBtn.textContent = t('web.paste.apply_btn');
+            if (populateDefaultContent && pasteLyricsTextarea) {
+                pasteLyricsTextarea.value = lastOpenedPasteModalClipText || '';
             }
         }
+    }
+
+    function handlePasteModalTargetChange() {
+        const side = pasteLyricsTargetSelect?.value || 'local';
+        updatePasteModalInsertAnchorOption(side);
+        if (currentPasteModalMode === 'edit_text' && pasteLyricsTextarea) {
+            pasteLyricsTextarea.value = getPlainTextFromSideState(side);
+        }
+    }
+
+    function loadCurrentSideTextIntoPasteModal() {
+        const side = pasteLyricsTargetSelect?.value || 'local';
+        if (pasteLyricsTextarea) {
+            pasteLyricsTextarea.value = getPlainTextFromSideState(side);
+            pasteLyricsTextarea.focus();
+        }
+    }
+
+    async function openPasteLyricsModal(side) {
+        const targetSide = side || 'local';
+        if (pasteLyricsTargetSelect) {
+            pasteLyricsTargetSelect.value = targetSide;
+        }
+
+        lastOpenedPasteModalClipText = '';
+        if (navigator.clipboard && navigator.clipboard.readText) {
+            try {
+                const clipText = await navigator.clipboard.readText();
+                if (clipText && clipText.trim()) {
+                    lastOpenedPasteModalClipText = clipText;
+                }
+            } catch (_e) {
+                // User can press Ctrl+V directly inside the focused textarea
+            }
+        }
+
+        const existingState = targetSide === 'local' ? localLinesState : remoteLinesState;
+        const defaultMode = (existingState && existingState.length > 0) ? 'edit_text' : 'replace_all';
+        setPasteModalMode(defaultMode, true);
+
         if (pasteLyricsModal) {
             pasteLyricsModal.style.display = 'flex';
             setTimeout(() => {
                 pasteLyricsTextarea?.focus();
-                pasteLyricsTextarea?.select();
+                if (defaultMode !== 'edit_text') {
+                    pasteLyricsTextarea?.select();
+                }
             }, 50);
         }
     }
@@ -4792,6 +5685,7 @@
         try {
             const clipText = await navigator.clipboard.readText();
             if (clipText && clipText.trim()) {
+                lastOpenedPasteModalClipText = clipText;
                 pasteLyricsTextarea.value = clipText;
                 pasteLyricsTextarea.focus();
                 showToast(t('web.paste.clipboard_read_toast'));
@@ -4807,8 +5701,21 @@
     function applyPastedLyricsFromModal() {
         const side = pasteLyricsTargetSelect?.value || 'local';
         const rawText = pasteLyricsTextarea?.value || '';
-        const autoSync = pasteAutoEnterSyncMode ? pasteAutoEnterSyncMode.checked : true;
-        if (applyPastedLyrics(side, rawText, autoSync)) {
+        const autoSync = pasteAutoEnterSyncMode ? pasteAutoEnterSyncMode.checked : false;
+
+        let ok = false;
+        if (currentPasteModalMode === 'edit_text') {
+            exitInlineTextEditMode(side, false);
+            ok = applyEditedTextPreservingTimestamps(side, rawText, autoSync);
+        } else if (currentPasteModalMode === 'insert_after') {
+            exitInlineTextEditMode(side, false);
+            const posMode = document.getElementById('pasteInsertPosSelect')?.value || 'after_selected';
+            ok = applyInsertedZeroedSnippet(side, rawText, posMode, autoSync);
+        } else {
+            ok = applyPastedLyrics(side, rawText, autoSync);
+        }
+
+        if (ok) {
             closePasteLyricsModal();
         }
     }
@@ -4834,32 +5741,28 @@
 
     function parseTextToLyricLines(text) {
         if (!text) return [];
-        const rawLines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-        const parsed = [];
-        const lrcRegex = /^\[(\d{1,2}:\d{2}(?:\.\d{1,3})?)\](.*)$/;
-
-        rawLines.forEach(l => {
-            const match = l.match(lrcRegex);
-            if (match) {
-                const timeMs = parseFormattedTimeToMs(match[1]);
-                parsed.push({
+        return parseRawTextLinesWithOptionalTime(text)
+            .filter(item => Boolean(item.text) || item.explicitMs !== null)
+            .map(item => {
+                if (item.explicitMs !== null) {
+                    return {
+                        noTimestamp: false,
+                        hasExplicitTimestamp: true,
+                        timestampMs: item.explicitMs,
+                        timeMs: item.explicitMs,
+                        formattedTime: formatLrcTimestamp(item.explicitMs),
+                        text: item.text
+                    };
+                }
+                return {
                     noTimestamp: false,
-                    timestampMs: timeMs,
-                    timeMs: timeMs,
-                    formattedTime: formatLrcTimestamp(timeMs),
-                    text: match[2].trim()
-                });
-            } else {
-                parsed.push({
-                    noTimestamp: false,
+                    hasExplicitTimestamp: false,
                     timestampMs: 0,
                     timeMs: 0,
                     formattedTime: '00:00.00',
-                    text: l
-                });
-            }
-        });
-        return parsed;
+                    text: item.text
+                };
+            });
     }
 
     function resolveTargetActiveSide(explicitSide = null) {
@@ -4958,6 +5861,10 @@
             : t('web.batch.copied_toast_other', linesToCopy.length));
     }
 
+    function normalizeClipboardString(s) {
+        return String(s || '').replace(/\r\n/g, '\n').trim();
+    }
+
     async function pasteLyricLines(explicitSide = null, rawClipboardText = null) {
         const now = Date.now();
         if (now - lastPasteEventTimestamp < 150) {
@@ -4971,21 +5878,32 @@
         const state = side === 'local' ? localLinesState : remoteLinesState;
         const container = side === 'local' ? localLyricsScroller : remoteLyricsScroller;
 
-        let linesToPaste = [];
+        // Always inspect the real OS clipboard first (when not already passed by native paste event)
+        // so text copied OUTSIDE the project is never shadowed by an old internal copiedLyricsBuffer!
+        let effectiveClipText = rawClipboardText;
+        if ((effectiveClipText === null || effectiveClipText === undefined) && navigator.clipboard && navigator.clipboard.readText) {
+            try {
+                effectiveClipText = await navigator.clipboard.readText();
+            } catch (_err) {
+                effectiveClipText = null;
+            }
+        }
 
-        if (rawClipboardText && rawClipboardText.trim() && rawClipboardText.trim() !== lastCopiedLyricsText.trim()) {
-            linesToPaste = parseTextToLyricLines(rawClipboardText);
+        const normClip = normalizeClipboardString(effectiveClipText);
+        const normInternal = normalizeClipboardString(lastCopiedLyricsText);
+
+        let linesToPaste = [];
+        let isExternalPaste = false;
+
+        if (normClip.length > 0 && (copiedLyricsBuffer.length === 0 || normClip !== normInternal)) {
+            linesToPaste = parseTextToLyricLines(effectiveClipText);
+            isExternalPaste = true;
         } else if (copiedLyricsBuffer && copiedLyricsBuffer.length > 0) {
             linesToPaste = copiedLyricsBuffer;
-        } else if (rawClipboardText && rawClipboardText.trim()) {
-            linesToPaste = parseTextToLyricLines(rawClipboardText);
-        } else if (navigator.clipboard && navigator.clipboard.readText) {
-            try {
-                const clipText = await navigator.clipboard.readText();
-                if (clipText && clipText.trim()) {
-                    linesToPaste = parseTextToLyricLines(clipText);
-                }
-            } catch (_err) {}
+            isExternalPaste = false;
+        } else if (normClip.length > 0) {
+            linesToPaste = parseTextToLyricLines(effectiveClipText);
+            isExternalPaste = true;
         }
 
         if (!linesToPaste || linesToPaste.length === 0) {
@@ -4994,13 +5912,18 @@
         }
 
         if (!state || state.length === 0) {
-            const cloned = linesToPaste.map(l => ({
-                noTimestamp: Boolean(l.noTimestamp),
-                timestampMs: l.timestampMs || 0,
-                timeMs: l.timeMs || l.timestampMs || 0,
-                formattedTime: l.noTimestamp ? '' : (l.formattedTime || formatLrcTimestamp(l.timestampMs || 0)),
-                text: l.text || ''
-            }));
+            const cloned = linesToPaste.map(l => {
+                const ms = isExternalPaste
+                    ? (l.hasExplicitTimestamp ? (l.timestampMs || 0) : 0)
+                    : (l.timestampMs || 0);
+                return {
+                    noTimestamp: Boolean(l.noTimestamp),
+                    timestampMs: ms,
+                    timeMs: ms,
+                    formattedTime: l.noTimestamp ? '' : formatLrcTimestamp(ms),
+                    text: l.text || ''
+                };
+            });
             if (side === 'local') {
                 localLinesState = cloned;
             } else {
@@ -5010,74 +5933,85 @@
             for (let i = 0; i < cloned.length; i++) {
                 selectedLineIndices[side].add(i);
             }
-            focusedLineIndex[side] = 0;
+            focusedLineIndex[side] = cloned.length - 1;
+            lastClickedLineIndex[side] = focusedLineIndex[side];
             updateStatusBadgeCount(side);
             updateBatchSelectionBarUI(side);
             renderLyricLines(container, cloned, side);
-            showToast(t('web.batch.pasted_toast_other', cloned.length, 1, '00:00.00'));
+            showToast(isExternalPaste
+                ? (cloned.length === 1
+                    ? t('web.batch.pasted_zeroed_toast_one', 1)
+                    : t('web.batch.pasted_zeroed_toast_other', cloned.length, 1))
+                : t('web.batch.pasted_toast_other', cloned.length, 1, formatLrcTimestamp(cloned[0]?.timestampMs || 0)));
             return;
         }
 
-        const selSet = selectedLineIndices[side];
-        let anchorIndex = -1;
-        if (selSet && selSet.size > 0) {
-            anchorIndex = Math.max(...Array.from(selSet));
-        } else if (typeof focusedLineIndex[side] === 'number' && focusedLineIndex[side] >= 0 && focusedLineIndex[side] < state.length) {
-            anchorIndex = focusedLineIndex[side];
-        }
+        const anchorIndex = resolveInsertionAnchorForSide(side);
+        const insertIndex = (anchorIndex >= 0 && anchorIndex < state.length)
+            ? (anchorIndex + 1)
+            : state.length;
 
-        let insertIndex;
-        if (anchorIndex >= 0 && anchorIndex < state.length) {
-            insertIndex = anchorIndex + 1;
-        } else {
-            insertIndex = state.length;
-        }
-
-        const isPlaying = !audio.paused && audio.src && audio.src !== window.location.href;
-        const audioMs = Math.round((audio.currentTime || 0) * 1000);
-
+        let clonedLines;
         let targetStartMs = 0;
-        if (isPlaying) {
-            targetStartMs = audioMs;
-        } else if (audio.src && audio.src !== window.location.href && audioMs > 0) {
-            targetStartMs = audioMs;
-        } else if (anchorIndex >= 0 && anchorIndex < state.length) {
-            const anchorLine = state[anchorIndex];
-            targetStartMs = (anchorLine && !anchorLine.noTimestamp && typeof anchorLine.timestampMs === 'number')
-                ? anchorLine.timestampMs
-                : 0;
-        } else if (state.length > 0) {
-            const lastLine = state[state.length - 1];
-            targetStartMs = (lastLine && !lastLine.noTimestamp && typeof lastLine.timestampMs === 'number')
-                ? lastLine.timestampMs + 2000
-                : 0;
-        }
 
-        const firstTimedLine = linesToPaste.find(l => !l.noTimestamp && typeof l.timestampMs === 'number');
-        const baseSourceMs = firstTimedLine ? firstTimedLine.timestampMs : 0;
+        if (isExternalPaste) {
+            // External text copied outside the project: create zeroed [00:00.00] lines immediately AFTER the selected line
+            clonedLines = linesToPaste.map(srcLine => {
+                const ms = srcLine.hasExplicitTimestamp ? (srcLine.timestampMs || 0) : 0;
+                return {
+                    noTimestamp: false,
+                    timestampMs: ms,
+                    timeMs: ms,
+                    formattedTime: formatLrcTimestamp(ms),
+                    text: srcLine.text || ''
+                };
+            });
+        } else {
+            const isPlaying = !audio.paused && audio.src && audio.src !== window.location.href;
+            const audioMs = Math.round((audio.currentTime || 0) * 1000);
 
-        const clonedLines = linesToPaste.map(srcLine => {
-            const hasTs = !srcLine.noTimestamp && typeof srcLine.timestampMs === 'number';
-            let finalMs = targetStartMs;
-            let isNoTs = Boolean(srcLine.noTimestamp);
-
-            if (hasTs) {
-                const relativeOffset = srcLine.timestampMs - baseSourceMs;
-                finalMs = Math.max(0, targetStartMs + relativeOffset);
-                isNoTs = false;
-            } else if (targetStartMs > 0) {
-                finalMs = targetStartMs;
-                isNoTs = false;
+            if (isPlaying) {
+                targetStartMs = audioMs;
+            } else if (audio.src && audio.src !== window.location.href && audioMs > 0) {
+                targetStartMs = audioMs;
+            } else if (anchorIndex >= 0 && anchorIndex < state.length) {
+                const anchorLine = state[anchorIndex];
+                targetStartMs = (anchorLine && !anchorLine.noTimestamp && typeof anchorLine.timestampMs === 'number')
+                    ? anchorLine.timestampMs
+                    : 0;
+            } else if (state.length > 0) {
+                const lastLine = state[state.length - 1];
+                targetStartMs = (lastLine && !lastLine.noTimestamp && typeof lastLine.timestampMs === 'number')
+                    ? lastLine.timestampMs + 2000
+                    : 0;
             }
 
-            return {
-                noTimestamp: isNoTs,
-                timestampMs: finalMs,
-                timeMs: finalMs,
-                formattedTime: isNoTs ? '' : formatLrcTimestamp(finalMs),
-                text: srcLine.text || ''
-            };
-        });
+            const firstTimedLine = linesToPaste.find(l => !l.noTimestamp && typeof l.timestampMs === 'number');
+            const baseSourceMs = firstTimedLine ? firstTimedLine.timestampMs : 0;
+
+            clonedLines = linesToPaste.map(srcLine => {
+                const hasTs = !srcLine.noTimestamp && typeof srcLine.timestampMs === 'number';
+                let finalMs = targetStartMs;
+                let isNoTs = Boolean(srcLine.noTimestamp);
+
+                if (hasTs) {
+                    const relativeOffset = srcLine.timestampMs - baseSourceMs;
+                    finalMs = Math.max(0, targetStartMs + relativeOffset);
+                    isNoTs = false;
+                } else if (targetStartMs > 0) {
+                    finalMs = targetStartMs;
+                    isNoTs = false;
+                }
+
+                return {
+                    noTimestamp: isNoTs,
+                    timestampMs: finalMs,
+                    timeMs: finalMs,
+                    formattedTime: isNoTs ? '' : formatLrcTimestamp(finalMs),
+                    text: srcLine.text || ''
+                };
+            });
+        }
 
         state.splice(insertIndex, 0, ...clonedLines);
 
@@ -5085,8 +6019,8 @@
         for (let i = 0; i < clonedLines.length; i++) {
             selectedLineIndices[side].add(insertIndex + i);
         }
-        focusedLineIndex[side] = insertIndex;
-        lastClickedLineIndex[side] = insertIndex;
+        focusedLineIndex[side] = insertIndex + clonedLines.length - 1;
+        lastClickedLineIndex[side] = focusedLineIndex[side];
         if (syncEditModeSide === side) {
             syncEditCursorIndex = insertIndex;
         }
@@ -5105,9 +6039,17 @@
             container.scrollBy({top: scrollOffset, behavior: 'smooth'});
         }
 
-        showToast(clonedLines.length === 1
-            ? t('web.batch.pasted_toast_one', insertIndex + 1, formatLrcTimestamp(targetStartMs))
-            : t('web.batch.pasted_toast_other', clonedLines.length, insertIndex + 1, formatLrcTimestamp(targetStartMs)));
+        const hasPlainZeroed = isExternalPaste && linesToPaste.some(l => !l.hasExplicitTimestamp);
+        if (hasPlainZeroed) {
+            showToast(clonedLines.length === 1
+                ? t('web.batch.pasted_zeroed_toast_one', insertIndex + 1)
+                : t('web.batch.pasted_zeroed_toast_other', clonedLines.length, insertIndex + 1));
+        } else {
+            const toastMs = isExternalPaste ? (clonedLines[0]?.timestampMs || 0) : targetStartMs;
+            showToast(clonedLines.length === 1
+                ? t('web.batch.pasted_toast_one', insertIndex + 1, formatLrcTimestamp(toastMs))
+                : t('web.batch.pasted_toast_other', clonedLines.length, insertIndex + 1, formatLrcTimestamp(toastMs)));
+        }
     }
 
     // Direct Ctrl+C native event listener fallback
@@ -5380,8 +6322,8 @@
         remote: -1
     };
     const focusedLineIndex = {
-        local: 0,
-        remote: 0
+        local: -1,
+        remote: -1
     };
     let dragState = {
         side: null,
@@ -5724,13 +6666,20 @@
                     ? line.timestampMs
                     : ((typeof line.timeMs === 'number')
                         ? line.timeMs
-                        : parseFormattedTimeToMs(line.formattedTime || '00:00')));
+                        : parseFormattedTimeToMs(line.formattedTime || '00:00.00')));
             line.timestampMs = ms;
             line.timeMs = ms;
 
+            if (!line.noTimestamp) {
+                const cleaned = (line.formattedTime || '').replace(/[\[\]]/g, '').trim();
+                line.formattedTime = (cleaned && /[.,:]\d{1,3}$/.test(cleaned))
+                    ? cleaned.replace(/,(\d{1,3})$/, '.$1')
+                    : formatLrcTimestamp(ms);
+            }
+
             const displayTime = line.noTimestamp
                 ? '--:--.--'
-                : (line.formattedTime || formatLrcTimestamp(ms)).replace(/[\[\]]/g, '');
+                : line.formattedTime;
 
             const isTarget = (syncEditModeSide === side && index === syncEditCursorIndex);
             const isSelected = selSet.has(index);
@@ -5982,7 +6931,11 @@
         const timeInput = document.createElement('input');
         timeInput.type = 'text';
         timeInput.className = 'line-input-time';
-        const cleanTime = line.noTimestamp ? '' : (line.formattedTime || '').replace(/[\[\]]/g, '');
+        const lineMs = typeof line.timestampMs === 'number' ? line.timestampMs : (line.timeMs || 0);
+        const rawCleanTime = line.noTimestamp ? '' : (line.formattedTime || '').replace(/[\[\]]/g, '').trim();
+        const cleanTime = line.noTimestamp
+            ? ''
+            : ((rawCleanTime && /[.,:]\d{1,3}$/.test(rawCleanTime)) ? rawCleanTime : formatLrcTimestamp(lineMs));
         timeInput.value = cleanTime;
         timeInput.placeholder = 'mm:ss.xx';
 
@@ -6011,10 +6964,12 @@
                 line.timeMs = 0;
             } else {
                 line.noTimestamp = false;
-                line.formattedTime = rawTimeVal;
-                const parsedMs = parseFormattedTimeToMs(line.formattedTime);
+                const parsedMs = parseFormattedTimeToMs(rawTimeVal);
                 line.timestampMs = parsedMs;
                 line.timeMs = parsedMs;
+                line.formattedTime = /[.,:]\d{1,3}$/.test(rawTimeVal)
+                    ? rawTimeVal.replace(/,(\d{1,3})$/, '.$1')
+                    : formatLrcTimestamp(parsedMs);
             }
             const container = side === 'local' ? localLyricsScroller : remoteLyricsScroller;
             const state = side === 'local' ? localLyricsStateOrFallback(side) : remoteLinesState;
@@ -6200,11 +7155,16 @@
             if (l.noTimestamp) {
                 return l.text || '';
             }
-            const timeStr = (l.formattedTime || '').replace(/[\[\]]/g, '').trim();
-            if (!timeStr) {
-                return l.text || '';
-            }
-            return `[${timeStr}] ${l.text}`;
+            const ms = (typeof l.timestampMs === 'number')
+                ? l.timestampMs
+                : ((typeof l.timeMs === 'number')
+                    ? l.timeMs
+                    : parseFormattedTimeToMs(l.formattedTime || '00:00.00'));
+            const rawStr = (l.formattedTime || '').replace(/[\[\]]/g, '').trim();
+            const timeStr = (rawStr && /[.,:]\d{1,3}$/.test(rawStr))
+                ? rawStr.replace(/,(\d{1,3})$/, '.$1')
+                : formatLrcTimestamp(ms);
+            return `[${timeStr}] ${l.text || ''}`;
         }).join('\n');
     }
 
@@ -6215,6 +7175,13 @@
     async function saveChoice(choice) {
         if (!viewComparator || !viewComparator.classList.contains('active')) return;
         if (!currentTrackDetails) return;
+
+        const targetSide = (choice === 'LRCLIB') ? 'remote' : 'local';
+        if (inlineTextEditActive[targetSide]) {
+            if (!commitInlineTextEdit(targetSide)) {
+                return;
+            }
+        }
 
         const linesToSave = (choice === 'LRCLIB') ? remoteLinesState : localLinesState;
         const customLrc = serializeLinesToLrc(linesToSave);
@@ -6237,9 +7204,10 @@
             if (result.success) {
                 showToast(result.message || (choice === 'LRCLIB' ? t('web.comparator.save_online_default_toast') : t('web.comparator.save_local_default_toast')));
                 currentItems[currentIndex].status = (choice === 'LRCLIB') ? 'SAVED_LRCLIB' : 'KEPT_LOCAL';
+                markCurrentTrackAsSaved();
                 updateFilterCounts();
                 renderTrackList();
-                nextTrack();
+                nextTrack(true);
             } else {
                 showToast(t('web.comparator.save_error_toast', result.message));
             }
@@ -6248,20 +7216,185 @@
         }
     }
 
-    function prevTrack() {
+    function prevTrack(forceSkipUnsavedCheck = false) {
         if (currentIndex > 0) {
-            selectTrack(currentIndex - 1);
+            selectTrack(currentIndex - 1, true, forceSkipUnsavedCheck === true);
         }
     }
 
-    function nextTrack() {
+    function nextTrack(forceSkipUnsavedCheck = false) {
         if (currentIndex < currentItems.length - 1) {
-            selectTrack(currentIndex + 1);
+            selectTrack(currentIndex + 1, true, forceSkipUnsavedCheck === true);
         }
     }
 
-    btnPrevTrack.addEventListener('click', prevTrack);
-    btnNextTrack.addEventListener('click', nextTrack);
+    btnPrevTrack.addEventListener('click', () => prevTrack(false));
+    btnNextTrack.addEventListener('click', () => nextTrack(false));
+
+    // =========================================================================
+    // UNSAVED CHANGES DETECTION & 5-SECOND SAFETY CONFIRMATION MODAL
+    // =========================================================================
+    const unsavedChangesModal = document.getElementById('unsavedChangesModal');
+    const btnCancelUnsavedNo = document.getElementById('btnCancelUnsavedNo');
+    const btnConfirmUnsavedYes = document.getElementById('btnConfirmUnsavedYes');
+    const unsavedCountdownBanner = document.getElementById('unsavedCountdownBanner');
+
+    let unsavedTimerInterval = null;
+    let unsavedSecondsRemaining = 5;
+    let pendingUnsavedActionCallback = null;
+
+    function resetTrackCleanBaseline() {
+        initialLocalSnapshot = null;
+        initialRemoteSnapshot = null;
+        lastCandidateRemoteSnapshot = null;
+    }
+
+    function markCurrentTrackAsSaved() {
+        initialLocalSnapshot = serializeLinesToLrc(localLinesState || []);
+        initialRemoteSnapshot = serializeLinesToLrc(remoteLinesState || []);
+        lastCandidateRemoteSnapshot = initialRemoteSnapshot;
+    }
+
+    function isSideEditorDirty(side) {
+        if (inlineTextEditActive && inlineTextEditActive[side]) {
+            const ta = side === 'local' ? inlineTextAreaLocal : inlineTextAreaRemote;
+            if (ta) {
+                const currentText = ta.value.replace(/\r\n/g, '\n').trim();
+                const originalText = getPlainTextFromSideState(side).replace(/\r\n/g, '\n').trim();
+                if (currentText !== originalText) {
+                    return true;
+                }
+            }
+        }
+        const container = side === 'local' ? localLyricsScroller : remoteLyricsScroller;
+        if (container && container.querySelector('.lyric-line.editing')) {
+            return true;
+        }
+        return false;
+    }
+
+    function hasRemoteManualEdits() {
+        if (isTrackLoading || currentIndex < 0 || !currentTrackDetails) return false;
+        if (isSideEditorDirty('remote')) return true;
+        if (remoteTimestampsBackup !== null) return true;
+        if (lastCandidateRemoteSnapshot === null) return false;
+        return serializeLinesToLrc(remoteLinesState || []) !== lastCandidateRemoteSnapshot;
+    }
+
+    function hasUnsavedChanges() {
+        if (isTrackLoading || currentIndex < 0 || !currentTrackDetails) return false;
+        if (isSideEditorDirty('local') || isSideEditorDirty('remote')) return true;
+        if (localTimestampsBackup !== null || remoteTimestampsBackup !== null) return true;
+        if (initialLocalSnapshot !== null && serializeLinesToLrc(localLinesState || []) !== initialLocalSnapshot) {
+            return true;
+        }
+        if (initialRemoteSnapshot !== null && serializeLinesToLrc(remoteLinesState || []) !== initialRemoteSnapshot) {
+            return true;
+        }
+        return false;
+    }
+
+    function updateUnsavedModalButtonsUI() {
+        if (!btnConfirmUnsavedYes) return;
+        const timerDone = unsavedSecondsRemaining <= 0;
+        btnConfirmUnsavedYes.disabled = !timerDone;
+        btnConfirmUnsavedYes.style.opacity = timerDone ? '1' : '0.45';
+        btnConfirmUnsavedYes.style.cursor = timerDone ? 'pointer' : 'not-allowed';
+        btnConfirmUnsavedYes.textContent = timerDone
+            ? t('web.unsaved.yes_btn')
+            : t('web.unsaved.yes_btn_timer', unsavedSecondsRemaining);
+    }
+
+    function requestUnsavedChangesConfirmation(onConfirmCallback) {
+        if (!hasUnsavedChanges()) {
+            if (typeof onConfirmCallback === 'function') {
+                onConfirmCallback();
+            }
+            return;
+        }
+
+        if (unsavedTimerInterval) {
+            clearInterval(unsavedTimerInterval);
+            unsavedTimerInterval = null;
+        }
+
+        pendingUnsavedActionCallback = onConfirmCallback;
+        unsavedSecondsRemaining = 5;
+
+        if (unsavedCountdownBanner) {
+            unsavedCountdownBanner.style.borderColor = '#fbbf24';
+            unsavedCountdownBanner.style.color = '#fde68a';
+            unsavedCountdownBanner.innerHTML = t('web.unsaved.countdown_waiting_html', '<span id="unsavedTimerSeconds">5</span>');
+        }
+
+        updateUnsavedModalButtonsUI();
+
+        if (unsavedChangesModal) {
+            unsavedChangesModal.style.display = 'flex';
+        }
+
+        // Default to "Não" (No) so pressing Enter / Space / Esc keeps the user on the current song
+        if (btnCancelUnsavedNo) {
+            setTimeout(() => {
+                btnCancelUnsavedNo.focus();
+            }, 0);
+        }
+
+        unsavedTimerInterval = setInterval(() => {
+            unsavedSecondsRemaining = Math.max(0, unsavedSecondsRemaining - 1);
+            const secEl = document.getElementById('unsavedTimerSeconds');
+            if (secEl) {
+                secEl.textContent = String(unsavedSecondsRemaining);
+            }
+            if (unsavedSecondsRemaining <= 0) {
+                clearInterval(unsavedTimerInterval);
+                unsavedTimerInterval = null;
+                if (unsavedCountdownBanner) {
+                    unsavedCountdownBanner.style.borderColor = '#10b981';
+                    unsavedCountdownBanner.style.color = '#34d399';
+                    unsavedCountdownBanner.textContent = t('web.unsaved.countdown_ready');
+                }
+            }
+            updateUnsavedModalButtonsUI();
+        }, 1000);
+    }
+
+    function closeUnsavedChangesModal() {
+        if (unsavedTimerInterval) {
+            clearInterval(unsavedTimerInterval);
+            unsavedTimerInterval = null;
+        }
+        pendingUnsavedActionCallback = null;
+        if (unsavedChangesModal) {
+            unsavedChangesModal.style.display = 'none';
+        }
+    }
+
+    function confirmUnsavedChangesProceed() {
+        if (unsavedSecondsRemaining > 0) {
+            return;
+        }
+        const cb = pendingUnsavedActionCallback;
+        closeUnsavedChangesModal();
+        resetTrackCleanBaseline();
+        if (typeof cb === 'function') {
+            cb();
+        }
+    }
+
+    unsavedChangesModal?.addEventListener('click', (e) => {
+        if (e.target === unsavedChangesModal) {
+            closeUnsavedChangesModal();
+        }
+    });
+
+    window.addEventListener('beforeunload', (e) => {
+        if (hasUnsavedChanges()) {
+            e.preventDefault();
+            e.returnValue = '';
+            return '';
+        }
+    });
 
     // =========================================================================
     // INSTRUMENTAL LYRICS GENERATOR (00:00 TO TRACK DURATION)
@@ -6376,9 +7509,10 @@
                     if (currentItems[currentIndex]) {
                         currentItems[currentIndex].status = 'KEPT_LOCAL';
                     }
+                    markCurrentTrackAsSaved();
                     updateFilterCounts();
                     renderTrackList();
-                    nextTrack();
+                    nextTrack(true);
                 } else {
                     showToast(t('web.instrumental.save_error_toast', data.message || t('web.instrumental.unknown_error')));
                 }
@@ -6585,13 +7719,45 @@
         }
         showToast(t('web.batch_best.done_toast', savedCount));
 
-        if (currentIndex >= 0 && currentIndex < currentItems.length) {
-            selectTrack(currentIndex, false);
+        if (currentIndex >= 0 && currentIndex < currentItems.length && !hasUnsavedChanges()) {
+            selectTrack(currentIndex, false, true);
         }
     }
 
     // Keyboard Shortcuts
     window.addEventListener('keydown', (e) => {
+        if (unsavedChangesModal && unsavedChangesModal.style.display === 'flex') {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                closeUnsavedChangesModal();
+                return;
+            }
+            if (e.key === 'Enter' || e.code === 'Space') {
+                if (document.activeElement === btnConfirmUnsavedYes && unsavedSecondsRemaining <= 0) {
+                    e.preventDefault();
+                    confirmUnsavedChangesProceed();
+                    return;
+                }
+                e.preventDefault();
+                closeUnsavedChangesModal();
+                return;
+            }
+            if (e.key === 'Tab' || e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
+                return;
+            }
+            e.preventDefault();
+            return;
+        }
+
+        // Intercept page reload shortcuts (F5 / Ctrl+R / Cmd+R) when there are unsaved changes
+        if ((e.key === 'F5' || ((e.ctrlKey || e.metaKey) && !e.altKey && (e.code === 'KeyR' || e.key === 'r' || e.key === 'R'))) && hasUnsavedChanges()) {
+            e.preventDefault();
+            requestUnsavedChangesConfirmation(() => {
+                window.location.reload();
+            });
+            return;
+        }
+
         if (e.key === 'Escape') {
             if (shortcutsHelpModal && shortcutsHelpModal.style.display === 'flex') {
                 closeShortcutsHelpModal();
@@ -6617,6 +7783,14 @@
                 closeActionModal();
                 return;
             }
+            if (inlineTextEditActive.local) {
+                exitInlineTextEditMode('local', true);
+                return;
+            }
+            if (inlineTextEditActive.remote) {
+                exitInlineTextEditMode('remote', true);
+                return;
+            }
             if (syncEditModeSide !== null) {
                 disableSyncEditMode();
                 showToast(t('web.sync_edit.disabled_toast'));
@@ -6633,7 +7807,8 @@
             (allApiResultsModal && allApiResultsModal.style.display === 'flex') ||
             (pasteLyricsModal && pasteLyricsModal.style.display === 'flex') ||
             (instrumentalModal && instrumentalModal.style.display === 'flex') ||
-            (batchBestConfirmModal && batchBestConfirmModal.style.display === 'flex')
+            (batchBestConfirmModal && batchBestConfirmModal.style.display === 'flex') ||
+            (unsavedChangesModal && unsavedChangesModal.style.display === 'flex')
         ) return;
 
         // All comparator shortcuts must strictly and only work when the comparator view is active
@@ -6643,12 +7818,12 @@
         if (e.altKey && !e.ctrlKey && !e.metaKey) {
             if (e.code === 'KeyA' || e.key === 'a' || e.key === 'A') {
                 e.preventDefault();
-                prevTrack();
+                prevTrack(false);
                 return;
             }
             if (e.code === 'KeyF' || e.key === 'f' || e.key === 'F') {
                 e.preventDefault();
-                nextTrack();
+                nextTrack(false);
                 return;
             }
         }
@@ -6661,14 +7836,9 @@
             return;
         }
 
-        // Ctrl + V / Cmd + V: Paste copied lines below selection, at song time, or at end
+        // Ctrl + V / Cmd + V: Always let the native 'paste' event fire so e.clipboardData.getData('text/plain')
+        // delivers the real OS clipboard text (never shadowed by a stale internal copiedLyricsBuffer!)
         if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && (e.code === 'KeyV' || e.key === 'v' || e.key === 'V')) {
-            if (copiedLyricsBuffer && copiedLyricsBuffer.length > 0) {
-                e.preventDefault();
-                pasteLyricLines();
-                return;
-            }
-            // If internal buffer is empty, let the native 'paste' event fire to grab clipboard text
             return;
         }
 
@@ -6777,26 +7947,28 @@
             case 'ArrowUp':
                 if (!e.ctrlKey && !e.altKey && !e.metaKey) {
                     e.preventDefault();
-                    prevTrack();
+                    prevTrack(false);
                 }
                 break;
             case 'ArrowDown':
                 if (!e.ctrlKey && !e.altKey && !e.metaKey) {
                     e.preventDefault();
-                    nextTrack();
+                    nextTrack(false);
                 }
                 break;
         }
     });
 
     function clearViewer() {
+        resetTrackCleanBaseline();
+        isTrackLoading = false;
         songTitle.textContent = t('web.player.no_track_selected');
         songArtist.textContent = '-';
         songAlbum.textContent = '-';
         albumArtImg.style.display = 'none';
         vinylFallback.style.display = 'block';
-        localLyricsScroller.innerHTML = `<p style=\"text-align: center; color: #777777; margin-top: 40px;\">${escapeHtml(t('web.comparator.no_tracks_available'))}</p>`;
-        remoteLyricsScroller.innerHTML = `<p style=\"text-align: center; color: #777777; margin-top: 40px;\">${escapeHtml(t('web.comparator.no_tracks_available'))}</p>`;
+        localLyricsScroller.innerHTML = `<p style="text-align: center; color: #777777; margin-top: 40px;">${escapeHtml(t('web.comparator.no_tracks_available'))}</p>`;
+        remoteLyricsScroller.innerHTML = `<p style="text-align: center; color: #777777; margin-top: 40px;">${escapeHtml(t('web.comparator.no_tracks_available'))}</p>`;
     }
 
     // Theme management (System Auto + AMOLED #000000 + Neutral 0-Saturation Dark + Light)
