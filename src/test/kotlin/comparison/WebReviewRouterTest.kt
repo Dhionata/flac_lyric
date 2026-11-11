@@ -137,4 +137,87 @@ class WebReviewRouterTest {
         Assertions.assertFalse(html.contains(",\\n"), "index.html should not contain broken ',\\\\n' string")
         Assertions.assertFalse(html.contains(")\\n"), "index.html should not contain broken ')\\\\n' string")
     }
+
+    @Test
+    fun `test shutdown endpoint triggers onShutdownRequested after grace period when last tab closes`() {
+        val shutdownLatch = java.util.concurrent.CountDownLatch(1)
+        val router = createTestRouter(graceMs = 80L) {
+            shutdownLatch.countDown()
+        }
+        val server = comparison.infrastructure.web.WebLyricReviewServerImpl(router)
+        val port = server.start(0)
+        try {
+            sendHttpPost("http://localhost:$port/api/heartbeat?clientId=tab-1")
+            sendHttpPost("http://localhost:$port/api/shutdown?clientId=tab-1")
+
+            Assertions.assertTrue(
+                shutdownLatch.await(1500, java.util.concurrent.TimeUnit.MILLISECONDS),
+                "Server should trigger shutdown callback when the last client closes"
+            )
+        } finally {
+            server.stop()
+        }
+    }
+
+    @Test
+    fun `test shutdown is cancelled if page reloads and sends heartbeat within grace period`() {
+        val shutdownCalled = java.util.concurrent.atomic.AtomicBoolean(false)
+        val router = createTestRouter(graceMs = 200L) {
+            shutdownCalled.set(true)
+        }
+        val server = comparison.infrastructure.web.WebLyricReviewServerImpl(router)
+        val port = server.start(0)
+        try {
+            sendHttpPost("http://localhost:$port/api/heartbeat?clientId=tab-old")
+            sendHttpPost("http://localhost:$port/api/shutdown?clientId=tab-old")
+            // Simulate immediate page reload (new tab clientId)
+            Thread.sleep(30)
+            sendHttpPost("http://localhost:$port/api/heartbeat?clientId=tab-new")
+
+            Thread.sleep(300)
+            Assertions.assertFalse(
+                shutdownCalled.get(),
+                "Server must NOT shut down when page reloads within grace period"
+            )
+        } finally {
+            server.stop()
+        }
+    }
+
+    private fun createTestRouter(graceMs: Long, onShutdown: () -> Unit): WebReviewRouter {
+        val reportParser = comparison.infrastructure.parsers.LyricsReportParserImpl()
+        val metadataExtractor = comparison.infrastructure.audio.AudioMetadataExtractorImpl()
+        val lrcClient = object : comparison.domain.ports.LrcLibClient {
+            override fun getLyrics(trackName: String, artistName: String, albumName: String?, durationSeconds: Int?) = null
+            override fun searchLyrics(query: String) = emptyList<comparison.domain.models.LrcLibLyrics>()
+        }
+        val storage = comparison.infrastructure.io.LyricFileStorageImpl()
+        val lineParser = comparison.infrastructure.parsers.LyricLineParserImpl()
+        val parseLines = comparison.application.usecases.ParseLyricLinesUseCase(lineParser)
+        val fetchLrc = comparison.application.usecases.FetchLrcLibLyricsUseCase(lrcClient)
+        return WebReviewRouter(
+            parseReportUseCase = comparison.application.usecases.ParseIssuesReportUseCase(reportParser),
+            extractDetailsUseCase = comparison.application.usecases.ExtractTrackDetailsUseCase(
+                metadataExtractor, storage, parseLines, fetchLrc
+            ),
+            saveLyricUseCase = comparison.application.usecases.SaveLyricChoiceUseCase(storage),
+            fetchLrcLibUseCase = fetchLrc,
+            audioMetadataExtractor = metadataExtractor,
+            shutdownGracePeriodMs = graceMs,
+            onShutdownRequested = onShutdown
+        )
+    }
+
+    private fun sendHttpPost(urlStr: String): Int {
+        val conn = (java.net.URI.create(urlStr).toURL().openConnection() as java.net.HttpURLConnection).apply {
+            requestMethod = "POST"
+            doOutput = true
+            connectTimeout = 2000
+            readTimeout = 2000
+        }
+        conn.outputStream.use { it.write(ByteArray(0)) }
+        val code = conn.responseCode
+        conn.disconnect()
+        return code
+    }
 }

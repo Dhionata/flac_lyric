@@ -3,20 +3,23 @@ package services
 import interfaces.AudioAnalysisService
 import interfaces.AudioFileHandler
 import interfaces.AudioNomenclatureValidator
+import interfaces.AuditLogService
 import interfaces.DirectoryService
 import interfaces.FileService
 import interfaces.LogService
+import interfaces.LyricContentCleaner
 import interfaces.LyricFileHandler
 import interfaces.LyricSyncValidator
 import interfaces.MatchService
 import interfaces.UserInterface
 import java.io.File
+import models.LyricCleanOptions
 import models.LyricValidationIssue
 import models.OperationResult
 
 /**
  * Orchestrator service that centralizes all business rules related to music and lyrics.
- * Coordinates pairing actions, nomenclature verification, spectrum analysis, and synchronization.
+ * Coordinates pairing actions, nomenclature verification, spectrum analysis, content cleaning, and synchronization.
  */
 class MusicLyricsService(
     private val userInterface: UserInterface,
@@ -28,7 +31,9 @@ class MusicLyricsService(
     private val nomenclatureValidator: AudioNomenclatureValidator,
     private val audioAnalysisService: AudioAnalysisService,
     private val lyricSyncValidator: LyricSyncValidator = LyricSyncValidatorImpl(),
+    private val lyricContentCleaner: LyricContentCleaner = LyricContentCleanerImpl(),
     private val logService: LogService = JdkLogService(MusicLyricsService::class.java),
+    private val auditLogService: AuditLogService = AuditLogServiceImpl(),
 ) {
 
     private fun getValidatedMusicDirectory(message: String): File {
@@ -161,13 +166,11 @@ class MusicLyricsService(
         val outDirectory = directoryService.getDirectory(Messages.get("prompt.select.out_dir"))
         val lyricFiles = lyricFileHandler.getLyricFiles(lyricsDirectory)
 
-        val timestampRegex = Regex("""\[\d{1,2}:\d{2}""")
-
         userInterface.showProgress(Messages.get("progress.check_sync"), lyricFiles.size)
         val lyricsFilesWithoutSync = lyricFiles.filterIndexed { index, lyricFile ->
             userInterface.updateProgress(index + 1, lyricFile.name)
             try {
-                !timestampRegex.containsMatchIn(lyricFile.readText())
+                !LyricSyntaxPatterns.TIMESTAMP_REGEX.containsMatchIn(lyricFile.readText())
             } catch (_: Exception) {
                 false
             }
@@ -199,41 +202,73 @@ class MusicLyricsService(
         return lyricsFilesWithoutSync
     }
 
-    fun findLyricsWithV1Text(): List<File> {
+    /**
+     * Scans and cleans `.lrc` files using [LyricContentCleaner] according to the provided [options]
+     * (speaker markers `v1:/v2:`, background tags `[bg:]`, inline `<mm:ss>` word tags, credits/watermarks,
+     * out-of-order/duplicated multi-timestamps, UTF-8 BOM, and optional unsynced lines in synced files),
+     * recording a complete before/after audit log for every modified file.
+     */
+    fun findLyricsWithV1Text(options: LyricCleanOptions = LyricCleanOptions()): List<File> {
         val lyricsDirectory = directoryService.getDirectory(Messages.get("prompt.select.lyrics_dir"))
+        auditLogService.logOperationStart(
+            actionName = "Option 3 - Clean and Normalize .lrc Files",
+            options = mapOf(
+                "lyricsDirectory" to lyricsDirectory.absolutePath,
+                "removeSpeakerAndBgTags" to options.removeSpeakerAndBgTags,
+                "removeInlineWordTimestamps" to options.removeInlineWordTimestamps,
+                "removeCreditsAndWatermarks" to options.removeCreditsAndWatermarks,
+                "sortAndDeduplicateMultiTimestamps" to options.sortAndDeduplicateMultiTimestamps,
+                "removeUnsyncedLinesInSyncedFile" to options.removeUnsyncedLinesInSyncedFile,
+                "stripBom" to options.stripBom
+            )
+        )
+
         val lyricFiles = lyricFileHandler.getLyricFiles(lyricsDirectory)
 
+        val cleanedMatches = mutableListOf<Pair<File, models.LyricCleanResult>>()
+
         userInterface.showProgress(Messages.get("progress.find_v1"), lyricFiles.size)
-        val lyricsFilesWithV1 = lyricFiles.filterIndexed { index, lyricFile ->
+        lyricFiles.forEachIndexed { index, lyricFile ->
             userInterface.updateProgress(index + 1, lyricFile.name)
             try {
-                lyricFile.readText().contains("v1:", ignoreCase = true)
+                val originalText = lyricFile.readText()
+                val cleanResult = lyricContentCleaner.clean(originalText, options)
+                if (cleanResult.modified) {
+                    cleanedMatches.add(lyricFile to cleanResult)
+                }
             } catch (_: Exception) {
-                false
+                // Skip unreadable files during scan
             }
         }
         userInterface.closeProgress()
 
         val changes = mutableSetOf<String>()
         val errors = mutableSetOf<Exception>()
+        val modifiedFiles = cleanedMatches.map { it.first }
 
-        if (lyricsFilesWithV1.isNotEmpty()) {
+        if (cleanedMatches.isNotEmpty()) {
             val reportFile = AppOutputDirectories.createReportFile(
-                AppOutputDirectories.SUBDIR_V1_LYRICS, "LyricsWithV1_${lyricsFilesWithV1.hashCode()}.txt"
+                AppOutputDirectories.SUBDIR_V1_LYRICS, "LyricsWithV1_${modifiedFiles.hashCode()}.txt"
             )
             reportFile.writeText(
-                lyricsFilesWithV1.joinToString("\n") { it.name })
+                cleanedMatches.joinToString("\n") { [file, res] ->
+                    "${file.name} [${res.appliedFixes.joinToString(", ")}]"
+                }
+            )
 
-            userInterface.showProgress(Messages.get("progress.remove_v1"), lyricsFilesWithV1.size)
-            lyricsFilesWithV1.forEachIndexed { index, lyricFile ->
+            userInterface.showProgress(Messages.get("progress.remove_v1"), cleanedMatches.size)
+            cleanedMatches.forEachIndexed { index, [lyricFile, cleanResult] ->
                 userInterface.updateProgress(index + 1, lyricFile.name)
                 try {
-                    val originalText = lyricFile.readText()
-                    if (originalText.contains("v1:", ignoreCase = true)) {
-                        val updatedText = originalText.replace(Regex("(?i)v1:"), "")
-                        lyricFile.writeText(updatedText)
-                        changes.add(lyricFile.name)
-                    }
+                    lyricFile.writeText(cleanResult.cleanedContent)
+                    auditLogService.logContentModification(
+                        operation = "Option 3 - Clean and Normalize .lrc",
+                        targetFile = lyricFile,
+                        beforeContent = cleanResult.originalContent,
+                        afterContent = cleanResult.cleanedContent,
+                        metadata = mapOf("appliedFixes" to cleanResult.appliedFixes.joinToString(", "))
+                    )
+                    changes.add("${lyricFile.name} (${cleanResult.appliedFixes.joinToString(", ")})")
                 } catch (e: Exception) {
                     errors.add(e)
                 }
@@ -241,22 +276,50 @@ class MusicLyricsService(
             userInterface.closeProgress()
         }
 
+        auditLogService.logOperationEnd(
+            actionName = "Option 3 - Clean and Normalize .lrc Files",
+            success = errors.isEmpty(),
+            processedCount = changes.size,
+            errorCount = errors.size,
+            details = changes.toList()
+        )
+
         userInterface.showResult(changes, errors)
 
-        return lyricsFilesWithV1
+        return modifiedFiles
     }
 
-    fun findAndMoveAloneLyrics(): List<File> {
+    /**
+     * Finds and moves `.lrc` files that do not have a matching audio file **in the same folder**
+     * (catching both completely unpaired lyrics and orphan `.lrc` files left in empty/different folders).
+     * When [includeTxtFiles] is `true`, also moves stray `.txt` files found inside the music directory.
+     */
+    fun findAndMoveAloneLyrics(includeTxtFiles: Boolean = false): List<File> {
         val mainDirectory = directoryService.getDirectory(Messages.get("prompt.select.main_dir"))
         val outDirectory = directoryService.getDirectory(Messages.get("prompt.select.move_alone_lyrics"))
 
         val lyricFiles = lyricFileHandler.getLyricFiles(mainDirectory)
         val audioFiles = audioFileHandler.getAudioFiles(mainDirectory)
 
-        val audioNamesWithoutExtension = audioFiles.map { it.nameWithoutExtension.lowercase() }.toSet()
+        val audioParentAndNameSet = audioFiles.map { audio ->
+            (audio.parentFile?.canonicalPath ?: "") to audio.nameWithoutExtension.lowercase()
+        }.toSet()
 
         val aloneLyrics = lyricFiles.filter { lyricFile ->
-            !audioNamesWithoutExtension.contains(lyricFile.nameWithoutExtension.lowercase())
+            val key = (lyricFile.parentFile?.canonicalPath ?: "") to lyricFile.nameWithoutExtension.lowercase()
+            !audioParentAndNameSet.contains(key)
+        }.toMutableList()
+
+        if (includeTxtFiles) {
+            val outCanonical = outDirectory.canonicalPath
+            val strayTxtFiles = mainDirectory.walkTopDown()
+                .filter { file ->
+                    file.isFile &&
+                            file.extension.equals("txt", ignoreCase = true) &&
+                            !file.canonicalPath.startsWith(outCanonical)
+                }
+                .toList()
+            aloneLyrics.addAll(strayTxtFiles)
         }
 
         val movedLyricsNames = mutableListOf<String>()
@@ -267,13 +330,27 @@ class MusicLyricsService(
         aloneLyrics.forEachIndexed { index, lyric ->
             userInterface.updateProgress(index + 1, lyric.name)
             val parentFolder = lyric.parentFile
-            val [_, moveResult] = fileService.moveLyricFile(lyric, outDirectory)
-            changes.addAll(moveResult.changedSet)
-            errors.addAll(moveResult.errorSet)
-            movedLyricsNames.add(lyric.name)
+            if (lyric.extension.equals("lrc", ignoreCase = true)) {
+                val [_, moveResult] = fileService.moveLyricFile(lyric, outDirectory)
+                changes.addAll(moveResult.changedSet)
+                errors.addAll(moveResult.errorSet)
+                movedLyricsNames.add(lyric.name)
+            } else {
+                try {
+                    if (fileService.moveFile(lyric, outDirectory)) {
+                        movedLyricsNames.add(lyric.name)
+                        changes.add(Messages.get("result.lyric_moved", lyric.name, parentFolder?.absolutePath ?: "", outDirectory.absolutePath))
+                    } else {
+                        errors.add(RuntimeException(Messages.get("error.move_simple_failed", lyric.name)))
+                    }
+                } catch (e: Exception) {
+                    errors.add(e)
+                }
+            }
 
             if (parentFolder != null && parentFolder != mainDirectory && parentFolder.isDirectory && parentFolder.listFiles()?.isEmpty() == true) {
                 if (parentFolder.delete()) {
+                    auditLogService.logFileAction("DELETE_EMPTY_DIR", parentFolder)
                     changes.add(Messages.get("result.deleted_empty_dir", parentFolder.absolutePath))
                 }
             }
@@ -411,9 +488,20 @@ class MusicLyricsService(
             userInterface.updateProgress(index + 1, lyricFile.name)
             try {
                 val candidates = audioMap[lyricFile.nameWithoutExtension.lowercase()]
-                val matchingAudio = candidates?.find { it.parentFile == lyricFile.parentFile } ?: candidates?.firstOrNull()
+                val sameFolderAudio = candidates?.find { it.parentFile == lyricFile.parentFile }
 
-                val issues = lyricSyncValidator.validate(lyricFile, matchingAudio)
+                if (sameFolderAudio == null) {
+                    allIssues.add(
+                        LyricValidationIssue(
+                            lyricFile = lyricFile,
+                            audioFile = null,
+                            issueType = Messages.get("lyric.issue.type.orphan_lyric"),
+                            description = Messages.get("lyric.issue.orphan_lyric")
+                        )
+                    )
+                }
+
+                val issues = lyricSyncValidator.validate(lyricFile, sameFolderAudio)
                 allIssues.addAll(issues)
             } catch (e: Exception) {
                 errors.add(e)
@@ -426,7 +514,8 @@ class MusicLyricsService(
                 try {
                     val siblingLrc = File(audioFile.parentFile, "${audioFile.nameWithoutExtension}.lrc")
                     val matchingLyrics = lyricMap[audioFile.nameWithoutExtension.lowercase()]
-                    val hasMatchingLrc = siblingLrc.exists() || !matchingLyrics.isNullOrEmpty()
+                    val hasMatchingLrc = siblingLrc.exists() ||
+                            (matchingLyrics?.any { it.parentFile == audioFile.parentFile } == true)
                     if (!hasMatchingLrc) {
                         allIssues.add(
                             LyricValidationIssue(

@@ -1,25 +1,26 @@
 package services
 
+import interfaces.LyricContentCleaner
 import interfaces.LyricSyncValidator
 import java.io.File
 import java.text.Normalizer
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
+import kotlin.math.roundToLong
 import models.LyricValidationIssue
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.tag.FieldKey
+import services.LyricSyntaxPatterns.trimAndStripBom
 
 /**
  * Implementation of [LyricSyncValidator] that verifies whether a lyric file (.lrc)
- * is properly synchronized and corresponds to the matching audio file.
+ * is properly synchronized, encoded, free of extraneous clutter tags, and corresponds
+ * to the matching audio file.
  * All issue descriptions are localized using [Messages].
  */
-class LyricSyncValidatorImpl : LyricSyncValidator {
-
-    private val timeRegex = Regex("""\[(\d{1,2}):(\d{2}(?:\.\d{1,3})?)\]""")
-    private val arRegex = Regex("""^\[ar:(.*?)\]""", RegexOption.IGNORE_CASE)
-    private val tiRegex = Regex("""^\[ti:(.*?)\]""", RegexOption.IGNORE_CASE)
-    private val lenRegex = Regex("""^\[length:\s*(\d{1,2}):(\d{2})\]""", RegexOption.IGNORE_CASE)
+class LyricSyncValidatorImpl(
+    private val lyricContentCleaner: LyricContentCleaner = LyricContentCleanerImpl(),
+) : LyricSyncValidator {
 
     override fun validate(lyricFile: File, audioFile: File?): List<LyricValidationIssue> {
         val issues = mutableListOf<LyricValidationIssue>()
@@ -29,7 +30,7 @@ class LyricSyncValidatorImpl : LyricSyncValidator {
         }
 
         val lines = try {
-            lyricFile.readLines()
+            lyricFile.readLines(Charsets.UTF_8)
         } catch (_: Exception) {
             try {
                 lyricFile.readLines(Charsets.ISO_8859_1)
@@ -49,39 +50,88 @@ class LyricSyncValidatorImpl : LyricSyncValidator {
         var lrcTitle: String? = null
         var lrcLength: Double? = null
         val timestamps = mutableListOf<Double>()
-        var hasMultiTimestampOnSingleLine = false
         val singleLineTimestamps = mutableListOf<Pair<Int, Double>>()
+        val nonCreditVerseTimestamps = mutableListOf<Long>()
+        val unsyncedLines = mutableListOf<Pair<Int, String>>()
+        var firstEncodingErrorLine: Int? = null
+        var inlineOutOfOrderIssue: Triple<Int, Double, Double>? = null
+        var inlineDuplicateTimestamp: Double? = null
 
         lines.forEachIndexed { idx, line ->
-            val trimmed = line.trim()
-            val arMatch = arRegex.find(trimmed)
+            val lineNum = idx + 1
+            if (firstEncodingErrorLine == null && LyricSyntaxPatterns.ENCODING_CORRUPTION_REGEX.containsMatchIn(line)) {
+                firstEncodingErrorLine = lineNum
+            }
+
+            val trimmed = line.trimAndStripBom()
+            if (trimmed.isEmpty()) return@forEachIndexed
+
+            val arMatch = LyricSyntaxPatterns.AR_TAG_REGEX.find(trimmed)
             if (arMatch != null && lrcArtist == null) {
                 lrcArtist = arMatch.groupValues[1].trim()
             }
 
-            val tiMatch = tiRegex.find(trimmed)
+            val tiMatch = LyricSyntaxPatterns.TI_TAG_REGEX.find(trimmed)
             if (tiMatch != null && lrcTitle == null) {
                 lrcTitle = tiMatch.groupValues[1].trim()
             }
 
-            val lenMatch = lenRegex.find(trimmed)
+            val lenMatch = LyricSyntaxPatterns.LENGTH_TAG_REGEX.find(trimmed)
             if (lenMatch != null && lrcLength == null) {
                 val min = lenMatch.groupValues[1].toIntOrNull() ?: 0
                 val sec = lenMatch.groupValues[2].toIntOrNull() ?: 0
                 lrcLength = (min * 60 + sec).toDouble()
             }
 
-            val lineMatches = timeRegex.findAll(trimmed).toList()
-            if (lineMatches.size > 1) {
-                hasMultiTimestampOnSingleLine = true
+            if (LyricSyntaxPatterns.GENERIC_HEADER_TAG_REGEX.matches(trimmed)) {
+                return@forEachIndexed
             }
-            lineMatches.forEach { match ->
-                val min = match.groupValues[1].toDoubleOrNull() ?: 0.0
-                val sec = match.groupValues[2].toDoubleOrNull() ?: 0.0
-                val ts = min * 60.0 + sec
-                timestamps.add(ts)
-                singleLineTimestamps.add((idx + 1) to ts)
+
+            val lineMatches = LyricSyntaxPatterns.TIMESTAMP_REGEX.findAll(trimmed).toList()
+            if (lineMatches.isEmpty()) {
+                unsyncedLines.add(lineNum to trimmed)
+                return@forEachIndexed
             }
+
+            val verseText = trimmed
+                .replace(LyricSyntaxPatterns.TIMESTAMP_REGEX, "")
+                .replace(LyricSyntaxPatterns.INLINE_WORD_TAG_REGEX, "")
+                .trim()
+            val isCreditStub = LyricSyntaxPatterns.CREDIT_ONLY_TEXT_REGEX.matches(verseText)
+
+            val currentLineTsValues = lineMatches.map { LyricSyntaxPatterns.parseMatchToSeconds(it) }
+            timestamps.addAll(currentLineTsValues)
+
+            if (lineMatches.size == 1) {
+                val ts = currentLineTsValues[0]
+                singleLineTimestamps.add(lineNum to ts)
+                if (verseText.isNotEmpty() && !isCreditStub) {
+                    nonCreditVerseTimestamps.add((ts * 1000.0).roundToLong())
+                }
+            } else {
+                // Check if multiple timestamps on the same line are inverted or duplicated
+                for (i in 1 until currentLineTsValues.size) {
+                    val prevTagTs = currentLineTsValues[i - 1]
+                    val currTagTs = currentLineTsValues[i]
+                    if (currTagTs < prevTagTs && inlineOutOfOrderIssue == null) {
+                        inlineOutOfOrderIssue = Triple(lineNum, currTagTs, prevTagTs)
+                    } else if (currTagTs == prevTagTs && inlineDuplicateTimestamp == null) {
+                        inlineDuplicateTimestamp = currTagTs
+                    }
+                }
+            }
+        }
+
+        // 0. Check encoding corruption (U+FFFD or mojibake)
+        if (firstEncodingErrorLine != null) {
+            issues.add(
+                LyricValidationIssue(
+                    lyricFile,
+                    audioFile,
+                    Messages.get("lyric.issue.type.encoding_error"),
+                    Messages.get("lyric.issue.encoding_error", firstEncodingErrorLine)
+                )
+            )
         }
 
         // 1. Basic timestamp checks
@@ -97,9 +147,24 @@ class LyricSyncValidatorImpl : LyricSyncValidator {
             return issues
         }
 
-        if (!hasMultiTimestampOnSingleLine && singleLineTimestamps.size > 1) {
+        // 1b. Check partial synchronization (unsynced verse lines mixed inside a synced file)
+        if (unsyncedLines.isNotEmpty()) {
+            val firstUnsyncedLine = unsyncedLines.first().first
+            issues.add(
+                LyricValidationIssue(
+                    lyricFile,
+                    audioFile,
+                    Messages.get("lyric.issue.type.partial_sync"),
+                    Messages.get("lyric.issue.partial_sync", unsyncedLines.size, firstUnsyncedLine)
+                )
+            )
+        }
+
+        // 1c. Check out-of-order timestamps (across single-timestamp lines or within a multi-timestamp line)
+        var outOfOrderReported = false
+        if (singleLineTimestamps.size > 1) {
             for (i in 1 until singleLineTimestamps.size) {
-                val (prevLineNum, prevTs) = singleLineTimestamps[i - 1]
+                val (_, prevTs) = singleLineTimestamps[i - 1]
                 val (currLineNum, currTs) = singleLineTimestamps[i]
                 if (currTs < prevTs) {
                     issues.add(
@@ -110,9 +175,21 @@ class LyricSyncValidatorImpl : LyricSyncValidator {
                             Messages.get("lyric.issue.out_of_order", currLineNum, formatTime(currTs), formatTime(prevTs))
                         )
                     )
+                    outOfOrderReported = true
                     break
                 }
             }
+        }
+        if (!outOfOrderReported && inlineOutOfOrderIssue != null) {
+            val (lineNum, currTs, prevTs) = inlineOutOfOrderIssue
+            issues.add(
+                LyricValidationIssue(
+                    lyricFile,
+                    audioFile,
+                    Messages.get("lyric.issue.type.out_of_order"),
+                    Messages.get("lyric.issue.out_of_order", lineNum, formatTime(currTs), formatTime(prevTs))
+                )
+            )
         }
 
         timestamps.sort()
@@ -126,6 +203,44 @@ class LyricSyncValidatorImpl : LyricSyncValidator {
                     audioFile,
                     Messages.get("lyric.issue.type.static_timestamps"),
                     Messages.get("lyric.issue.static_timestamps", formatTime(firstTs))
+                )
+            )
+        } else {
+            // 1d. Check stacked/duplicate timestamps (3+ non-credit verses sharing the exact same timestamp, or repeated tag on same line)
+            val groupedCounts = nonCreditVerseTimestamps.groupingBy { it }.eachCount()
+            val maxDupEntry = groupedCounts.entries.maxByOrNull { it.value }
+            if (maxDupEntry != null && maxDupEntry.value >= 3) {
+                val dupSeconds = maxDupEntry.key / 1000.0
+                issues.add(
+                    LyricValidationIssue(
+                        lyricFile,
+                        audioFile,
+                        Messages.get("lyric.issue.type.duplicate_timestamps"),
+                        Messages.get("lyric.issue.duplicate_timestamps", maxDupEntry.value, formatTime(dupSeconds))
+                    )
+                )
+            } else if (inlineDuplicateTimestamp != null) {
+                issues.add(
+                    LyricValidationIssue(
+                        lyricFile,
+                        audioFile,
+                        Messages.get("lyric.issue.type.duplicate_timestamps"),
+                        Messages.get("lyric.issue.duplicate_timestamps", 2, formatTime(inlineDuplicateTimestamp))
+                    )
+                )
+            }
+        }
+
+        // 1e. Check cleanable dirty tags (v1:/v2:, [bg:], <mm:ss>, embedded credits, URLs/watermarks)
+        val fullText = lines.joinToString("\n")
+        val dirtyPatterns = lyricContentCleaner.inspectDirtyPatterns(fullText)
+        if (dirtyPatterns.isNotEmpty()) {
+            issues.add(
+                LyricValidationIssue(
+                    lyricFile,
+                    audioFile,
+                    Messages.get("lyric.issue.type.dirty_tags"),
+                    Messages.get("lyric.issue.dirty_tags", dirtyPatterns.joinToString(", "))
                 )
             )
         }

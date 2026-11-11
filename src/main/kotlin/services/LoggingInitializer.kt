@@ -159,4 +159,38 @@ object LoggingInitializer {
             }
         }
     }
+
+    /**
+     * Appends a structured, timestamped audit trail block to both the current execution `.log` file
+     * (`logs/flac_lyric_YYYY-MM-DD_HH-mm-ss.log`) and the persistent audit log (`logs/flac_lyric_audit.log`).
+     */
+    fun logAuditEntry(
+        category: String,
+        body: String,
+    ) {
+        if (!initialized || currentExecutionLogFile == null) {
+            init()
+        }
+        val targetFile = currentExecutionLogFile ?: return
+        val auditFile = File(targetFile.parentFile ?: File("logs"), "flac_lyric_audit.log")
+
+        val nowStr = LocalDateTime.now().format(entryTimestampFormatter)
+        val entry = buildString {
+            appendLine("================================================================================")
+            appendLine("[$nowStr] [$category]")
+            body.lineSequence().forEach { line ->
+                appendLine("  $line")
+            }
+            appendLine("================================================================================")
+        }
+
+        synchronized(fileWriteLock) {
+            try {
+                targetFile.appendText(entry, StandardCharsets.UTF_8)
+                auditFile.appendText(entry, StandardCharsets.UTF_8)
+            } catch (_: Exception) {
+            }
+        }
+    }
 }
+

@@ -2,7 +2,9 @@ package comparison.infrastructure.parsers
 
 import comparison.domain.models.ParsedLyricLine
 import comparison.domain.ports.LyricLineParser
-import java.util.Locale
+import java.util.*
+import services.LyricSyntaxPatterns
+import services.LyricSyntaxPatterns.trimAndStripBom
 
 /**
  * Robust parser for synchronized LRC file lines and unsynchronized plain lyrics.
@@ -12,14 +14,7 @@ import java.util.Locale
  */
 class LyricLineParserImpl : LyricLineParser {
 
-    private val timestampRegex = Regex("""\[(\d{1,2}):(\d{2})(?:[.,:](\d{1,3}))?(?:-\d+)?\]""")
-    private val inlineWordTagRegex = Regex("""<\d{1,2}:\d{2}(?:[.,:]\d{1,3})?>""")
-    private val headerTagRegex = Regex("""^\[[a-zA-Z]+:[^\]]*\].*""")
     private val sectionHeaderRegex = Regex("""^\[[^\]]+\]$""")
-    private val creditOnlyLineRegex = Regex(
-        """^(?:作词|作曲|编曲|制作人|混音|母带|录音|吉他|贝斯|鼓|和声|词|曲|Lyrics\s*by|Composed\s*by|Arranged\s*by|Produced\s*by)\s*[:：].*$""",
-        RegexOption.IGNORE_CASE
-    )
 
     private fun formatTimestampMs(totalMs: Long): String {
         val clamped = totalMs.coerceAtLeast(0L)
@@ -41,13 +36,13 @@ class LyricLineParserImpl : LyricLineParser {
         var hasMultiTimestampLine = false
 
         content.lineSequence().forEach { rawLine ->
-            val trimmed = rawLine.trim()
+            val trimmed = rawLine.trimAndStripBom()
             if (trimmed.isEmpty()) return@forEach
 
             // Ignore header tags like [ti:Title], [ar:Artist], [al:Album], [length:03:00], etc.
-            if (headerTagRegex.matches(trimmed)) return@forEach
+            if (LyricSyntaxPatterns.GENERIC_HEADER_TAG_REGEX.matches(trimmed)) return@forEach
 
-            val matches = timestampRegex.findAll(trimmed).toList()
+            val matches = LyricSyntaxPatterns.TIMESTAMP_REGEX.findAll(trimmed).toList()
             if (matches.isEmpty()) return@forEach
             if (matches.size > 1) {
                 hasMultiTimestampLine = true
@@ -55,25 +50,15 @@ class LyricLineParserImpl : LyricLineParser {
 
             // Extract the text after all timestamp tags and remove inline <mm:ss.xx> tags
             val text = trimmed
-                .replace(timestampRegex, "")
-                .replace(inlineWordTagRegex, "")
+                .replace(LyricSyntaxPatterns.TIMESTAMP_REGEX, "")
+                .replace(LyricSyntaxPatterns.INLINE_WORD_TAG_REGEX, "")
                 .trim()
 
             // Skip credit-only metadata lines (e.g. "[00:00.00-1] 作词 : Ana Muller")
-            if (creditOnlyLineRegex.matches(text)) return@forEach
+            if (LyricSyntaxPatterns.CREDIT_ONLY_TEXT_REGEX.matches(text)) return@forEach
 
             for (match in matches) {
-                val minutes = match.groupValues[1].toLongOrNull() ?: 0L
-                val seconds = match.groupValues[2].toLongOrNull() ?: 0L
-                val millisRaw = match.groupValues.getOrNull(3).orEmpty()
-                val millis = when (millisRaw.length) {
-                    1 -> (millisRaw.toLongOrNull() ?: 0L) * 100
-                    2 -> (millisRaw.toLongOrNull() ?: 0L) * 10
-                    3 -> millisRaw.toLongOrNull() ?: 0L
-                    else -> 0L
-                }
-
-                val totalMs = (minutes * 60 + seconds) * 1000 + millis
+                val totalMs = LyricSyntaxPatterns.parseMatchToMs(match)
                 val formattedTime = formatTimestampMs(totalMs)
 
                 parsedLines.add(ParsedLyricLine(totalMs, formattedTime, text))
@@ -95,14 +80,15 @@ class LyricLineParserImpl : LyricLineParser {
 
         content.lineSequence().forEach { rawLine ->
             val cleaned = rawLine
-                .replace(timestampRegex, "")
-                .replace(inlineWordTagRegex, "")
+                .trimAndStripBom()
+                .replace(LyricSyntaxPatterns.TIMESTAMP_REGEX, "")
+                .replace(LyricSyntaxPatterns.INLINE_WORD_TAG_REGEX, "")
                 .trim()
 
             if (cleaned.isEmpty()) return@forEach
-            if (headerTagRegex.matches(cleaned)) return@forEach
+            if (LyricSyntaxPatterns.GENERIC_HEADER_TAG_REGEX.matches(cleaned)) return@forEach
             if (sectionHeaderRegex.matches(cleaned)) return@forEach
-            if (creditOnlyLineRegex.matches(cleaned)) return@forEach
+            if (LyricSyntaxPatterns.CREDIT_ONLY_TEXT_REGEX.matches(cleaned)) return@forEach
 
             plainLines.add(
                 ParsedLyricLine(

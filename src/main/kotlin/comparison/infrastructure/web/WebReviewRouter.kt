@@ -18,9 +18,17 @@ import comparison.infrastructure.io.SystemFileOpenerImpl
 import comparison.infrastructure.parsers.LyricLineParserImpl
 import comparison.infrastructure.parsers.ReportIssueLocalizer
 import comparison.infrastructure.services.WebActionRunnerService
+import interfaces.LyricContentCleaner
 import java.io.File
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledFuture
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicLong
+import models.LyricCleanOptions
+import services.LyricContentCleanerImpl
 import services.Messages
 
 /**
@@ -34,16 +42,42 @@ class WebReviewRouter(
     private val audioMetadataExtractor: AudioMetadataExtractor,
     private val openFileLocationUseCase: OpenFileLocationUseCase = OpenFileLocationUseCase(SystemFileOpenerImpl()),
     private val parseLinesUseCase: ParseLyricLinesUseCase = ParseLyricLinesUseCase(LyricLineParserImpl()),
+    private val lyricContentCleaner: LyricContentCleaner = LyricContentCleanerImpl(),
     private val audioStreamer: HttpAudioStreamer = HttpAudioStreamer(),
     private val actionRunner: WebActionRunnerService = WebActionRunnerService(),
     private val gson: Gson = Gson(),
+    private val shutdownGracePeriodMs: Long = 1500L,
+    private val onShutdownRequested: (() -> Unit)? = null,
 ) : HttpHandler {
 
     private val cachedItems = mutableMapOf<Int, ReportIssueItem>()
+    private val activeClients = ConcurrentHashMap<String, Long>()
+    private val lastActivityMs = AtomicLong(System.currentTimeMillis())
+    private val shutdownScheduler = Executors.newSingleThreadScheduledExecutor { r ->
+        Thread(r, "web-shutdown-scheduler").apply { isDaemon = true }
+    }
+    private val shutdownLock = Any()
+    private var pendingShutdownFuture: ScheduledFuture<*>? = null
+
+    private fun recordClientActivity(clientId: String? = null) {
+        val now = System.currentTimeMillis()
+        lastActivityMs.set(now)
+        if (!clientId.isNullOrBlank()) {
+            activeClients[clientId] = now
+        }
+        synchronized(shutdownLock) {
+            pendingShutdownFuture?.cancel(false)
+            pendingShutdownFuture = null
+        }
+    }
 
     override fun handle(exchange: HttpExchange) {
         val path = exchange.requestURI.path
         val method = exchange.requestMethod
+
+        if (path != "/api/shutdown") {
+            recordClientActivity()
+        }
 
         try {
             when (path) {
@@ -60,12 +94,15 @@ class WebReviewRouter(
                 "/api/search" if method == "GET" -> handleSearchRemote(exchange)
                 "/api/open-location" if method == "GET" -> handleOpenLocation(exchange)
                 "/api/parse-lrc" if method == "POST" -> handleParseLrc(exchange)
+                "/api/clean-lrc" if method == "POST" -> handleCleanLrc(exchange)
                 "/api/menu-options" if method == "GET" -> handleMenuOptions(exchange)
                 "/api/action/execute" if method == "POST" -> handleActionExecute(exchange)
                 "/api/action/status" if method == "GET" -> handleActionStatus(exchange)
                 "/api/action/browse-dir" if method == "GET" -> handleActionBrowseDir(exchange)
                 "/api/action/config" if method == "GET" -> handleActionConfig(exchange)
                 "/api/locale" if method == "GET" -> handleLocale(exchange)
+                "/api/heartbeat" if (method == "POST" || method == "GET") -> handleHeartbeat(exchange)
+                "/api/shutdown" if (method == "POST" || method == "GET") -> handleShutdown(exchange)
                 else -> sendJsonResponse(exchange, 404, mapOf("error" to Messages.get("error.endpoint_not_found", path)))
             }
         } catch (e: Exception) {
@@ -190,7 +227,18 @@ class WebReviewRouter(
                         "placeholder" to Messages.get("action.placeholder.lyrics_dir")
                     )
                 ),
-                "options" to emptyList<Any>()
+                "options" to listOf(
+                    mapOf("key" to "removeSpeakerAndBgTags", "label" to Messages.get("action.3.opt.speaker_bg"), "type" to "checkbox", "default" to true),
+                    mapOf("key" to "removeInlineWordTimestamps", "label" to Messages.get("action.3.opt.inline_word_ts"), "type" to "checkbox", "default" to true),
+                    mapOf("key" to "removeCreditsAndWatermarks", "label" to Messages.get("action.3.opt.credits_watermarks"), "type" to "checkbox", "default" to true),
+                    mapOf("key" to "sortAndDeduplicateMultiTimestamps", "label" to Messages.get("action.3.opt.sort_dedup_multi_ts"), "type" to "checkbox", "default" to true),
+                    mapOf(
+                        "key" to "removeUnsyncedLinesInSyncedFile",
+                        "label" to Messages.get("action.3.opt.remove_unsynced_in_synced"),
+                        "type" to "checkbox",
+                        "default" to false
+                    )
+                )
             )
 
             4 -> mapOf(
@@ -212,7 +260,9 @@ class WebReviewRouter(
                         "placeholder" to Messages.get("action.placeholder.alone_lyrics_dir")
                     )
                 ),
-                "options" to emptyList<Any>()
+                "options" to listOf(
+                    mapOf("key" to "includeTxtFiles", "label" to Messages.get("action.4.opt.include_txt"), "type" to "checkbox", "default" to false)
+                )
             )
 
             5 -> mapOf(
@@ -547,11 +597,77 @@ class WebReviewRouter(
         sendJsonResponse(exchange, 200, lines)
     }
 
+    private fun handleCleanLrc(exchange: HttpExchange) {
+        val bodyMap = parseJsonBodyMap(exchange)
+        val rawContent = (bodyMap["content"] as? String).orEmpty()
+        val options = LyricCleanOptions(
+            removeSpeakerAndBgTags = (bodyMap["removeSpeakerAndBgTags"] as? Boolean) ?: true,
+            removeInlineWordTimestamps = (bodyMap["removeInlineWordTimestamps"] as? Boolean) ?: true,
+            removeCreditsAndWatermarks = (bodyMap["removeCreditsAndWatermarks"] as? Boolean) ?: true,
+            sortAndDeduplicateMultiTimestamps = (bodyMap["sortAndDeduplicateMultiTimestamps"] as? Boolean) ?: true,
+            removeUnsyncedLinesInSyncedFile = (bodyMap["removeUnsyncedLinesInSyncedFile"] as? Boolean) ?: true
+        )
+        val cleanResult = lyricContentCleaner.clean(rawContent, options)
+        val syncedLines = parseLinesUseCase.execute(cleanResult.cleanedContent)
+        val lines = syncedLines.ifEmpty {
+            parseLinesUseCase.executePlain(cleanResult.cleanedContent)
+        }
+        sendJsonResponse(
+            exchange,
+            200,
+            mapOf(
+                "modified" to cleanResult.modified,
+                "appliedFixes" to cleanResult.appliedFixes,
+                "cleanedContent" to cleanResult.cleanedContent,
+                "lines" to lines
+            )
+        )
+    }
+
+    private fun handleHeartbeat(exchange: HttpExchange) {
+        val queryParams = parseQueryParams(exchange)
+        val bodyMap = parseJsonBodyMap(exchange)
+        val clientId = queryParams["clientId"] ?: (bodyMap["clientId"] as? String) ?: "default"
+        recordClientActivity(clientId)
+        sendJsonResponse(exchange, 200, mapOf("alive" to true))
+    }
+
+    private fun handleShutdown(exchange: HttpExchange) {
+        val queryParams = parseQueryParams(exchange)
+        val bodyMap = parseJsonBodyMap(exchange)
+        val clientId = queryParams["clientId"] ?: (bodyMap["clientId"] as? String)
+        val shutdownTimestamp = System.currentTimeMillis()
+
+        if (!clientId.isNullOrBlank()) {
+            activeClients.remove(clientId)
+        } else {
+            activeClients.clear()
+        }
+
+        // Remove stale clients not seen within the last 15 seconds
+        activeClients.entries.removeIf { (_, lastSeen) ->
+            shutdownTimestamp - lastSeen > 15_000L
+        }
+
+        sendJsonResponse(exchange, 200, mapOf("shuttingDown" to true))
+
+        if (activeClients.isEmpty()) {
+            synchronized(shutdownLock) {
+                pendingShutdownFuture?.cancel(false)
+                pendingShutdownFuture = shutdownScheduler.schedule({
+                    if (activeClients.isEmpty() && lastActivityMs.get() <= shutdownTimestamp) {
+                        onShutdownRequested?.invoke()
+                    }
+                }, shutdownGracePeriodMs, TimeUnit.MILLISECONDS)
+            }
+        }
+    }
+
     private fun sendJsonResponse(exchange: HttpExchange, statusCode: Int, data: Any) {
         val jsonString = gson.toJson(data)
         val path = exchange.requestURI.path
-        // Log all API requests except repetitive in-progress status polling
-        val shouldLog = path != "/api/action/status" || statusCode != 200
+        // Log all API requests except repetitive in-progress status polling and heartbeats
+        val shouldLog = (path != "/api/action/status" && path != "/api/heartbeat") || statusCode != 200
         if (shouldLog) {
             services.LoggingInitializer.logHttpExchange(
                 Messages.get("log.web.router_category"), exchange.requestMethod, exchange.requestURI.toString(), responseStatus = statusCode, responseBody = jsonString

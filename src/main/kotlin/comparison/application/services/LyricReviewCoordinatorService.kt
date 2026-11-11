@@ -37,6 +37,7 @@ class LyricReviewCoordinatorService(
     lineParser: LyricLineParser = LyricLineParserImpl(),
     private val actionRunner: WebActionRunnerService = WebActionRunnerService(),
     private val logService: LogService = JdkLogService(LyricReviewCoordinatorService::class.java),
+    private val onShutdown: (() -> Unit)? = null,
 ) {
 
     private val parseReportUseCase = ParseIssuesReportUseCase(reportParser)
@@ -48,7 +49,16 @@ class LyricReviewCoordinatorService(
     private val saveLyricUseCase = SaveLyricChoiceUseCase(lyricStorage)
 
     private val router = WebReviewRouter(
-        parseReportUseCase, extractDetailsUseCase, saveLyricUseCase, fetchLrcLibUseCase, audioMetadataExtractor, actionRunner = actionRunner
+        parseReportUseCase,
+        extractDetailsUseCase,
+        saveLyricUseCase,
+        fetchLrcLibUseCase,
+        audioMetadataExtractor,
+        actionRunner = actionRunner,
+        onShutdownRequested = {
+            stopReview()
+            onShutdown?.invoke()
+        }
     )
 
     private val server: WebLyricReviewServer = WebLyricReviewServerImpl(router)

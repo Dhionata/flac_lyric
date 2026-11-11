@@ -1,5 +1,6 @@
 package services
 
+import interfaces.AuditLogService
 import interfaces.FileService
 import interfaces.LogService
 import interfaces.UserInterface
@@ -13,6 +14,7 @@ import models.OperationResult
  */
 class FileServiceImpl(
     private val logService: LogService = JdkLogService(FileServiceImpl::class.java),
+    private val auditLogService: AuditLogService = AuditLogServiceImpl(),
 ) : FileService {
 
     override fun printFilePermissions(file: File) {
@@ -36,7 +38,10 @@ class FileServiceImpl(
             val sameFileWithDifferentName = sameFilesWithDiffNames(actualTargetDir, sourceFile)
             if (sameFileWithDifferentName && sourceFile.parentFile != targetFile.parentFile) {
                 logService.warning("log.file.will_delete", sourceFile)
-                sourceFile.delete().also {
+                sourceFile.delete().also { deleted ->
+                    if (deleted) {
+                        auditLogService.logFileAction("DELETE_DUPLICATE", sourceFile, details = "Duplicate of ${targetFile.absolutePath}")
+                    }
                     logService.info("log.file.deleted_duplicate", sourceFile)
                 }
             } else {
@@ -53,6 +58,7 @@ class FileServiceImpl(
                     sourceFile.copyTo(targetFile, overwrite = false)
                     sourceFile.delete()
                 }
+                auditLogService.logFileAction("MOVE", sourceFile, targetFile)
                 logService.info("log.file.moved", sourceFile.name, sourceFile.parent, targetFile.parent)
                 true
             } catch (e: Exception) {
@@ -71,7 +77,10 @@ class FileServiceImpl(
         val targetFile = File(file.parent, newName)
         return if (targetFile.exists()) {
             if (filesAreEqual(targetFile, file)) {
-                file.delete()
+                val deleted = file.delete()
+                if (deleted) {
+                    auditLogService.logFileAction("DELETE_DUPLICATE_ON_RENAME", file, details = "Identical to ${targetFile.absolutePath}")
+                }
                 throw Exception(
                     Messages.get("error.rename_duplicate", targetFile.name, targetFile.parent, file.name)
                 )
@@ -88,7 +97,11 @@ class FileServiceImpl(
                 )
             }
         } else {
-            file.renameTo(targetFile)
+            file.renameTo(targetFile).also { renamed ->
+                if (renamed) {
+                    auditLogService.logFileAction("RENAME", file, targetFile)
+                }
+            }
         }
     }
 
@@ -145,7 +158,7 @@ class FileServiceImpl(
                 }
                 unmatchedLyricFiles.forEach { lyricFile ->
                     if (lyricFile.parentFile != newDirectory) {
-                        val (_, moveResult) = moveLyricFile(lyricFile, newDirectory)
+                        val [_, moveResult] = moveLyricFile(lyricFile, newDirectory)
                         changes.addAll(moveResult.changedSet)
                         errors.addAll(moveResult.errorSet)
                     }

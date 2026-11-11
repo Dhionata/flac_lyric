@@ -14,14 +14,24 @@ object ReportIssueLocalizer {
     private val tagToTypeKey: Map<String, String> = mapOf(
         "SEM_LETRA" to "lyric.issue.type.missing_lyric",
         "MISSING_LYRICS" to "lyric.issue.type.missing_lyric",
+        "LETRA_ISOLADA" to "lyric.issue.type.orphan_lyric",
+        "ORPHAN_LYRIC" to "lyric.issue.type.orphan_lyric",
         "ERRO_LEITURA" to "lyric.issue.type.read_error",
         "READ_ERROR" to "lyric.issue.type.read_error",
+        "ERRO_CODIFICACAO" to "lyric.issue.type.encoding_error",
+        "ENCODING_ERROR" to "lyric.issue.type.encoding_error",
         "SEM_TIMESTAMPS" to "lyric.issue.type.no_timestamps",
         "NO_TIMESTAMPS" to "lyric.issue.type.no_timestamps",
+        "SINCRONIA_INCOMPLETA" to "lyric.issue.type.partial_sync",
+        "PARTIAL_SYNC" to "lyric.issue.type.partial_sync",
         "TIMESTAMPS_FORA_DE_ORDEM" to "lyric.issue.type.out_of_order",
         "OUT_OF_ORDER" to "lyric.issue.type.out_of_order",
         "TIMESTAMPS_ESTATICOS" to "lyric.issue.type.static_timestamps",
         "STATIC_TIMESTAMPS" to "lyric.issue.type.static_timestamps",
+        "TIMESTAMPS_DUPLICADOS" to "lyric.issue.type.duplicate_timestamps",
+        "DUPLICATE_TIMESTAMPS" to "lyric.issue.type.duplicate_timestamps",
+        "TAGS_SUJAS" to "lyric.issue.type.dirty_tags",
+        "DIRTY_TAGS" to "lyric.issue.type.dirty_tags",
         "MUSICA_DIFERENTE" to "lyric.issue.type.wrong_song",
         "DIFFERENT_SONG" to "lyric.issue.type.wrong_song",
         "ULTRAPASSOU_DURACAO" to "lyric.issue.type.exceeds_duration",
@@ -30,6 +40,42 @@ object ReportIssueLocalizer {
         "LENGTH_MISMATCH" to "lyric.issue.type.length_mismatch",
         "TERMINO_PREMATURO" to "lyric.issue.type.premature_end",
         "PREMATURE_END" to "lyric.issue.type.premature_end",
+    )
+
+    private val encodingPtRegex = Regex(
+        """^O arquivo (?:apresenta|contém) caracteres corrompidos por codificação inválida \(ex:\s*linha (\d+)\)\.?$""",
+        RegexOption.IGNORE_CASE
+    )
+    private val encodingEnRegex = Regex(
+        """^The file contains corrupted characters due to invalid encoding \(e\.g\.\s*line (\d+)\)\.?$""",
+        RegexOption.IGNORE_CASE
+    )
+
+    private val partialSyncPtRegex = Regex(
+        """^O arquivo possui (\d+) linha\(s\) de texto sem timestamp misturadas?(?:\(s\))? com versos sincronizados \(primeira na linha (\d+)\)\.?$""",
+        RegexOption.IGNORE_CASE
+    )
+    private val partialSyncEnRegex = Regex(
+        """^The file has (\d+) text line\(s\) without timestamp mixed with synchronized verses \(first at line (\d+)\)\.?$""",
+        RegexOption.IGNORE_CASE
+    )
+
+    private val duplicateTsPtRegex = Regex(
+        """^(?:Foram )?encontrados (\d+) versos (?:empilhados exatamente na mesma minutagem|acumulados no mesmo timestamp) \(([^)]+)\)\.?$""",
+        RegexOption.IGNORE_CASE
+    )
+    private val duplicateTsEnRegex = Regex(
+        """^Found (\d+) verses stacked at the exact same timestamp \(([^)]+)\)\.?$""",
+        RegexOption.IGNORE_CASE
+    )
+
+    private val dirtyTagsPtRegex = Regex(
+        """^(?:O arquivo de letra|A letra) contém marcações extras que podem ser limpas \((.+)\)\.?$""",
+        RegexOption.IGNORE_CASE
+    )
+    private val dirtyTagsEnRegex = Regex(
+        """^The lyric file contains extraneous tags that can be cleaned \((.+)\)\.?$""",
+        RegexOption.IGNORE_CASE
     )
 
     private val outOfOrderPtRegex = Regex(
@@ -118,6 +164,9 @@ object ReportIssueLocalizer {
         if (mappedTagKey == "lyric.issue.type.missing_lyric") {
             return mappedTagKey to Messages.get("lyric.issue.missing_lyric")
         }
+        if (mappedTagKey == "lyric.issue.type.orphan_lyric") {
+            return mappedTagKey to Messages.get("lyric.issue.orphan_lyric")
+        }
         if (mappedTagKey == "lyric.issue.type.read_error") {
             return mappedTagKey to Messages.get("lyric.issue.read_error")
         }
@@ -138,6 +187,13 @@ object ReportIssueLocalizer {
         }
 
         if (
+            desc.equals("O arquivo .lrc está isolado na pasta sem um arquivo de áudio correspondente.", ignoreCase = true) ||
+            desc.equals("The .lrc file is isolated in the folder without a corresponding audio file.", ignoreCase = true)
+        ) {
+            return "lyric.issue.type.orphan_lyric" to Messages.get("lyric.issue.orphan_lyric")
+        }
+
+        if (
             desc.equals("Não foi possível ler o conteúdo do arquivo .lrc.", ignoreCase = true) ||
             desc.equals("Could not read .lrc file content.", ignoreCase = true)
         ) {
@@ -152,6 +208,28 @@ object ReportIssueLocalizer {
         }
 
         // Parameterized messages
+        (encodingPtRegex.find(desc) ?: encodingEnRegex.find(desc))?.let { m ->
+            val lineNum = m.groupValues[1].toIntOrNull() ?: 1
+            return "lyric.issue.type.encoding_error" to Messages.get("lyric.issue.encoding_error", lineNum)
+        }
+
+        (partialSyncPtRegex.find(desc) ?: partialSyncEnRegex.find(desc))?.let { m ->
+            val count = m.groupValues[1].toIntOrNull() ?: 1
+            val firstLine = m.groupValues[2].toIntOrNull() ?: 1
+            return "lyric.issue.type.partial_sync" to Messages.get("lyric.issue.partial_sync", count, firstLine)
+        }
+
+        (duplicateTsPtRegex.find(desc) ?: duplicateTsEnRegex.find(desc))?.let { m ->
+            val count = m.groupValues[1].toIntOrNull() ?: 2
+            val ts = m.groupValues[2]
+            return "lyric.issue.type.duplicate_timestamps" to Messages.get("lyric.issue.duplicate_timestamps", count, ts)
+        }
+
+        (dirtyTagsPtRegex.find(desc) ?: dirtyTagsEnRegex.find(desc))?.let { m ->
+            val tags = m.groupValues[1]
+            return "lyric.issue.type.dirty_tags" to Messages.get("lyric.issue.dirty_tags", tags)
+        }
+
         (outOfOrderPtRegex.find(desc) ?: outOfOrderEnRegex.find(desc))?.let { m ->
             val lineNum = m.groupValues[1].toIntOrNull() ?: 1
             val currTs = m.groupValues[2]

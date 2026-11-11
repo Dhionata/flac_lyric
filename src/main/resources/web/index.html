@@ -2422,7 +2422,8 @@
                     </button>
                     <button class="btn-offset" data-i18n="web.comparator.edit_text_btn" data-i18n-title="web.comparator.edit_text_title" id="btnInlineTextEditLocal"
                             onclick="toggleInlineTextEditMode('local')" style="color: #34d399;"
-                            title="Editar somente o texto da música livremente (colar/remover/alterar versos) preservando as minutagens existentes e deixando linhas novas com [00:00.00]">📝 Editar Texto
+                            title="Editar somente o texto da música livremente (colar/remover/alterar versos) preservando as minutagens existentes e deixando linhas novas com [00:00.00]">
+                        📝 Editar Texto
                     </button>
                     <button class="btn-offset" data-i18n="web.comparator.sync_mode_btn" data-i18n-title="web.comparator.sync_mode_title" id="btnSyncEditModeLocal"
                             onclick="toggleSyncEditMode('local')" style="color: #fbbf24;"
@@ -2432,6 +2433,10 @@
                     <button class="btn-offset" data-i18n="web.comparator.strip_timestamps_btn" data-i18n-title="web.comparator.strip_timestamps_title"
                             id="btnToggleTimestampsLocal" onclick="toggleStripTimestamps('local')" style="color: #f87171;"
                             title="Retira todas as minutagens em memória (com opção de reverter). Só grava no arquivo ao clicar em Salvar [1] ou [2].">🧹 Retirar Minutagens
+                    </button>
+                    <button class="btn-offset" data-i18n="web.comparator.clean_btn" data-i18n-title="web.comparator.clean_title"
+                            onclick="cleanSideLyrics('local')" style="color: #22d3ee; border-color: rgba(34, 211, 238, 0.45);"
+                            title="Remove automaticamente v1:/v2:, [bg:], tags <mm:ss> inline, créditos/marcas d'água e linhas soltas sem sincronia">✨ Limpar Tags
                     </button>
                     <button class="btn-offset" data-i18n="web.comparator.add_line_btn" data-i18n-title="web.comparator.add_line_title" onclick="addNewLyricLine('local')"
                             style="color: #34d399;"
@@ -2520,7 +2525,9 @@
             <div class="inline-text-editor-banner" id="inlineTextBannerLocal">
                 <div>
                     <strong id="inlineTextTitleLocal">📝 Editor Livre de Texto (Local)</strong>
-                    <div data-i18n="web.text_edit.banner_hint" style="font-size: 0.7rem; opacity: 0.9;">Edite, remova ou cole versos em qualquer ponto (1 por linha). As minutagens existentes são mantidas; linhas novas entram com [00:00.00].</div>
+                    <div data-i18n="web.text_edit.banner_hint" style="font-size: 0.7rem; opacity: 0.9;">Edite, remova ou cole versos em qualquer ponto (1 por linha). As
+                        minutagens existentes são mantidas; linhas novas entram com [00:00.00].
+                    </div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                     <button class="btn-offset" data-i18n="web.text_edit.apply_btn" onclick="commitInlineTextEdit('local')"
@@ -2684,7 +2691,8 @@
                     </button>
                     <button class="btn-offset" data-i18n="web.comparator.edit_text_btn" data-i18n-title="web.comparator.edit_text_title" id="btnInlineTextEditRemote"
                             onclick="toggleInlineTextEditMode('remote')" style="color: #34d399;"
-                            title="Editar somente o texto da música livremente (colar/remover/alterar versos) preservando as minutagens existentes e deixando linhas novas com [00:00.00]">📝 Editar Texto
+                            title="Editar somente o texto da música livremente (colar/remover/alterar versos) preservando as minutagens existentes e deixando linhas novas com [00:00.00]">
+                        📝 Editar Texto
                     </button>
                     <button class="btn-offset" data-i18n="web.comparator.sync_mode_btn" data-i18n-title="web.comparator.sync_mode_title" id="btnSyncEditModeRemote"
                             onclick="toggleSyncEditMode('remote')" style="color: #fbbf24;"
@@ -2694,6 +2702,10 @@
                     <button class="btn-offset" data-i18n="web.comparator.strip_timestamps_btn" data-i18n-title="web.comparator.strip_timestamps_title"
                             id="btnToggleTimestampsRemote" onclick="toggleStripTimestamps('remote')" style="color: #f87171;"
                             title="Retira todas as minutagens em memória (com opção de reverter). Só grava no arquivo ao clicar em Salvar [1] ou [2].">🧹 Retirar Minutagens
+                    </button>
+                    <button class="btn-offset" data-i18n="web.comparator.clean_btn" data-i18n-title="web.comparator.clean_title"
+                            onclick="cleanSideLyrics('remote')" style="color: #22d3ee; border-color: rgba(34, 211, 238, 0.45);"
+                            title="Remove automaticamente v1:/v2:, [bg:], tags <mm:ss> inline, créditos/marcas d'água e linhas soltas sem sincronia">✨ Limpar Tags
                     </button>
                     <button class="btn-offset" data-i18n="web.comparator.add_line_btn" data-i18n-title="web.comparator.add_line_title" onclick="addNewLyricLine('remote')"
                             style="color: #60a5fa;"
@@ -2782,7 +2794,9 @@
             <div class="inline-text-editor-banner" id="inlineTextBannerRemote">
                 <div>
                     <strong id="inlineTextTitleRemote">📝 Editor Livre de Texto (Online)</strong>
-                    <div data-i18n="web.text_edit.banner_hint" style="font-size: 0.7rem; opacity: 0.9;">Edite, remova ou cole versos em qualquer ponto (1 por linha). As minutagens existentes são mantidas; linhas novas entram com [00:00.00].</div>
+                    <div data-i18n="web.text_edit.banner_hint" style="font-size: 0.7rem; opacity: 0.9;">Edite, remova ou cole versos em qualquer ponto (1 por linha). As
+                        minutagens existentes são mantidas; linhas novas entram com [00:00.00].
+                    </div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                     <button class="btn-offset" data-i18n="web.text_edit.apply_btn" onclick="commitInlineTextEdit('remote')"
@@ -3042,13 +3056,16 @@
                 <span class="modal-action-icon">⚠️</span>
                 <div>
                     <h2 data-i18n="web.unsaved.title" style="color: #fcd34d;">⚠️ Alterações Pendentes Não Salvas!</h2>
-                    <div class="modal-action-subtitle" data-i18n="web.unsaved.subtitle" style="color: #fde68a;">Proteção contra perda acidental de edição • Trava de segurança de 5 segundos</div>
+                    <div class="modal-action-subtitle" data-i18n="web.unsaved.subtitle" style="color: #fde68a;">Proteção contra perda acidental de edição • Trava de segurança
+                        de 5 segundos
+                    </div>
                 </div>
             </div>
             <button class="btn-close-modal" data-i18n-title="web.modal.close_esc_title" onclick="closeUnsavedChangesModal()" title="Fechar (Esc)">✕</button>
         </div>
         <div class="modal-body" style="gap: 14px;">
-            <div data-i18n-html="web.unsaved.desc_html" style="padding: 14px; border-radius: 10px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.35); color: var(--text-main); font-size: 0.92rem; line-height: 1.55;">
+            <div data-i18n-html="web.unsaved.desc_html"
+                 style="padding: 14px; border-radius: 10px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.35); color: var(--text-main); font-size: 0.92rem; line-height: 1.55;">
                 Você possui <b>alterações pendentes não salvas</b> na música atual.<br>Deseja realmente descartar as edições e sair/trocar de música?
             </div>
             <div data-i18n-arg0="5" data-i18n-html="web.unsaved.countdown_waiting_html" data-i18n-preserve-id="unsavedTimerSeconds" id="unsavedCountdownBanner"
@@ -3091,10 +3108,12 @@
                 <button class="paste-mode-tab" data-i18n="web.paste.mode_edit_text" data-paste-mode="edit_text" onclick="setPasteModalMode('edit_text', true)" type="button">
                     📝 Só Editar Texto (Manter Tempos)
                 </button>
-                <button class="paste-mode-tab" data-i18n="web.paste.mode_insert_after" data-paste-mode="insert_after" onclick="setPasteModalMode('insert_after', true)" type="button">
+                <button class="paste-mode-tab" data-i18n="web.paste.mode_insert_after" data-paste-mode="insert_after" onclick="setPasteModalMode('insert_after', true)"
+                        type="button">
                     ➕ Inserir Trecho [00:00.00]
                 </button>
-                <button class="paste-mode-tab active" data-i18n="web.paste.mode_replace_all" data-paste-mode="replace_all" onclick="setPasteModalMode('replace_all', true)" type="button">
+                <button class="paste-mode-tab active" data-i18n="web.paste.mode_replace_all" data-paste-mode="replace_all" onclick="setPasteModalMode('replace_all', true)"
+                        type="button">
                     🔄 Substituir Tudo [00:00.00]
                 </button>
             </div>
@@ -3121,7 +3140,8 @@
                     </div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                    <button class="btn-browse" data-i18n="web.paste.load_current_text_btn" id="btnLoadCurrentTextPasteModal" onclick="loadCurrentSideTextIntoPasteModal()" type="button">
+                    <button class="btn-browse" data-i18n="web.paste.load_current_text_btn" id="btnLoadCurrentTextPasteModal" onclick="loadCurrentSideTextIntoPasteModal()"
+                            type="button">
                         📄 Carregar Texto Atual
                     </button>
                     <button class="btn-browse" data-i18n="web.paste.read_clipboard_btn" onclick="readClipboardIntoPasteTextarea()" type="button">📋 Ler da Área de Transferência
@@ -3448,6 +3468,7 @@
     logoBtn.addEventListener('click', () => switchView('menu'));
 
     let toastTimeout = null;
+
     function showToast(msg) {
         if (!toast) return;
         toast.textContent = msg;
@@ -3797,7 +3818,13 @@
             isFullAnalysis: document.getElementById('input_isFullAnalysis')?.value === 'true',
             moveFiles: document.getElementById('input_moveFiles')?.checked ?? true,
             renameFiles: document.getElementById('input_renameFiles')?.checked ?? true,
-            includeMissingLyrics: document.getElementById('input_includeMissingLyrics')?.checked ?? true
+            includeMissingLyrics: document.getElementById('input_includeMissingLyrics')?.checked ?? true,
+            removeSpeakerAndBgTags: document.getElementById('input_removeSpeakerAndBgTags')?.checked ?? true,
+            removeInlineWordTimestamps: document.getElementById('input_removeInlineWordTimestamps')?.checked ?? true,
+            removeCreditsAndWatermarks: document.getElementById('input_removeCreditsAndWatermarks')?.checked ?? true,
+            sortAndDeduplicateMultiTimestamps: document.getElementById('input_sortAndDeduplicateMultiTimestamps')?.checked ?? true,
+            removeUnsyncedLinesInSyncedFile: document.getElementById('input_removeUnsyncedLinesInSyncedFile')?.checked ?? false,
+            includeTxtFiles: document.getElementById('input_includeTxtFiles')?.checked ?? false
         };
 
         document.getElementById('modalFormSection').style.display = 'none';
@@ -3970,7 +3997,17 @@
             } else {
                 const lower = String(iss || '').toLowerCase();
                 let inferred = null;
-                if (lower.includes('não encontrado') || lower.includes('sem letra') || lower.includes('not found') || lower.includes('missing lyric')) {
+                if (lower.includes('isolado') || lower.includes('isolated')) {
+                    inferred = isPt ? 'LETRA_ISOLADA' : 'ORPHAN_LYRIC';
+                } else if (lower.includes('corrompidos') || lower.includes('corrupted') || lower.includes('encoding')) {
+                    inferred = isPt ? 'ERRO_CODIFICACAO' : 'ENCODING_ERROR';
+                } else if (lower.includes('misturadas com versos') || lower.includes('mixed with synchronized')) {
+                    inferred = isPt ? 'SINCRONIA_INCOMPLETA' : 'PARTIAL_SYNC';
+                } else if (lower.includes('empilhados') || lower.includes('stacked at the exact')) {
+                    inferred = isPt ? 'TIMESTAMPS_DUPLICADOS' : 'DUPLICATE_TIMESTAMPS';
+                } else if (lower.includes('marcações extras') || lower.includes('extraneous tags')) {
+                    inferred = isPt ? 'TAGS_SUJAS' : 'DIRTY_TAGS';
+                } else if (lower.includes('não encontrado') || lower.includes('sem letra') || lower.includes('not found') || lower.includes('missing lyric')) {
                     inferred = isPt ? 'SEM_LETRA' : 'MISSING_LYRICS';
                 } else if (lower.includes('sem marcações') || lower.includes('sem timestamps') || lower.includes('no timestamp')) {
                     inferred = isPt ? 'SEM_TIMESTAMPS' : 'NO_TIMESTAMPS';
@@ -4351,6 +4388,51 @@
             btn.textContent = t('web.comparator.strip_timestamps_btn');
             btn.style.color = '#f87171';
             btn.style.borderColor = '';
+        }
+    }
+
+    async function cleanSideLyrics(side) {
+        const isLocal = side === 'local';
+        const container = isLocal ? localLyricsScroller : remoteLyricsScroller;
+        const state = isLocal ? localLinesState : remoteLinesState;
+
+        if (!state || state.length === 0) {
+            showToast(t('web.comparator.clean_empty_toast'));
+            return;
+        }
+
+        const rawPayload = serializeLinesToLrc(state);
+        try {
+            const res = await fetch('/api/clean-lrc', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({content: rawPayload})
+            });
+            const data = await res.json();
+            if (!data || !Array.isArray(data.lines)) {
+                showToast(t('web.comparator.clean_error_toast'));
+                return;
+            }
+            const beforeStr = JSON.stringify(state.map(l => ({t: l.formattedTime || '', x: l.text || ''})));
+            const afterStr = JSON.stringify(data.lines.map(l => ({t: l.formattedTime || '', x: l.text || ''})));
+            if (!data.modified && beforeStr === afterStr) {
+                showToast(t('web.comparator.clean_nothing_toast'));
+                return;
+            }
+
+            if (isLocal) {
+                localLinesState = data.lines;
+            } else {
+                remoteLinesState = data.lines;
+            }
+            updateStatusBadgeCount(side);
+            renderLyricLines(container, data.lines, side);
+            syncLyricsHighlight(Math.round((audio.currentTime || 0) * 1000));
+            const sideLabel = isLocal ? t('web.comparator.side_local') : t('web.comparator.side_online');
+            const summaryStr = (data.appliedFixes || data.appliedRules || []).join(', ') || 'OK';
+            showToast(t('web.comparator.clean_success_toast', sideLabel, summaryStr));
+        } catch (err) {
+            showToast(t('web.comparator.clean_error_toast'));
         }
     }
 
@@ -5736,7 +5818,8 @@
             ta.select();
             document.execCommand('copy');
             document.body.removeChild(ta);
-        } catch (_err) {}
+        } catch (_err) {
+        }
     }
 
     function parseTextToLyricLines(text) {
@@ -5854,7 +5937,8 @@
 
         try {
             window.getSelection()?.removeAllRanges();
-        } catch (_e) {}
+        } catch (_e) {
+        }
 
         showToast(linesToCopy.length === 1
             ? t('web.batch.copied_toast_one', linesToCopy.length)
@@ -8022,6 +8106,44 @@
         } catch (_e) {
         }
     }
+
+    // Client lifecycle: send periodic heartbeats and notify server to shut down when the window/tab is closed
+    const __flacClientId = (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function')
+        ? crypto.randomUUID()
+        : ('client-' + Date.now() + '-' + Math.random().toString(36).slice(2));
+
+    function sendClientHeartbeat() {
+        fetch('/api/heartbeat?clientId=' + encodeURIComponent(__flacClientId), {
+            method: 'POST',
+            keepalive: true
+        }).catch(() => {
+        });
+    }
+
+    let __shutdownSent = false;
+
+    function notifyServerPageClosed() {
+        if (__shutdownSent) return;
+        __shutdownSent = true;
+        const shutdownUrl = '/api/shutdown?clientId=' + encodeURIComponent(__flacClientId);
+        try {
+            if (navigator.sendBeacon) {
+                const sent = navigator.sendBeacon(shutdownUrl, new Blob(['{}'], {type: 'application/json'}));
+                if (sent) return;
+            }
+        } catch (_e) {
+        }
+        try {
+            fetch(shutdownUrl, {method: 'POST', keepalive: true}).catch(() => {
+            });
+        } catch (_e) {
+        }
+    }
+
+    sendClientHeartbeat();
+    setInterval(sendClientHeartbeat, 3000);
+    window.addEventListener('pagehide', notifyServerPageClosed);
+    window.addEventListener('beforeunload', notifyServerPageClosed);
 
     // Start application
     syncSystemLocale().finally(() => {

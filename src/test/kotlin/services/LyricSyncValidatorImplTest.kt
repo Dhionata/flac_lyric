@@ -175,4 +175,73 @@ class LyricSyncValidatorImplTest {
         val issues = validator.validate(lrc, null)
         assertTrue(issues.any { it.issueType == "TIMESTAMPS_FORA_DE_ORDEM" })
     }
+
+    @Test
+    fun testLyricWithMultiTimestampSameLineIsNotFalsePositiveOutOfOrder() {
+        Messages.setLocale(Locale.forLanguageTag("pt-BR"))
+        val lrc = File(tempDir, "Artist - MultiTs.lrc").apply {
+            writeText(
+                """
+                [00:10.00]First line
+                [00:15.00][00:38.00]Chorus line repeated at 15s and 38s
+                [00:25.00]Bridge line
+                """.trimIndent()
+            )
+        }
+
+        val issues = validator.validate(lrc, null)
+        assertTrue(issues.none { it.issueType == "TIMESTAMPS_FORA_DE_ORDEM" })
+    }
+
+    @Test
+    fun testLyricWithPartialSync() {
+        Messages.setLocale(Locale.forLanguageTag("pt-BR"))
+        val lrc = File(tempDir, "Artist - PartialSync.lrc").apply {
+            writeText(
+                """
+                [00:10.00]Synced line 1
+                Unsynced line in the middle
+                [00:20.00]Synced line 2
+                """.trimIndent()
+            )
+        }
+
+        val issues = validator.validate(lrc, null)
+        assertTrue(issues.any { it.issueType == "SINCRONIA_INCOMPLETA" })
+    }
+
+    @Test
+    fun testLyricWithDuplicateStackedTimestamps() {
+        Messages.setLocale(Locale.forLanguageTag("pt-BR"))
+        val lrc = File(tempDir, "Artist - Stacked.lrc").apply {
+            writeText(
+                """
+                [00:10.00]Line 1
+                [00:20.00]Line 2
+                [00:20.00]Line 3
+                [00:20.00]Line 4
+                [00:20.00]Line 5
+                """.trimIndent()
+            )
+        }
+
+        val issues = validator.validate(lrc, null)
+        assertTrue(issues.any { it.issueType == "TIMESTAMPS_DUPLICADOS" })
+    }
+
+    @Test
+    fun testLyricWithDirtyTagsAndEncodingError() {
+        Messages.setLocale(Locale.forLanguageTag("pt-BR"))
+        val lrc = File(tempDir, "Artist - DirtyAndMojibake.lrc").apply {
+            writeText(
+                "[00:05.00]作词 : Someone\n" +
+                        "[00:10.00]v1: Corrupted char: \uFFFD here <00:10.50>now\n" +
+                        "[00:20.00]Second line [bg: background]"
+            )
+        }
+
+        val issues = validator.validate(lrc, null)
+        assertTrue(issues.any { it.issueType == "ERRO_CODIFICACAO" })
+        assertTrue(issues.any { it.issueType == "TAGS_SUJAS" })
+    }
 }

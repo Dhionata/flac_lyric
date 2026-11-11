@@ -4,6 +4,9 @@ import exceptions.OperationCancelledException
 import interfaces.UserInterface
 import java.awt.Component
 import java.awt.Dimension
+import java.awt.Window
+import java.awt.event.WindowAdapter
+import java.awt.event.WindowEvent
 import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.ButtonGroup
@@ -18,7 +21,9 @@ import javax.swing.JScrollPane
 import javax.swing.JTextArea
 import javax.swing.SwingUtilities
 import javax.swing.UIManager
+import javax.swing.WindowConstants
 import javax.swing.border.EmptyBorder
+import kotlin.system.exitProcess
 import models.FilePair
 import services.Messages
 
@@ -26,9 +31,11 @@ import services.Messages
  * Graphical implementation of [UserInterface] using Java Swing to display dialogs,
  * error messages, confirmation dialog boxes, progress bars, and the main menu.
  */
-class UserInterfaceImpl : UserInterface {
+class UserInterfaceImpl(
+    private val onClose: () -> Unit = { exitProcess(0) },
+) : UserInterface {
 
-    /** Hidden frame that serves as a parent to center JOptionPane dialog boxes. */
+    /** Hidden utility frame that serves as a parent to center JOptionPane dialog boxes. */
     private val frame: JFrame = JFrame("Flac Lyric")
 
     /** Active progress window. */
@@ -42,10 +49,26 @@ class UserInterfaceImpl : UserInterface {
 
     init {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
+        frame.type = Window.Type.UTILITY
         frame.isUndecorated = true
+        frame.defaultCloseOperation = WindowConstants.DISPOSE_ON_CLOSE
         frame.setSize(0, 0)
         frame.setLocationRelativeTo(null)
-        frame.isVisible = true
+        frame.addWindowListener(object : WindowAdapter() {
+            override fun windowClosing(e: WindowEvent?) {
+                dispose()
+                onClose()
+            }
+        })
+    }
+
+    /**
+     * Disposes any active Swing dialogs and the parent frame.
+     */
+    fun dispose() {
+        progressDialog?.dispose()
+        progressDialog = null
+        frame.dispose()
     }
 
     override fun showError(message: String) {
@@ -194,6 +217,13 @@ class UserInterfaceImpl : UserInterface {
     override fun showProgress(title: String, max: Int) {
         SwingUtilities.invokeLater {
             progressDialog = JDialog(frame, title, false).apply {
+                defaultCloseOperation = WindowConstants.DISPOSE_ON_CLOSE
+                addWindowListener(object : WindowAdapter() {
+                    override fun windowClosing(e: WindowEvent?) {
+                        dispose()
+                        onClose()
+                    }
+                })
                 val panel = JPanel().apply {
                     layout = BoxLayout(this, BoxLayout.Y_AXIS)
                     border = EmptyBorder(15, 15, 15, 15)
@@ -309,6 +339,8 @@ class UserInterfaceImpl : UserInterface {
         )
 
         if (result != JOptionPane.OK_OPTION) {
+            dispose()
+            onClose()
             return null
         }
 

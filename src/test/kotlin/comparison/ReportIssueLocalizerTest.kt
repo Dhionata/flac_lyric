@@ -75,4 +75,32 @@ class ReportIssueLocalizerTest {
         assertTrue(localized[3].startsWith("[ULTRAPASSOU_DURACAO] "))
         assertTrue(localized[3].contains("último verso em 04:15 para faixa de 04:00"))
     }
+
+    @Test
+    fun `test localizes new quality issue tags between Portuguese and English`() {
+        val ptIssues = listOf(
+            "[LETRA_ISOLADA] O arquivo .lrc está isolado na pasta sem um arquivo de áudio correspondente.",
+            "[ERRO_CODIFICACAO] O arquivo apresenta caracteres corrompidos por codificação inválida (ex: linha 12).",
+            "[SINCRONIA_INCOMPLETA] O arquivo possui 3 linha(s) de texto sem timestamp misturadas com versos sincronizados (primeira na linha 8).",
+            "[TIMESTAMPS_DUPLICADOS] Encontrados 4 versos empilhados exatamente na mesma minutagem (00:00.00).",
+            "[TAGS_SUJAS] O arquivo de letra contém marcações extras que podem ser limpas (v1:/v2:, [bg:])."
+        )
+
+        Messages.setLocale(Locale.ENGLISH)
+        val enLocalized = ReportIssueLocalizer.localizeIssues(ptIssues)
+        assertEquals(5, enLocalized.size)
+        assertTrue(enLocalized[0].startsWith("[ORPHAN_LYRIC] "))
+        assertTrue(enLocalized[1].startsWith("[ENCODING_ERROR] "))
+        assertTrue(enLocalized[1].contains("line 12"))
+        assertTrue(enLocalized[2].startsWith("[PARTIAL_SYNC] "))
+        assertTrue(enLocalized[2].contains("3 text line(s)"))
+        assertTrue(enLocalized[3].startsWith("[DUPLICATE_TIMESTAMPS] "))
+        assertTrue(enLocalized[3].contains("4 verses stacked"))
+        assertTrue(enLocalized[4].startsWith("[DIRTY_TAGS] "))
+        assertTrue(enLocalized[4].contains("v1:/v2:, [bg:]"))
+
+        Messages.setLocale(Locale.forLanguageTag("pt-BR"))
+        val roundTripPt = ReportIssueLocalizer.localizeIssues(enLocalized)
+        assertEquals(ptIssues, roundTripPt)
+    }
 }

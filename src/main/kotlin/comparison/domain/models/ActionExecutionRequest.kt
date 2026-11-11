@@ -13,4 +13,10 @@ data class ActionExecutionRequest(
     val moveFiles: Boolean = true,
     val renameFiles: Boolean = true,
     val includeMissingLyrics: Boolean = true,
+    val removeSpeakerAndBgTags: Boolean = true,
+    val removeInlineWordTimestamps: Boolean = true,
+    val removeCreditsAndWatermarks: Boolean = true,
+    val sortAndDeduplicateMultiTimestamps: Boolean = true,
+    val removeUnsyncedLinesInSyncedFile: Boolean = false,
+    val includeTxtFiles: Boolean = false,
 )

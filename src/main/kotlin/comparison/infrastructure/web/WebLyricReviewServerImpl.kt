@@ -32,10 +32,12 @@ class WebLyricReviewServerImpl(
             try {
                 val http = HttpServer.create(InetSocketAddress(portToTry), 0)
                 http.createContext("/", router)
-                http.executor = Executors.newCachedThreadPool()
+                http.executor = Executors.newCachedThreadPool { r ->
+                    Thread(r, "web-http-worker").apply { isDaemon = true }
+                }
                 http.start()
                 server = http
-                boundPort = portToTry
+                boundPort = http.address.port
                 created = true
             } catch (_: Exception) {
                 portToTry++
@@ -46,7 +48,9 @@ class WebLyricReviewServerImpl(
             // Bind to any available dynamic port
             val http = HttpServer.create(InetSocketAddress(0), 0)
             http.createContext("/", router)
-            http.executor = Executors.newCachedThreadPool()
+            http.executor = Executors.newCachedThreadPool { r ->
+                Thread(r, "web-http-worker").apply { isDaemon = true }
+            }
             http.start()
             server = http
             boundPort = http.address.port
@@ -56,7 +60,7 @@ class WebLyricReviewServerImpl(
     }
 
     override fun stop() {
-        server?.stop(1)
+        server?.stop(0)
         server = null
         boundPort = 0
     }
