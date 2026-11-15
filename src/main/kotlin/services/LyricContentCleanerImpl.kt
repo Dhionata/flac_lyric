@@ -16,6 +16,34 @@ import services.LyricSyntaxPatterns.trimAndStripBom
  */
 class LyricContentCleanerImpl : LyricContentCleaner {
 
+    private fun isEmptyTimestampOnlyLine(trimmedLine: String): Boolean {
+        if (trimmedLine.isEmpty()) return false
+        if (LyricSyntaxPatterns.GENERIC_HEADER_TAG_REGEX.matches(trimmedLine)) return false
+        val matches = LyricSyntaxPatterns.TIMESTAMP_REGEX.findAll(trimmedLine).toList()
+        if (matches.isEmpty()) return false
+        return trimmedLine.replace(LyricSyntaxPatterns.TIMESTAMP_REGEX, "").trim().isEmpty()
+    }
+
+    private fun findVerseBounds(lines: List<String>): Pair<Int, Int> {
+        var first = -1
+        var last = -1
+        lines.forEachIndexed { idx, rawLine ->
+            val trimmed = rawLine.trimAndStripBom()
+            if (trimmed.isEmpty() || LyricSyntaxPatterns.GENERIC_HEADER_TAG_REGEX.matches(trimmed)) return@forEachIndexed
+            val matches = LyricSyntaxPatterns.TIMESTAMP_REGEX.findAll(trimmed).toList()
+            if (matches.isEmpty()) return@forEachIndexed
+            val verseText = trimmed
+                .replace(LyricSyntaxPatterns.TIMESTAMP_REGEX, "")
+                .replace(LyricSyntaxPatterns.INLINE_WORD_TAG_REGEX, "")
+                .trim()
+            if (verseText.isNotEmpty()) {
+                if (first == -1) first = idx
+                last = idx
+            }
+        }
+        return first to last
+    }
+
     override fun inspectDirtyPatterns(content: String): List<String> {
         if (content.isBlank()) return emptyList()
 
@@ -37,17 +65,24 @@ class LyricContentCleanerImpl : LyricContentCleaner {
             found.add("<mm:ss>")
         }
 
-        for (rawLine in content.lineSequence()) {
+        val lines = content.split(Regex("\r?\n"))
+        val (firstNonEmptyIdx, lastNonEmptyIdx) = findVerseBounds(lines)
+
+        lines.forEachIndexed { idx, rawLine ->
             val trimmed = rawLine.trimAndStripBom()
-            if (trimmed.isEmpty()) continue
+            if (trimmed.isEmpty()) return@forEachIndexed
             if (LyricSyntaxPatterns.WATERMARK_HEADER_REGEX.matches(trimmed)) {
                 found.add("URL/watermark")
-                continue
+                return@forEachIndexed
             }
-            if (LyricSyntaxPatterns.GENERIC_HEADER_TAG_REGEX.matches(trimmed)) continue
+            if (LyricSyntaxPatterns.GENERIC_HEADER_TAG_REGEX.matches(trimmed)) return@forEachIndexed
 
             val matches = LyricSyntaxPatterns.TIMESTAMP_REGEX.findAll(trimmed).toList()
-            if (matches.isEmpty()) continue
+            if (matches.isEmpty()) return@forEachIndexed
+
+            if (matches.any { it.groupValues.getOrNull(3).orEmpty().isEmpty() }) {
+                found.add("[mm:ss] sem .xx")
+            }
 
             val verseText = trimmed
                 .replace(LyricSyntaxPatterns.TIMESTAMP_REGEX, "")
@@ -62,8 +97,30 @@ class LyricContentCleanerImpl : LyricContentCleaner {
                 LyricSyntaxPatterns.ZERO_TIME_META_STUB_REGEX.matches(verseText)
             ) {
                 found.add("créditos")
+            } else if (
+                LyricSyntaxPatterns.isContextualAuthorSignature(
+                    verseText = verseText,
+                    lineIndex = idx,
+                    firstNonEmptyIndex = firstNonEmptyIdx,
+                    lastNonEmptyIndex = lastNonEmptyIdx,
+                    timestampMs = matches.firstOrNull()?.let { LyricSyntaxPatterns.parseMatchToMs(it) }
+                )
+            ) {
+                found.add("créditos")
             } else if (LyricSyntaxPatterns.WATERMARK_VERSE_REGEX.matches(verseText)) {
                 found.add("URL/watermark")
+            }
+        }
+
+        val lastNonBlankIdx = lines.indexOfLast { it.trimAndStripBom().isNotEmpty() }
+        if (lastNonBlankIdx > 0 && isEmptyTimestampOnlyLine(lines[lastNonBlankIdx].trimAndStripBom())) {
+            val hasVerseBefore = lines.take(lastNonBlankIdx).any { line ->
+                val t = line.trimAndStripBom()
+                t.isNotEmpty() && !LyricSyntaxPatterns.GENERIC_HEADER_TAG_REGEX.matches(t) &&
+                    t.replace(LyricSyntaxPatterns.TIMESTAMP_REGEX, "").trim().isNotEmpty()
+            }
+            if (hasVerseBefore) {
+                found.add("timestamp final vazio")
             }
         }
 
@@ -85,16 +142,17 @@ class LyricContentCleanerImpl : LyricContentCleaner {
 
         val lineBreak = if (workingContent.contains("\r\n")) "\r\n" else "\n"
         val rawLines = workingContent.split(Regex("\r?\n"))
+        val (firstNonEmptyIdx, lastNonEmptyIdx) = findVerseBounds(rawLines)
 
         val hasAnySyncedLine = rawLines.any { line ->
             val trimmed = line.trimAndStripBom()
             !LyricSyntaxPatterns.GENERIC_HEADER_TAG_REGEX.matches(trimmed) &&
-                    LyricSyntaxPatterns.TIMESTAMP_REGEX.containsMatchIn(trimmed)
+                LyricSyntaxPatterns.TIMESTAMP_REGEX.containsMatchIn(trimmed)
         }
 
         val outputLines = mutableListOf<String>()
 
-        for (rawLine in rawLines) {
+        rawLines.forEachIndexed { lineIdx, rawLine ->
             val line = if (options.stripBom && rawLine.startsWith(LyricSyntaxPatterns.UTF8_BOM)) {
                 fixes.add("UTF-8 BOM")
                 rawLine.trimStart(LyricSyntaxPatterns.UTF8_BOM)
@@ -105,13 +163,13 @@ class LyricContentCleanerImpl : LyricContentCleaner {
             val trimmed = line.trim()
             if (trimmed.isEmpty()) {
                 outputLines.add("")
-                continue
+                return@forEachIndexed
             }
 
             // 1. Check watermark header [re:www.megalobiz.com...]
             if (options.removeCreditsAndWatermarks && LyricSyntaxPatterns.WATERMARK_HEADER_REGEX.matches(trimmed)) {
                 fixes.add("URL/watermark")
-                continue
+                return@forEachIndexed
             }
 
             // 2. Check standalone unclosed [bg:<02:49.166>Wanna ...] line
@@ -129,13 +187,13 @@ class LyricContentCleanerImpl : LyricContentCleaner {
                 if (firstInlineTime != null && cleanBgText.isNotEmpty()) {
                     outputLines.add("[${firstInlineTime.groupValues[1]}] ($cleanBgText)")
                 }
-                continue
+                return@forEachIndexed
             }
 
             // Preserve standard metadata headers like [ar:...], [ti:...], [length:...]
             if (LyricSyntaxPatterns.GENERIC_HEADER_TAG_REGEX.matches(trimmed)) {
                 outputLines.add(trimmed)
-                continue
+                return@forEachIndexed
             }
 
             val tsMatches = LyricSyntaxPatterns.TIMESTAMP_REGEX.findAll(trimmed).toList()
@@ -144,7 +202,7 @@ class LyricContentCleanerImpl : LyricContentCleaner {
             if (tsMatches.isEmpty()) {
                 if (options.removeUnsyncedLinesInSyncedFile && hasAnySyncedLine) {
                     fixes.add("unsynced-lines")
-                    continue
+                    return@forEachIndexed
                 }
                 var cleanedUnsynced = trimmed
                 if (options.removeSpeakerAndBgTags && LyricSyntaxPatterns.SPEAKER_PREFIX_REGEX.containsMatchIn(cleanedUnsynced)) {
@@ -156,7 +214,7 @@ class LyricContentCleanerImpl : LyricContentCleaner {
                     fixes.add("<mm:ss>")
                 }
                 outputLines.add(cleanedUnsynced)
-                continue
+                return@forEachIndexed
             }
 
             // Extract verse text after removing line timestamps
@@ -167,7 +225,7 @@ class LyricContentCleanerImpl : LyricContentCleaner {
             if (options.removeCreditsAndWatermarks) {
                 if (LyricSyntaxPatterns.CREDIT_ONLY_TEXT_REGEX.matches(plainForCheck)) {
                     fixes.add("créditos")
-                    continue
+                    return@forEachIndexed
                 }
                 if (
                     tsMatches.size == 1 &&
@@ -175,11 +233,23 @@ class LyricContentCleanerImpl : LyricContentCleaner {
                     LyricSyntaxPatterns.ZERO_TIME_META_STUB_REGEX.matches(plainForCheck)
                 ) {
                     fixes.add("créditos")
-                    continue
+                    return@forEachIndexed
+                }
+                if (
+                    LyricSyntaxPatterns.isContextualAuthorSignature(
+                        verseText = plainForCheck,
+                        lineIndex = lineIdx,
+                        firstNonEmptyIndex = firstNonEmptyIdx,
+                        lastNonEmptyIndex = lastNonEmptyIdx,
+                        timestampMs = tsMatches.firstOrNull()?.let { LyricSyntaxPatterns.parseMatchToMs(it) }
+                    )
+                ) {
+                    fixes.add("créditos")
+                    return@forEachIndexed
                 }
                 if (LyricSyntaxPatterns.WATERMARK_VERSE_REGEX.matches(plainForCheck)) {
                     fixes.add("URL/watermark")
-                    continue
+                    return@forEachIndexed
                 }
             }
 
@@ -211,19 +281,31 @@ class LyricContentCleanerImpl : LyricContentCleaner {
                 fixes.add("<mm:ss>")
             }
 
+            val formatTag: (MatchResult) -> String = { m ->
+                if (options.normalizeTimestampsToCentiseconds) {
+                    val normalized = LyricSyntaxPatterns.normalizeTimestampToCentiseconds(m)
+                    if (normalized != m.value) {
+                        fixes.add("[mm:ss] -> [mm:ss.00]")
+                    }
+                    normalized
+                } else {
+                    m.value
+                }
+            }
+
             // Sort and deduplicate multi-timestamps on the same line if requested
             val finalTimestampPrefix = if (options.sortAndDeduplicateMultiTimestamps && tsMatches.size > 1) {
                 val originalTags = tsMatches.map { it.value }
-                val sortedDedupedTags = tsMatches
+                val sortedDedupedMatches = tsMatches
                     .distinctBy { LyricSyntaxPatterns.parseMatchToMs(it) }
                     .sortedBy { LyricSyntaxPatterns.parseMatchToMs(it) }
-                    .map { it.value }
-                if (sortedDedupedTags != originalTags) {
+                val sortedDedupedTags = sortedDedupedMatches.map { formatTag(it) }
+                if (sortedDedupedMatches.map { it.value } != originalTags) {
                     fixes.add("multi-timestamps")
                 }
                 sortedDedupedTags.joinToString("")
             } else {
-                tsMatches.joinToString("") { it.value }
+                tsMatches.joinToString("") { formatTag(it) }
             }
 
             val reconstructed = if (verseText.isNotEmpty()) {
@@ -239,6 +321,23 @@ class LyricContentCleanerImpl : LyricContentCleaner {
             }
 
             outputLines.add(reconstructed)
+        }
+
+        if (options.removeTrailingEmptyTimestampLines) {
+            while (true) {
+                val lastNonBlankIdx = outputLines.indexOfLast { it.trim().isNotEmpty() }
+                if (lastNonBlankIdx <= 0) break
+                val candidate = outputLines[lastNonBlankIdx].trim()
+                if (!isEmptyTimestampOnlyLine(candidate)) break
+                val hasVerseBefore = outputLines.take(lastNonBlankIdx).any { prev ->
+                    val t = prev.trim()
+                    t.isNotEmpty() && !LyricSyntaxPatterns.GENERIC_HEADER_TAG_REGEX.matches(t) &&
+                        t.replace(LyricSyntaxPatterns.TIMESTAMP_REGEX, "").trim().isNotEmpty()
+                }
+                if (!hasVerseBefore) break
+                outputLines.removeAt(lastNonBlankIdx)
+                fixes.add("timestamp final vazio")
+            }
         }
 
         val cleanedContent = outputLines.joinToString(lineBreak)

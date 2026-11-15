@@ -18,6 +18,7 @@ import comparison.infrastructure.io.SystemFileOpenerImpl
 import comparison.infrastructure.parsers.LyricLineParserImpl
 import comparison.infrastructure.parsers.ReportIssueLocalizer
 import comparison.infrastructure.services.WebActionRunnerService
+import interfaces.AuditLogService
 import interfaces.LyricContentCleaner
 import java.io.File
 import java.net.URLDecoder
@@ -28,6 +29,11 @@ import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 import models.LyricCleanOptions
+import services.AuditLogServiceImpl
+import services.AuditRunContext
+import services.EmbeddedCleanupOutcome
+import services.EmbeddedLyricsHelper
+import services.LoggingInitializer
 import services.LyricContentCleanerImpl
 import services.Messages
 
@@ -48,6 +54,7 @@ class WebReviewRouter(
     private val gson: Gson = Gson(),
     private val shutdownGracePeriodMs: Long = 1500L,
     private val onShutdownRequested: (() -> Unit)? = null,
+    private val auditLogService: AuditLogService = AuditLogServiceImpl(),
 ) : HttpHandler {
 
     private val cachedItems = mutableMapOf<Int, ReportIssueItem>()
@@ -95,12 +102,17 @@ class WebReviewRouter(
                 "/api/open-location" if method == "GET" -> handleOpenLocation(exchange)
                 "/api/parse-lrc" if method == "POST" -> handleParseLrc(exchange)
                 "/api/clean-lrc" if method == "POST" -> handleCleanLrc(exchange)
+                "/api/clean-embedded-lyrics" if method == "POST" -> handleCleanEmbeddedLyrics(exchange)
                 "/api/menu-options" if method == "GET" -> handleMenuOptions(exchange)
                 "/api/action/execute" if method == "POST" -> handleActionExecute(exchange)
                 "/api/action/status" if method == "GET" -> handleActionStatus(exchange)
                 "/api/action/browse-dir" if method == "GET" -> handleActionBrowseDir(exchange)
                 "/api/action/config" if method == "GET" -> handleActionConfig(exchange)
                 "/api/locale" if method == "GET" -> handleLocale(exchange)
+                "/api/locale" if method == "POST" -> handleSetLocale(exchange)
+                "/api/logs/events" if method == "GET" -> handleGetLogEvents(exchange)
+                "/api/logs/files" if method == "GET" -> handleGetLogFiles(exchange)
+                "/api/logs/file" if method == "GET" -> handleGetLogFileContent(exchange)
                 "/api/heartbeat" if (method == "POST" || method == "GET") -> handleHeartbeat(exchange)
                 "/api/shutdown" if (method == "POST" || method == "GET") -> handleShutdown(exchange)
                 else -> sendJsonResponse(exchange, 404, mapOf("error" to Messages.get("error.endpoint_not_found", path)))
@@ -110,24 +122,153 @@ class WebReviewRouter(
         }
     }
 
+    private fun buildLocalePayload(): Map<String, Any?> {
+        val activeLocale = Messages.getLocale()
+        val lang = Messages.toCanonicalTag(activeLocale)
+        return mapOf(
+            "locale" to lang,
+            "systemLocale" to Messages.toCanonicalTag(Messages.systemLocale),
+            "isAuto" to Messages.isUsingSystemLocale(),
+            "isPortuguese" to lang.lowercase().startsWith("pt"),
+            "availableLocales" to Messages.getAvailableLocales(),
+            "messages" to Messages.getAllWithFallback()
+        )
+    }
+
     private fun handleLocale(exchange: HttpExchange) {
-        val lang = Messages.getLocale().toLanguageTag()
+        sendJsonResponse(exchange, 200, buildLocalePayload())
+    }
+
+    private fun handleSetLocale(exchange: HttpExchange) {
+        val bodyMap = parseJsonBodyMap(exchange)
+        val requestedTag = bodyMap["locale"] as? String
+        Messages.setLocaleByTag(requestedTag)
+        sendJsonResponse(exchange, 200, buildLocalePayload())
+    }
+
+    private fun handleGetLogEvents(exchange: HttpExchange) {
+        val queryParams = parseQueryParams(exchange)
+        val category = queryParams["category"]
+        val actionId = queryParams["actionId"]?.toIntOrNull()
+        val runId = queryParams["runId"]
+        val search = queryParams["q"]
+        val limit = queryParams["limit"]?.toIntOrNull()?.coerceIn(1, 500) ?: 150
+        val offset = queryParams["offset"]?.toIntOrNull()?.coerceAtLeast(0) ?: 0
+
+        val result = LoggingInitializer.queryStructuredEvents(
+            category = category,
+            actionId = actionId,
+            runId = runId,
+            search = search,
+            limit = limit,
+            offset = offset
+        )
+
+        val enrichedEvents = result.events.map { ev ->
+            val localizedActionTitle = ev.actionKey?.let { key ->
+                Messages.get(key).takeIf { it != key }
+            } ?: ev.actionFallback
+            val catKey = "web.logs.cat.${ev.category.lowercase()}"
+            val localizedCategory = Messages.get(catKey).takeIf { it != catKey } ?: ev.category
+
+            mapOf(
+                "id" to ev.id,
+                "runId" to ev.runId,
+                "epochMs" to ev.epochMs,
+                "timestamp" to ev.timestamp,
+                "category" to ev.category,
+                "localizedCategory" to localizedCategory,
+                "eventType" to ev.eventType,
+                "actionId" to ev.actionId,
+                "actionKey" to ev.actionKey,
+                "actionFallback" to ev.actionFallback,
+                "localizedActionTitle" to localizedActionTitle,
+                "renderedMessage" to LoggingInitializer.renderEventMessage(ev),
+                "targetPath" to ev.targetPath,
+                "targetName" to ev.targetName,
+                "beforePath" to ev.beforePath,
+                "afterPath" to ev.afterPath,
+                "summaryStats" to ev.summaryStats,
+                "diffLines" to ev.diffLines,
+                "metadata" to ev.metadata
+            )
+        }
+
+        val enrichedRuns = result.runs.map { r ->
+            val localizedActionTitle = r.actionKey?.let { key ->
+                Messages.get(key).takeIf { it != key }
+            } ?: r.actionFallback
+            mapOf(
+                "runId" to r.runId,
+                "actionId" to r.actionId,
+                "actionKey" to r.actionKey,
+                "actionFallback" to r.actionFallback,
+                "localizedActionTitle" to localizedActionTitle,
+                "startedAt" to r.startedAt,
+                "epochMs" to r.epochMs,
+                "eventCount" to r.eventCount,
+                "errorCount" to r.errorCount
+            )
+        }
+
         sendJsonResponse(
             exchange,
             200,
             mapOf(
-                "locale" to lang,
-                "isPortuguese" to lang.lowercase().startsWith("pt"),
-                "messages" to Messages.getAll()
+                "events" to enrichedEvents,
+                "totalMatching" to result.totalMatching,
+                "totalEvents" to result.totalEvents,
+                "countsByCategory" to result.countsByCategory,
+                "runs" to enrichedRuns,
+                "logsDir" to LoggingInitializer.getLogsDirectory().canonicalPath
             )
         )
     }
 
+    private fun handleGetLogFiles(exchange: HttpExchange) {
+        val files = LoggingInitializer.listLogFiles()
+        sendJsonResponse(
+            exchange,
+            200,
+            mapOf(
+                "logsDir" to LoggingInitializer.getLogsDirectory().canonicalPath,
+                "files" to files
+            )
+        )
+    }
+
+    private fun handleGetLogFileContent(exchange: HttpExchange) {
+        val queryParams = parseQueryParams(exchange)
+        val fileName = queryParams["name"].orEmpty()
+        val tailLines = queryParams["tail"]?.toIntOrNull() ?: 400
+        val search = queryParams["q"]
+
+        val result = LoggingInitializer.readLogFileTail(
+            fileName = fileName,
+            tailLines = tailLines,
+            search = search
+        )
+        if (result == null) {
+            sendJsonResponse(exchange, 404, mapOf("error" to Messages.get("error.file_not_found", fileName)))
+            return
+        }
+        sendJsonResponse(exchange, 200, result)
+    }
+
     private fun handleIndex(exchange: HttpExchange) {
-        val lang = Messages.getLocale().toLanguageTag()
-        val messagesJson = gson.toJson(Messages.getAll()).replace("</", "<\\/")
+        val lang = Messages.toCanonicalTag(Messages.getLocale())
+        val messagesJson = gson.toJson(Messages.getAllWithFallback()).replace("</", "<\\/")
         val localeJson = gson.toJson(lang)
-        val i18nBootstrapScript = "<script id=\"server-i18n\">window.__SERVER_LOCALE__ = $localeJson; window.__SERVER_MESSAGES__ = $messagesJson;</script>"
+        val localeMetaJson = gson.toJson(
+            mapOf(
+                "locale" to lang,
+                "systemLocale" to Messages.toCanonicalTag(Messages.systemLocale),
+                "isAuto" to Messages.isUsingSystemLocale(),
+                "availableLocales" to Messages.getAvailableLocales()
+            )
+        ).replace("</", "<\\/")
+        val i18nBootstrapScript =
+            "<script id=\"server-i18n\">window.__SERVER_LOCALE__ = $localeJson; window.__SERVER_LOCALE_META__ = $localeMetaJson; window.__SERVER_MESSAGES__ = $messagesJson;</script>"
         val localizedHtml = WebStaticAssets.INDEX_HTML
             .replaceFirst("lang=\"pt-BR\"", "lang=\"$lang\"")
             .replaceFirst("</head>", "$i18nBootstrapScript\n</head>")
@@ -232,6 +373,9 @@ class WebReviewRouter(
                     mapOf("key" to "removeInlineWordTimestamps", "label" to Messages.get("action.3.opt.inline_word_ts"), "type" to "checkbox", "default" to true),
                     mapOf("key" to "removeCreditsAndWatermarks", "label" to Messages.get("action.3.opt.credits_watermarks"), "type" to "checkbox", "default" to true),
                     mapOf("key" to "sortAndDeduplicateMultiTimestamps", "label" to Messages.get("action.3.opt.sort_dedup_multi_ts"), "type" to "checkbox", "default" to true),
+                    mapOf("key" to "normalizeTimestampsToCentiseconds", "label" to Messages.get("action.3.opt.normalize_centiseconds"), "type" to "checkbox", "default" to true),
+                    mapOf("key" to "removeTrailingEmptyTimestampLines", "label" to Messages.get("action.3.opt.remove_trailing_empty_ts"), "type" to "checkbox", "default" to true),
+                    mapOf("key" to "removeEmbeddedSyncedLyricsFromAudio", "label" to Messages.get("action.3.opt.remove_embedded_synced_lyrics"), "type" to "checkbox", "default" to true),
                     mapOf(
                         "key" to "removeUnsyncedLinesInSyncedFile",
                         "label" to Messages.get("action.3.opt.remove_unsynced_in_synced"),
@@ -445,11 +589,23 @@ class WebReviewRouter(
         }
     }
 
+    private fun <T> withComparatorRun(block: () -> T): T {
+        return AuditRunContext.withRun(
+            actionId = 8,
+            actionKey = "menu.option.8.title",
+            actionFallback = Messages.get("menu.option.8.title")
+        ) {
+            block()
+        }
+    }
+
     private fun handleSaveLyric(exchange: HttpExchange) {
         val bodyString = exchange.requestBody.reader(StandardCharsets.UTF_8).use { it.readText() }
         val request = gson.fromJson(bodyString, SaveLyricRequest::class.java)
 
-        val result = saveLyricUseCase.execute(request)
+        val result = withComparatorRun {
+            saveLyricUseCase.execute(request)
+        }
 
         cachedItems.values.find { it.lyricFile.absolutePath == request.lyricPath }?.let {
             it.status = if (request.choice.equals("LRCLIB", true)) "SAVED_LRCLIB" else "KEPT_LOCAL"
@@ -480,11 +636,13 @@ class WebReviewRouter(
         val parsedLines = parseLinesUseCase.execute(lrcContent)
 
         if (autoSave && lyricPath.isNotBlank()) {
-            val saveRes = saveLyricUseCase.execute(
-                SaveLyricRequest(
-                    lyricPath, "LOCAL", lrcContent
+            val saveRes = withComparatorRun {
+                saveLyricUseCase.execute(
+                    SaveLyricRequest(
+                        lyricPath, "LOCAL", lrcContent
+                    )
                 )
-            )
+            }
             if (saveRes.success) {
                 cachedItems.values.find { it.lyricFile.absolutePath == lyricPath }?.let {
                     it.status = "KEPT_LOCAL"
@@ -546,7 +704,7 @@ class WebReviewRouter(
         }
 
         val item = cachedItems[id] ?: return
-        val res = saveBestCandidateForItem(item)
+        val res = withComparatorRun { saveBestCandidateForItem(item) }
         sendJsonResponse(exchange, 200, res)
     }
 
@@ -562,8 +720,10 @@ class WebReviewRouter(
             else -> cachedItems.values.toList()
         }
 
-        val results = targetItems.map { item ->
-            saveBestCandidateForItem(item)
+        val results = withComparatorRun {
+            targetItems.map { item ->
+                saveBestCandidateForItem(item)
+            }
         }
         val savedCount = results.count { it["success"] == true }
 
@@ -605,7 +765,9 @@ class WebReviewRouter(
             removeInlineWordTimestamps = (bodyMap["removeInlineWordTimestamps"] as? Boolean) ?: true,
             removeCreditsAndWatermarks = (bodyMap["removeCreditsAndWatermarks"] as? Boolean) ?: true,
             sortAndDeduplicateMultiTimestamps = (bodyMap["sortAndDeduplicateMultiTimestamps"] as? Boolean) ?: true,
-            removeUnsyncedLinesInSyncedFile = (bodyMap["removeUnsyncedLinesInSyncedFile"] as? Boolean) ?: true
+            removeUnsyncedLinesInSyncedFile = (bodyMap["removeUnsyncedLinesInSyncedFile"] as? Boolean) ?: true,
+            normalizeTimestampsToCentiseconds = (bodyMap["normalizeTimestampsToCentiseconds"] as? Boolean) ?: true,
+            removeTrailingEmptyTimestampLines = (bodyMap["removeTrailingEmptyTimestampLines"] as? Boolean) ?: true
         )
         val cleanResult = lyricContentCleaner.clean(rawContent, options)
         val syncedLines = parseLinesUseCase.execute(cleanResult.cleanedContent)
@@ -622,6 +784,107 @@ class WebReviewRouter(
                 "lines" to lines
             )
         )
+    }
+
+    private fun handleCleanEmbeddedLyrics(exchange: HttpExchange) {
+        val bodyMap = parseJsonBodyMap(exchange)
+        val itemId = (bodyMap["id"] as? Number)?.toInt()
+        val cachedItem = itemId?.let { cachedItems[it] }
+        val audioPathParam = (bodyMap["audioPath"] as? String)?.takeIf { it.isNotBlank() }
+        val audioFile = audioPathParam?.let { File(it) } ?: cachedItem?.audioFile
+
+        if (audioFile == null) {
+            sendJsonResponse(exchange, 400, mapOf("success" to false, "error" to Messages.get("error.missing_audio_path")))
+            return
+        }
+        if (!audioFile.exists() || !audioFile.isFile) {
+            sendJsonResponse(exchange, 404, mapOf("success" to false, "error" to Messages.get("error.audio_not_found", audioFile.absolutePath)))
+            return
+        }
+
+        withComparatorRun {
+            try {
+                when (val outcome = EmbeddedLyricsHelper.removeEmbeddedSyncedLyricsWithOutcome(audioFile)) {
+                    is EmbeddedCleanupOutcome.Removed -> {
+                        val removedInfo = outcome.info
+                        val tagsDesc = removedInfo.tagKeys.joinToString(", ")
+                        auditLogService.logContentModification(
+                            operation = "Comparator - Remove Embedded Synced Lyrics",
+                            targetFile = audioFile,
+                            beforeContent = removedInfo.content,
+                            afterContent = "(removed embedded tags: $tagsDesc)",
+                            metadata = mapOf("removedTags" to tagsDesc)
+                        )
+                        var remainingIssues: List<String>? = null
+                        if (cachedItem != null) {
+                            remainingIssues = cachedItem.issues.filterNot { iss ->
+                                val upper = iss.uppercase()
+                                upper.contains("[LETRA_EMBUTIDA]") ||
+                                    upper.contains("[EMBEDDED_LYRICS]") ||
+                                    upper.contains("LETRA EMBUTIDA COM TIMESTAMPS") ||
+                                    upper.contains("EMBEDDED LYRICS WITH TIMESTAMPS")
+                            }
+                            cachedItems[cachedItem.id] = cachedItem.copy(issues = remainingIssues)
+                        }
+                        sendJsonResponse(
+                            exchange,
+                            200,
+                            mapOf(
+                                "success" to true,
+                                "modified" to true,
+                                "removedTags" to removedInfo.tagKeys,
+                                "remainingIssues" to remainingIssues
+                            )
+                        )
+                    }
+
+                    is EmbeddedCleanupOutcome.SkippedUnsupported -> {
+                        val reasonArgsArray = outcome.reasonArgs.toTypedArray<Any>()
+                        auditLogService.logSkipped(
+                            operation = "Comparator - Remove Embedded Synced Lyrics",
+                            targetFile = audioFile,
+                            reasonKey = outcome.reasonKey,
+                            reasonArgs = outcome.reasonArgs,
+                            metadata = mapOf("extension" to outcome.extension)
+                        )
+                        sendJsonResponse(
+                            exchange,
+                            200,
+                            mapOf(
+                                "success" to false,
+                                "modified" to false,
+                                "unsupported" to true,
+                                "removedTags" to emptyList<String>(),
+                                "error" to Messages.get(outcome.reasonKey, *reasonArgsArray)
+                            )
+                        )
+                    }
+
+                    EmbeddedCleanupOutcome.Clean -> {
+                        sendJsonResponse(
+                            exchange,
+                            200,
+                            mapOf(
+                                "success" to true,
+                                "modified" to false,
+                                "removedTags" to emptyList<String>()
+                            )
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                auditLogService.logError("Comparator - Remove Embedded Synced Lyrics", audioFile, e)
+                sendJsonResponse(
+                    exchange,
+                    500,
+                    mapOf(
+                        "success" to false,
+                        "modified" to false,
+                        "error" to (e.message ?: e.toString())
+                    )
+                )
+            }
+        }
     }
 
     private fun handleHeartbeat(exchange: HttpExchange) {
@@ -666,10 +929,15 @@ class WebReviewRouter(
     private fun sendJsonResponse(exchange: HttpExchange, statusCode: Int, data: Any) {
         val jsonString = gson.toJson(data)
         val path = exchange.requestURI.path
-        // Log all API requests except repetitive in-progress status polling and heartbeats
-        val shouldLog = (path != "/api/action/status" && path != "/api/heartbeat") || statusCode != 200
+        // Log all API requests except repetitive status/heartbeat/locale/log-reader endpoints
+        val shouldLog = (
+            path != "/api/action/status" &&
+                path != "/api/heartbeat" &&
+                path != "/api/locale" &&
+                !path.startsWith("/api/logs/")
+            ) || statusCode != 200
         if (shouldLog) {
-            services.LoggingInitializer.logHttpExchange(
+            LoggingInitializer.logHttpExchange(
                 Messages.get("log.web.router_category"), exchange.requestMethod, exchange.requestURI.toString(), responseStatus = statusCode, responseBody = jsonString
             )
         }

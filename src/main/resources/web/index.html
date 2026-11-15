@@ -2279,6 +2279,667 @@
             border-color: #cbd5e1;
             color: #0f172a;
         }
+
+        /* =========================================================================
+           VIEW 3: LOGS & ACTIVITY EXPLORER
+           ========================================================================= */
+        .logs-view-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+            padding: 16px 24px;
+            gap: 12px;
+            background: var(--bg-dark);
+        }
+
+        .logs-hero-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .logs-hero-title-group h1 {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        .logs-hero-title-group p {
+            font-size: 0.84rem;
+            color: var(--text-muted);
+            margin: 3px 0 0 0;
+        }
+
+        .logs-hero-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .logs-mode-tabs {
+            display: inline-flex;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 3px;
+            gap: 3px;
+        }
+
+        .logs-mode-btn {
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .logs-mode-btn:hover {
+            color: var(--text-main);
+        }
+
+        .logs-mode-btn.active {
+            background: rgba(56, 189, 248, 0.16);
+            color: #38bdf8;
+        }
+
+        .logs-toolbar {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 12px 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+        }
+
+        .logs-category-chips {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .logs-cat-chip {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 5px 10px;
+            border-radius: 999px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s ease;
+        }
+
+        .logs-cat-chip:hover {
+            border-color: #38bdf8;
+            color: var(--text-main);
+        }
+
+        .logs-cat-chip.active {
+            background: rgba(56, 189, 248, 0.18);
+            border-color: #38bdf8;
+            color: #38bdf8;
+        }
+
+        .logs-cat-chip.cat-error.active {
+            background: rgba(239, 68, 68, 0.18);
+            border-color: #ef4444;
+            color: #f87171;
+        }
+
+        .logs-cat-chip.cat-modified.active {
+            background: rgba(16, 185, 129, 0.18);
+            border-color: #10b981;
+            color: #34d399;
+        }
+
+        .logs-cat-chip.cat-skipped.active {
+            background: rgba(245, 158, 11, 0.18);
+            border-color: #f59e0b;
+            color: #fbbf24;
+        }
+
+        .logs-cat-count {
+            font-size: 0.7rem;
+            opacity: 0.85;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 1px 6px;
+            border-radius: 999px;
+        }
+
+        .logs-filters-row {
+            display: grid;
+            grid-template-columns: minmax(220px, 1.3fr) minmax(180px, 1fr) minmax(220px, 1.4fr);
+            gap: 10px;
+            align-items: center;
+        }
+
+        .logs-filter-field {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 0;
+        }
+
+        .logs-filter-field label {
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .logs-filter-field .select-input,
+        .logs-filter-field .search-input {
+            width: 100%;
+            min-width: 0;
+        }
+
+        .logs-panel {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+            gap: 10px;
+        }
+
+        .logs-split-layout {
+            display: grid;
+            grid-template-columns: minmax(360px, 1.05fr) minmax(420px, 1.35fr);
+            gap: 14px;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .logs-list-pane,
+        .logs-detail-pane {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .logs-list-header {
+            padding: 9px 14px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .logs-list-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .log-event-card {
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.02);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .log-event-card:hover {
+            background: var(--bg-card-hover);
+            border-color: #38bdf8;
+        }
+
+        .log-event-card.active {
+            background: rgba(56, 189, 248, 0.10);
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.25);
+        }
+
+        .log-event-card.cat-ERROR {
+            border-left: 3px solid #ef4444;
+        }
+
+        .log-event-card.cat-MODIFIED {
+            border-left: 3px solid #10b981;
+        }
+
+        .log-event-card.cat-FILE_ACTION {
+            border-left: 3px solid #3b82f6;
+        }
+
+        .log-event-card.cat-SKIPPED {
+            border-left: 3px solid #f59e0b;
+        }
+
+        .log-event-card.cat-ANALYSIS {
+            border-left: 3px solid #a855f7;
+        }
+
+        .log-event-card.cat-OPERATION {
+            border-left: 3px solid #64748b;
+        }
+
+        .log-event-card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .log-event-badges {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .log-cat-pill {
+            font-size: 0.68rem;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 999px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .log-cat-pill.cat-ERROR { background: rgba(239, 68, 68, 0.18); color: #f87171; }
+        .log-cat-pill.cat-MODIFIED { background: rgba(16, 185, 129, 0.18); color: #34d399; }
+        .log-cat-pill.cat-FILE_ACTION { background: rgba(59, 130, 246, 0.18); color: #60a5fa; }
+        .log-cat-pill.cat-SKIPPED { background: rgba(245, 158, 11, 0.18); color: #fbbf24; }
+        .log-cat-pill.cat-ANALYSIS { background: rgba(168, 85, 247, 0.18); color: #c084fc; }
+        .log-cat-pill.cat-OPERATION { background: rgba(148, 163, 184, 0.18); color: #cbd5e1; }
+
+        .log-action-pill {
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-muted);
+            max-width: 240px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .log-event-time {
+            font-size: 0.7rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-dim);
+        }
+
+        .log-event-card-msg {
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: var(--text-main);
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        .log-event-card-path {
+            font-size: 0.73rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .logs-detail-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .logs-detail-empty {
+            margin: auto;
+            text-align: center;
+            max-width: 380px;
+            color: var(--text-muted);
+        }
+
+        .logs-detail-empty h3 {
+            color: var(--text-main);
+            font-size: 1rem;
+            margin-bottom: 6px;
+        }
+
+        .logs-detail-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logs-detail-title {
+            font-size: 1.02rem;
+            font-weight: 800;
+            color: var(--text-main);
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        .logs-detail-meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 8px;
+        }
+
+        .logs-detail-meta-card {
+            padding: 8px 10px;
+            border-radius: 7px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+        }
+
+        .logs-detail-meta-card .meta-label {
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            font-weight: 700;
+            margin-bottom: 3px;
+        }
+
+        .logs-detail-meta-card .meta-value {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-main);
+            word-break: break-word;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .logs-detail-path-box {
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .logs-detail-path-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-dim);
+        }
+
+        .logs-detail-path-value {
+            font-size: 0.78rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: #38bdf8;
+            word-break: break-all;
+        }
+
+        .logs-diff-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .logs-diff-section h4 {
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        .logs-diff-table {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+        }
+
+        .logs-diff-row {
+            display: grid;
+            grid-template-columns: 78px 1fr 1fr;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logs-diff-row:last-child {
+            border-bottom: none;
+        }
+
+        .logs-diff-row.header {
+            background: rgba(255, 255, 255, 0.05);
+            font-weight: 800;
+            color: var(--text-muted);
+        }
+
+        .logs-diff-cell {
+            padding: 6px 8px;
+            word-break: break-word;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .logs-diff-cell:last-child {
+            border-right: none;
+        }
+
+        .logs-diff-before {
+            background: rgba(239, 68, 68, 0.08);
+            color: #fca5a5;
+        }
+
+        .logs-diff-after {
+            background: rgba(16, 185, 129, 0.08);
+            color: #86efac;
+        }
+
+        .logs-raw-split {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 14px;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .logs-raw-file-card {
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.02);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            transition: all 0.15s ease;
+        }
+
+        .logs-raw-file-card:hover {
+            background: var(--bg-card-hover);
+            border-color: #38bdf8;
+        }
+
+        .logs-raw-file-card.active {
+            background: rgba(56, 189, 248, 0.12);
+            border-color: #38bdf8;
+        }
+
+        .logs-raw-file-name {
+            font-size: 0.8rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-main);
+            word-break: break-all;
+        }
+
+        .logs-raw-file-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+        }
+
+        .logs-raw-toolbar {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .logs-raw-lines-box {
+            flex: 1;
+            overflow: auto;
+            padding: 12px 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.76rem;
+            line-height: 1.55;
+            white-space: pre-wrap;
+            word-break: break-word;
+            background: rgba(0, 0, 0, 0.25);
+        }
+
+        .logs-raw-line {
+            padding: 1px 4px;
+            border-radius: 3px;
+        }
+
+        .logs-raw-line.raw-line-err {
+            color: #fca5a5;
+            background: rgba(239, 68, 68, 0.10);
+        }
+
+        .logs-raw-line.raw-line-audit {
+            color: #93c5fd;
+        }
+
+        .logs-raw-line.raw-line-ok {
+            color: #86efac;
+        }
+
+        [data-theme="amoled"] .logs-view-container,
+        [data-theme="amoled"] .logs-toolbar,
+        [data-theme="amoled"] .logs-list-pane,
+        [data-theme="amoled"] .logs-detail-pane {
+            background: #000000 !important;
+            border-color: #1e1e1e !important;
+        }
+
+        [data-theme="amoled"] .logs-mode-tabs,
+        [data-theme="amoled"] .logs-cat-chip,
+        [data-theme="amoled"] .log-event-card,
+        [data-theme="amoled"] .logs-raw-file-card,
+        [data-theme="amoled"] .logs-detail-meta-card,
+        [data-theme="amoled"] .logs-detail-path-box {
+            background: #080808 !important;
+            border-color: #222222 !important;
+        }
+
+        [data-theme="amoled"] .logs-raw-lines-box {
+            background: #030303 !important;
+        }
+
+        [data-theme="light"] .logs-view-container {
+            background: #f8fafc !important;
+            color: #0f172a !important;
+        }
+
+        [data-theme="light"] .logs-toolbar,
+        [data-theme="light"] .logs-list-pane,
+        [data-theme="light"] .logs-detail-pane,
+        [data-theme="light"] .logs-mode-tabs {
+            background: #ffffff !important;
+            border-color: #cbd5e1 !important;
+        }
+
+        [data-theme="light"] .logs-cat-chip,
+        [data-theme="light"] .log-event-card,
+        [data-theme="light"] .logs-raw-file-card,
+        [data-theme="light"] .logs-detail-meta-card,
+        [data-theme="light"] .logs-detail-path-box {
+            background: #f8fafc !important;
+            border-color: #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+
+        [data-theme="light"] .log-event-card.active,
+        [data-theme="light"] .logs-raw-file-card.active {
+            background: rgba(56, 189, 248, 0.14) !important;
+            border-color: #0284c7 !important;
+        }
+
+        [data-theme="light"] .logs-diff-before {
+            background: rgba(239, 68, 68, 0.12);
+            color: #b91c1c;
+        }
+
+        [data-theme="light"] .logs-diff-after {
+            background: rgba(16, 185, 129, 0.12);
+            color: #047857;
+        }
+
+        [data-theme="light"] .logs-detail-path-value {
+            color: #0369a1;
+        }
+
+        [data-theme="light"] .logs-raw-lines-box {
+            background: #f1f5f9 !important;
+            color: #1e293b;
+        }
+
+        [data-theme="light"] .logs-raw-line.raw-line-err {
+            color: #b91c1c;
+            background: rgba(239, 68, 68, 0.12);
+        }
+
+        [data-theme="light"] .logs-raw-line.raw-line-audit {
+            color: #1d4ed8;
+        }
+
+        [data-theme="light"] .logs-raw-line.raw-line-ok {
+            color: #047857;
+        }
+
+        @media (max-width: 1050px) {
+            .logs-filters-row {
+                grid-template-columns: 1fr;
+            }
+            .logs-split-layout,
+            .logs-raw-split {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -2311,6 +2972,15 @@
                 </svg>
                 <span data-i18n="web.header.tab_comparator">Comparador de Letras</span>
             </button>
+            <button class="nav-tab-btn" id="tabLogsBtn">
+                <svg fill="none" height="15" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="15">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" x2="8" y1="13" y2="13"></line>
+                    <line x1="16" x2="8" y1="17" y2="17"></line>
+                </svg>
+                <span data-i18n="web.header.tab_logs">Logs e Histórico</span>
+            </button>
         </nav>
 
         <span class="badge badge-info" data-i18n="web.header.status.ready" id="headerProgress">Pronto</span>
@@ -2319,6 +2989,8 @@
     <div class="header-right">
         <button class="btn-secondary" data-i18n="web.header.toggle_sidebar" id="btnToggleSidebar" style="padding: 5px 10px;">☰ Faixas</button>
         <select class="report-select" data-i18n-title="web.header.report_select_title" id="reportSelect" title="Selecionar arquivo de relatório"></select>
+        <select class="report-select" data-i18n-title="web.header.locale_select_title" id="localeSelect" style="max-width: 185px;"
+                title="Idioma da interface e dos logs"></select>
         <select class="report-select" data-i18n-title="web.header.theme_select_title" id="themeSelect" style="max-width: 175px;"
                 title="Tema visual (Auto detecta o modo do sistema)">
             <option data-i18n="web.header.theme_auto" value="auto">🖥️ Sistema (Auto)</option>
@@ -2594,6 +3266,13 @@
                 <ul id="issuesList" style="margin-left: 16px; list-style-type: square;"></ul>
             </div>
 
+            <button class="btn-offset" data-i18n="web.comparator.clean_embedded_btn" id="btnCleanEmbeddedLyrics"
+                    onclick="cleanEmbeddedAudioLyrics()"
+                    style="display: none; width: 100%; justify-content: center; padding: 7px 10px; margin-bottom: 10px; color: #fbbf24; border-color: rgba(251, 191, 36, 0.5); font-weight: 700;"
+                    type="button">
+                🧹 Limpar Letra Embutida no Áudio
+            </button>
+
             <!-- Audio Player & Controls -->
             <audio id="audioElement" preload="metadata"></audio>
 
@@ -2828,6 +3507,140 @@
                 </button>
             </div>
         </section>
+    </div>
+</main>
+
+<!-- =========================================================================
+     VIEW 3: EXPLORADOR DE ATIVIDADES & LOGS
+     ========================================================================= -->
+<main class="view-content" id="viewLogs">
+    <div class="logs-view-container">
+        <div class="logs-hero-row">
+            <div class="logs-hero-title-group">
+                <h1 data-i18n="web.logs.hero_title">Explorador de Atividades & Logs</h1>
+                <p data-i18n="web.logs.hero_subtitle">Inspecione tudo o que foi analisado, modificado, movido, ignorado ou que gerou erro, com diffs antes/depois e arquivos de log completos.</p>
+            </div>
+            <div class="logs-hero-actions">
+                <div class="logs-mode-tabs">
+                    <button class="logs-mode-btn active" data-i18n="web.logs.mode_activity" id="btnLogsModeActivity" onclick="setLogsViewMode('activity')" type="button">🧭 Atividades Estruturadas</button>
+                    <button class="logs-mode-btn" data-i18n="web.logs.mode_raw_files" id="btnLogsModeRaw" onclick="setLogsViewMode('raw')" type="button">📄 Arquivos Brutos (.log / .jsonl)</button>
+                </div>
+                <button class="btn-secondary" data-i18n="web.logs.refresh_btn" id="btnLogsRefresh" onclick="refreshLogsView()" type="button">🔄 Atualizar</button>
+                <button class="btn-secondary" data-i18n="web.logs.open_logs_dir_btn" id="btnOpenLogsDir" onclick="openLogsDirectory()" type="button">📁 Abrir Pasta logs/</button>
+            </div>
+        </div>
+
+        <!-- MODO A: ATIVIDADES ESTRUTURADAS (TIMELINE + DETALHES + DIFF) -->
+        <div class="logs-panel" id="logsActivityPanel">
+            <div class="logs-toolbar">
+                <div class="logs-category-chips" id="logsCategoryChips">
+                    <button class="logs-cat-chip active" data-logs-cat="ALL" onclick="setLogsCategoryFilter('ALL')" type="button">
+                        <span data-i18n="web.logs.cat.all">Tudo</span>
+                        <span class="logs-cat-count" id="logsCatCountALL">0</span>
+                    </button>
+                    <button class="logs-cat-chip cat-error" data-logs-cat="ERROR" onclick="setLogsCategoryFilter('ERROR')" type="button">
+                        <span data-i18n="web.logs.cat.error">Erros</span>
+                        <span class="logs-cat-count" id="logsCatCountERROR">0</span>
+                    </button>
+                    <button class="logs-cat-chip cat-modified" data-logs-cat="MODIFIED" onclick="setLogsCategoryFilter('MODIFIED')" type="button">
+                        <span data-i18n="web.logs.cat.modified">Modificados</span>
+                        <span class="logs-cat-count" id="logsCatCountMODIFIED">0</span>
+                    </button>
+                    <button class="logs-cat-chip" data-logs-cat="FILE_ACTION" onclick="setLogsCategoryFilter('FILE_ACTION')" type="button">
+                        <span data-i18n="web.logs.cat.file_action">Movidos / Renomeados</span>
+                        <span class="logs-cat-count" id="logsCatCountFILE_ACTION">0</span>
+                    </button>
+                    <button class="logs-cat-chip cat-skipped" data-logs-cat="SKIPPED" onclick="setLogsCategoryFilter('SKIPPED')" type="button">
+                        <span data-i18n="web.logs.cat.skipped">Ignorados</span>
+                        <span class="logs-cat-count" id="logsCatCountSKIPPED">0</span>
+                    </button>
+                    <button class="logs-cat-chip" data-logs-cat="ANALYSIS" onclick="setLogsCategoryFilter('ANALYSIS')" type="button">
+                        <span data-i18n="web.logs.cat.analysis">Analisados</span>
+                        <span class="logs-cat-count" id="logsCatCountANALYSIS">0</span>
+                    </button>
+                    <button class="logs-cat-chip" data-logs-cat="OPERATION" onclick="setLogsCategoryFilter('OPERATION')" type="button">
+                        <span data-i18n="web.logs.cat.operation">Operações</span>
+                        <span class="logs-cat-count" id="logsCatCountOPERATION">0</span>
+                    </button>
+                </div>
+
+                <div class="logs-filters-row">
+                    <div class="logs-filter-field">
+                        <label data-i18n="web.logs.run_label" for="logsRunFilter">Execução:</label>
+                        <select class="select-input" id="logsRunFilter" onchange="onLogsFilterChanged()">
+                            <option data-i18n="web.logs.run_all" value="ALL">Todas as Execuções</option>
+                        </select>
+                    </div>
+                    <div class="logs-filter-field">
+                        <label data-i18n="web.logs.action_label" for="logsActionFilter">Operação:</label>
+                        <select class="select-input" id="logsActionFilter" onchange="onLogsFilterChanged()">
+                            <option data-i18n="web.logs.action_all" value="">Todas as Operações</option>
+                        </select>
+                    </div>
+                    <div class="logs-filter-field">
+                        <input class="search-input" data-i18n-placeholder="web.logs.search_placeholder" id="logsSearchInput" oninput="scheduleLogsSearch()"
+                               placeholder="🔍 Buscar por arquivo, caminho, mensagem ou erro..." type="text">
+                    </div>
+                </div>
+            </div>
+
+            <div class="logs-split-layout">
+                <div class="logs-list-pane">
+                    <div class="logs-list-header">
+                        <span id="logsShowingLabel">0</span>
+                    </div>
+                    <div class="logs-list-scroll" id="logsEventList"></div>
+                    <div id="logsLoadMoreBar" style="display: none; padding: 8px 10px; border-top: 1px solid var(--border-color); text-align: center;">
+                        <button class="btn-secondary" id="btnLogsLoadMore" onclick="loadMoreLogEvents()" style="width: 100%; justify-content: center;" type="button"></button>
+                    </div>
+                </div>
+
+                <div class="logs-detail-pane">
+                    <div class="logs-detail-scroll" id="logsDetailPane">
+                        <div class="logs-detail-empty">
+                            <h3 data-i18n="web.logs.detail.empty_title">Nenhum evento selecionado</h3>
+                            <p data-i18n="web.logs.detail.empty_subtitle">Selecione um evento à esquerda para inspecionar os caminhos dos arquivos, diferenças (antes/depois) e metadados da execução.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODO B: ARQUIVOS BRUTOS (.LOG / .JSONL) -->
+        <div class="logs-panel" id="logsRawPanel" style="display: none;">
+            <div class="logs-raw-split">
+                <div class="logs-list-pane">
+                    <div class="logs-list-header">
+                        <span data-i18n="web.logs.mode_raw_files">📄 Arquivos Brutos (.log / .jsonl)</span>
+                    </div>
+                    <div class="logs-list-scroll" id="logsRawFilesList"></div>
+                </div>
+
+                <div class="logs-detail-pane">
+                    <div class="logs-raw-toolbar">
+                        <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0;">
+                            <strong id="logsRawFileTitle" style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; word-break: break-all;">-</strong>
+                            <span id="logsRawFileSubtitle" style="font-size: 0.72rem; color: var(--text-muted);">-</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                            <label data-i18n="web.logs.raw.tail_label" for="logsRawTailSelect" style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700;">Linhas:</label>
+                            <select class="select-input" id="logsRawTailSelect" onchange="reloadSelectedRawLogFile()" style="padding: 4px 8px; font-size: 0.76rem;">
+                                <option data-i18n="web.logs.raw.tail_200" value="200">Últimas 200 linhas</option>
+                                <option data-i18n="web.logs.raw.tail_400" selected value="400">Últimas 400 linhas</option>
+                                <option data-i18n="web.logs.raw.tail_1000" value="1000">Últimas 1000 linhas</option>
+                            </select>
+                            <input class="search-input" data-i18n-placeholder="web.logs.raw.search_placeholder" id="logsRawSearchInput" oninput="scheduleRawLogSearch()"
+                                   placeholder="🔍 Filtrar linhas dentro deste arquivo de log..." style="width: 240px;" type="text">
+                            <button class="btn-secondary" data-i18n="web.logs.detail.open_location_btn" id="btnOpenSelectedRawFile" onclick="openSelectedRawLogLocation()"
+                                    style="display: none; padding: 5px 10px; font-size: 0.75rem;" type="button">📂 Abrir Local do Arquivo</button>
+                        </div>
+                    </div>
+                    <div class="logs-raw-lines-box" id="logsRawLinesBox">
+                        <div style="color: var(--text-muted);" data-i18n="web.logs.raw.select_prompt">Selecione um arquivo de log à esquerda para visualizar seu conteúdo.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </main>
 
@@ -3285,7 +4098,11 @@
                 </div>
 
                 <div class="result-details-box">
-                    <h4 data-i18n="web.action.result_log_header">Registro de Operações & Saída:</h4>
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-bottom: 6px;">
+                        <h4 data-i18n="web.action.result_log_header" style="margin: 0;">Registro de Operações & Saída:</h4>
+                        <button class="btn-secondary" data-i18n="web.action.view_logs_btn" id="btnModalViewLogs" onclick="openLogsFromActionModal()"
+                                style="padding: 4px 10px; font-size: 0.76rem;" type="button">📜 Ver Logs e Detalhes</button>
+                    </div>
                     <div class="result-log-list" id="modalResultList"></div>
                 </div>
             </div>
@@ -3426,8 +4243,10 @@
     // Navigation Tabs Elements
     const tabMenuBtn = document.getElementById('tabMenuBtn');
     const tabComparatorBtn = document.getElementById('tabComparatorBtn');
+    const tabLogsBtn = document.getElementById('tabLogsBtn');
     const viewMenu = document.getElementById('viewMenu');
     const viewComparator = document.getElementById('viewComparator');
+    const viewLogs = document.getElementById('viewLogs');
     const logoBtn = document.getElementById('logoBtn');
     const optionsGrid = document.getElementById('optionsGrid');
 
@@ -3438,23 +4257,34 @@
     const modalExecuteBtn = document.getElementById('modalExecuteBtn');
 
     function switchView(viewName, forceSkipUnsavedCheck = false) {
+        if (viewName !== 'comparator' && !forceSkipUnsavedCheck && viewComparator && viewComparator.classList.contains('active') && typeof hasUnsavedChanges === 'function' && hasUnsavedChanges()) {
+            requestUnsavedChangesConfirmation(() => {
+                switchView(viewName, true);
+            });
+            return;
+        }
+
+        if (tabMenuBtn) tabMenuBtn.classList.remove('active');
+        if (tabComparatorBtn) tabComparatorBtn.classList.remove('active');
+        if (tabLogsBtn) tabLogsBtn.classList.remove('active');
+        if (viewMenu) viewMenu.classList.remove('active');
+        if (viewComparator) viewComparator.classList.remove('active');
+        if (viewLogs) viewLogs.classList.remove('active');
+
         if (viewName === 'menu') {
-            if (!forceSkipUnsavedCheck && viewComparator && viewComparator.classList.contains('active') && typeof hasUnsavedChanges === 'function' && hasUnsavedChanges()) {
-                requestUnsavedChangesConfirmation(() => {
-                    switchView('menu', true);
-                });
-                return;
-            }
-            tabMenuBtn.classList.add('active');
-            tabComparatorBtn.classList.remove('active');
-            viewMenu.classList.add('active');
-            viewComparator.classList.remove('active');
+            if (tabMenuBtn) tabMenuBtn.classList.add('active');
+            if (viewMenu) viewMenu.classList.add('active');
             audio.pause();
+        } else if (viewName === 'logs') {
+            if (tabLogsBtn) tabLogsBtn.classList.add('active');
+            if (viewLogs) viewLogs.classList.add('active');
+            audio.pause();
+            if (typeof loadLogsView === 'function') {
+                loadLogsView();
+            }
         } else {
-            tabComparatorBtn.classList.add('active');
-            tabMenuBtn.classList.remove('active');
-            viewComparator.classList.add('active');
-            viewMenu.classList.remove('active');
+            if (tabComparatorBtn) tabComparatorBtn.classList.add('active');
+            if (viewComparator) viewComparator.classList.add('active');
             if (audio.src && audio.src !== window.location.href && audio.paused) {
                 audio.play().catch(err => {
                     console.warn('Autoplay blocked/failed:', err);
@@ -3465,6 +4295,7 @@
 
     tabMenuBtn.addEventListener('click', () => switchView('menu'));
     tabComparatorBtn.addEventListener('click', () => switchView('comparator'));
+    if (tabLogsBtn) tabLogsBtn.addEventListener('click', () => switchView('logs'));
     logoBtn.addEventListener('click', () => switchView('menu'));
 
     let toastTimeout = null;
@@ -3823,6 +4654,9 @@
             removeInlineWordTimestamps: document.getElementById('input_removeInlineWordTimestamps')?.checked ?? true,
             removeCreditsAndWatermarks: document.getElementById('input_removeCreditsAndWatermarks')?.checked ?? true,
             sortAndDeduplicateMultiTimestamps: document.getElementById('input_sortAndDeduplicateMultiTimestamps')?.checked ?? true,
+            normalizeTimestampsToCentiseconds: document.getElementById('input_normalizeTimestampsToCentiseconds')?.checked ?? true,
+            removeTrailingEmptyTimestampLines: document.getElementById('input_removeTrailingEmptyTimestampLines')?.checked ?? true,
+            removeEmbeddedSyncedLyricsFromAudio: document.getElementById('input_removeEmbeddedSyncedLyricsFromAudio')?.checked ?? true,
             removeUnsyncedLinesInSyncedFile: document.getElementById('input_removeUnsyncedLinesInSyncedFile')?.checked ?? false,
             includeTxtFiles: document.getElementById('input_includeTxtFiles')?.checked ?? false
         };
@@ -3937,7 +4771,11 @@
         try {
             const res = await fetch('/api/menu-options');
             const options = await res.json();
+            window.__menuOptionsCache = options;
             renderMenuCards(options);
+            if (typeof updateLogsActionFilterOptions === 'function') {
+                updateLogsActionFilterOptions(options);
+            }
         } catch (e) {
             console.error('Failed to load menu options', e);
         }
@@ -4015,6 +4853,8 @@
                     inferred = isPt ? 'TAG_LENGTH_DIVERGENTE' : 'LENGTH_MISMATCH';
                 } else if (lower.includes('prematuro') || lower.includes('acaba aos') || lower.includes('premature') || lower.includes('ends at')) {
                     inferred = isPt ? 'TERMINO_PREMATURO' : 'PREMATURE_END';
+                } else if (lower.includes('embutida') || lower.includes('embedded')) {
+                    inferred = isPt ? 'LETRA_EMBUTIDA' : 'EMBEDDED_LYRICS';
                 } else if (lower.includes('fora de ordem') || lower.includes('out of order')) {
                     inferred = isPt ? 'TIMESTAMPS_FORA_DE_ORDEM' : 'OUT_OF_ORDER';
                 }
@@ -4284,6 +5124,8 @@
 
         isTrackLoading = true;
         resetTrackCleanBaseline();
+        const cleanEmbeddedBtnLoading = document.getElementById('btnCleanEmbeddedLyrics');
+        if (cleanEmbeddedBtnLoading) cleanEmbeddedBtnLoading.style.display = 'none';
 
         // Cancel any previous in-flight /api/track request so its late response never overwrites the current song
         const reqId = ++activeTrackRequestId;
@@ -4436,6 +5278,65 @@
         }
     }
 
+    async function cleanEmbeddedAudioLyrics() {
+        if (!currentTrackDetails || !currentTrackDetails.audioPath) {
+            showToast(t('web.player.no_audio_toast'));
+            return;
+        }
+
+        const btn = document.getElementById('btnCleanEmbeddedLyrics');
+        if (btn) btn.disabled = true;
+
+        try {
+            const res = await fetch('/api/clean-embedded-lyrics', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    id: currentTrackDetails.id,
+                    audioPath: currentTrackDetails.audioPath
+                })
+            });
+            const data = await res.json();
+            if (!res.ok || (data && data.error)) {
+                showToast(t('web.comparator.clean_embedded_error_toast', (data && data.error) || res.status));
+                return;
+            }
+
+            if (data && data.modified) {
+                if (btn) btn.style.display = 'none';
+                if (currentTrackDetails.metadata) {
+                    currentTrackDetails.metadata.hasEmbeddedSyncedLyrics = false;
+                    currentTrackDetails.metadata.embeddedLyricTags = [];
+                }
+                if (Array.isArray(data.remainingIssues)) {
+                    currentTrackDetails.issues = data.remainingIssues;
+                    if (currentIndex >= 0 && currentItems[currentIndex]) {
+                        currentItems[currentIndex].issues = data.remainingIssues;
+                    }
+                    if (data.remainingIssues.length > 0) {
+                        issuesList.innerHTML = data.remainingIssues.map(i => `<li>${escapeHtml(i)}</li>`).join('');
+                        issuesBox.style.display = 'block';
+                    } else {
+                        issuesBox.style.display = 'none';
+                    }
+                    renderIssueTagFilterChips();
+                    renderTrackList();
+                }
+                const removedTagsStr = (data.removedTags && data.removedTags.length > 0)
+                    ? data.removedTags.join(', ')
+                    : 'LYRICS';
+                showToast(t('web.comparator.clean_embedded_success_toast', removedTagsStr));
+            } else {
+                if (btn) btn.style.display = 'none';
+                showToast(t('web.comparator.clean_embedded_nothing_toast'));
+            }
+        } catch (err) {
+            showToast(t('web.comparator.clean_embedded_error_toast', String(err)));
+        } finally {
+            if (btn) btn.disabled = false;
+        }
+    }
+
     function toggleStripTimestamps(side) {
         const isLocal = side === 'local';
         const container = isLocal ? localLyricsScroller : remoteLyricsScroller;
@@ -4518,6 +5419,20 @@
             issuesBox.style.display = 'block';
         } else {
             issuesBox.style.display = 'none';
+        }
+
+        const cleanEmbeddedBtn = document.getElementById('btnCleanEmbeddedLyrics');
+        if (cleanEmbeddedBtn) {
+            const hasEmbedded = Boolean(d.metadata && d.metadata.hasEmbeddedSyncedLyrics);
+            if (hasEmbedded && d.audioPath) {
+                const tagList = (d.metadata.embeddedLyricTags && d.metadata.embeddedLyricTags.length > 0)
+                    ? d.metadata.embeddedLyricTags.join(', ')
+                    : 'LYRICS';
+                cleanEmbeddedBtn.title = t('web.comparator.clean_embedded_title', tagList);
+                cleanEmbeddedBtn.style.display = 'flex';
+            } else {
+                cleanEmbeddedBtn.style.display = 'none';
+            }
         }
 
         // Reset in-memory timestamp backups, multi-line selection, inline text editor, and Sync Edit Mode when switching tracks
@@ -8091,19 +9006,674 @@
         }
     });
 
-    // Adapt UI language based on system locale from backend
+    // =========================================================================
+    // RUNTIME LOCALE SWITCHER & SYSTEM STARTUP LANGUAGE SYNC
+    // =========================================================================
+    const localeSelect = document.getElementById('localeSelect');
+    let currentLocaleMeta = window.__SERVER_LOCALE_META__ || null;
+
+    function populateLocaleSelect(meta) {
+        if (!localeSelect || !meta) return;
+        const available = Array.isArray(meta.availableLocales) ? meta.availableLocales : [];
+        const sysTag = meta.systemLocale || 'en';
+        const sysEntry = available.find(l => l.tag && l.tag.toLowerCase() === sysTag.toLowerCase());
+        const sysDisplay = sysEntry ? sysEntry.nativeName : sysTag;
+
+        const savedPref = localStorage.getItem('flac_lyric_locale');
+        const selectedVal = savedPref && savedPref !== 'auto'
+            ? (meta.locale || savedPref)
+            : (meta.isAuto === false && meta.locale ? meta.locale : 'auto');
+
+        localeSelect.innerHTML = '';
+        const autoOpt = document.createElement('option');
+        autoOpt.value = 'auto';
+        autoOpt.textContent = t('web.header.locale_auto', sysDisplay);
+        localeSelect.appendChild(autoOpt);
+
+        available.forEach(loc => {
+            const opt = document.createElement('option');
+            opt.value = loc.tag;
+            opt.textContent = loc.nativeName || loc.tag;
+            localeSelect.appendChild(opt);
+        });
+
+        localeSelect.value = selectedVal;
+        if (localeSelect.value !== selectedVal) {
+            localeSelect.value = meta.locale || 'auto';
+        }
+    }
+
+    function applyLocalePayload(data, showFeedbackToast = false) {
+        if (!data) return;
+        currentLocaleMeta = data;
+        if (data.locale) {
+            document.documentElement.lang = data.locale;
+        }
+        if (data.messages && Object.keys(data.messages).length > 0) {
+            i18nMessages = data.messages;
+            applyI18nToDom();
+        }
+        populateLocaleSelect(data);
+
+        if (showFeedbackToast) {
+            const available = Array.isArray(data.availableLocales) ? data.availableLocales : [];
+            const activeEntry = available.find(l => l.tag && l.tag.toLowerCase() === String(data.locale || '').toLowerCase());
+            const label = data.isAuto
+                ? t('web.header.locale_auto', activeEntry ? activeEntry.nativeName : (data.locale || ''))
+                : (activeEntry ? activeEntry.nativeName : (data.locale || ''));
+            showToast(t('web.header.locale_switched_toast', label));
+        }
+    }
+
+    async function changeLocale(requestedValue, showFeedbackToast = true) {
+        try {
+            localStorage.setItem('flac_lyric_locale', requestedValue || 'auto');
+            const res = await fetch('/api/locale', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({locale: requestedValue || 'auto'})
+            });
+            const data = await res.json();
+            applyLocalePayload(data, showFeedbackToast);
+            await loadMenuOptions();
+            if (typeof renderIssueTagFilterChips === 'function') renderIssueTagFilterChips();
+            if (typeof renderTrackList === 'function') renderTrackList();
+            if (logsInitialized || (viewLogs && viewLogs.classList.contains('active'))) {
+                await loadLogsView(true);
+            }
+        } catch (e) {
+            console.error('Failed to change locale:', e);
+        }
+    }
+
+    if (localeSelect) {
+        if (currentLocaleMeta) {
+            populateLocaleSelect(currentLocaleMeta);
+        }
+        localeSelect.addEventListener('change', () => {
+            changeLocale(localeSelect.value, true);
+        });
+    }
+
+    // Adapt UI language based on saved preference or OS startup locale from backend
     async function syncSystemLocale() {
         try {
+            const savedLocale = localStorage.getItem('flac_lyric_locale');
+            if (savedLocale && savedLocale !== 'auto') {
+                const res = await fetch('/api/locale', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({locale: savedLocale})
+                });
+                const data = await res.json();
+                applyLocalePayload(data, false);
+                return;
+            }
             const res = await fetch('/api/locale');
             const data = await res.json();
-            if (data && data.locale) {
-                document.documentElement.lang = data.locale;
+            applyLocalePayload(data, false);
+        } catch (_e) {
+        }
+    }
+
+    // =========================================================================
+    // LOGS & ACTIVITY EXPLORER
+    // =========================================================================
+    let logsInitialized = false;
+    let logsViewMode = 'activity';
+    let logsCategoryFilter = 'ALL';
+    let logsOffset = 0;
+    const LOGS_PAGE_LIMIT = 150;
+    let logsLoadedEvents = [];
+    let logsTotalMatching = 0;
+    let logsTotalEvents = 0;
+    let logsRunsCache = [];
+    let logsSelectedEventId = null;
+    let logsDirPath = '';
+    let logsRawFilesCache = [];
+    let logsSelectedRawFileName = '';
+    let logsSelectedRawFilePath = '';
+    let logsSearchTimer = null;
+    let logsRawSearchTimer = null;
+
+    function updateLogsActionFilterOptions(options) {
+        const select = document.getElementById('logsActionFilter');
+        if (!select) return;
+        const prev = select.value;
+        select.innerHTML = '';
+        const allOpt = document.createElement('option');
+        allOpt.value = '';
+        allOpt.textContent = t('web.logs.action_all');
+        select.appendChild(allOpt);
+
+        (options || window.__menuOptionsCache || []).forEach(opt => {
+            const el = document.createElement('option');
+            el.value = String(opt.id);
+            el.textContent = `${t('web.menu.card.option_number', opt.id)} — ${opt.title}`;
+            select.appendChild(el);
+        });
+        if (prev) {
+            select.value = prev;
+        }
+    }
+
+    function setLogsViewMode(mode) {
+        logsViewMode = mode === 'raw' ? 'raw' : 'activity';
+        const activityPanel = document.getElementById('logsActivityPanel');
+        const rawPanel = document.getElementById('logsRawPanel');
+        const btnActivity = document.getElementById('btnLogsModeActivity');
+        const btnRaw = document.getElementById('btnLogsModeRaw');
+        if (activityPanel) activityPanel.style.display = logsViewMode === 'activity' ? 'flex' : 'none';
+        if (rawPanel) rawPanel.style.display = logsViewMode === 'raw' ? 'flex' : 'none';
+        if (btnActivity) btnActivity.classList.toggle('active', logsViewMode === 'activity');
+        if (btnRaw) btnRaw.classList.toggle('active', logsViewMode === 'raw');
+
+        if (logsViewMode === 'raw') {
+            loadRawLogFiles();
+        } else {
+            loadStructuredLogEvents(true);
+        }
+    }
+
+    async function loadLogsView(forceBoth = false) {
+        logsInitialized = true;
+        updateLogsActionFilterOptions(window.__menuOptionsCache);
+        if (forceBoth || logsViewMode === 'activity') {
+            await loadStructuredLogEvents(true);
+        }
+        if (forceBoth || logsViewMode === 'raw') {
+            await loadRawLogFiles();
+        }
+    }
+
+    async function refreshLogsView() {
+        await loadLogsView(true);
+    }
+
+    function openLogsFromActionModal() {
+        closeActionModal();
+        logsCategoryFilter = 'ALL';
+        const runSel = document.getElementById('logsRunFilter');
+        if (runSel) runSel.value = 'ALL';
+        updateCategoryChipUI();
+        switchView('logs', true);
+    }
+
+    function setLogsCategoryFilter(cat) {
+        logsCategoryFilter = cat || 'ALL';
+        updateCategoryChipUI();
+        loadStructuredLogEvents(true);
+    }
+
+    function updateCategoryChipUI() {
+        document.querySelectorAll('#logsCategoryChips .logs-cat-chip').forEach(btn => {
+            const btnCat = btn.getAttribute('data-logs-cat');
+            btn.classList.toggle('active', btnCat === logsCategoryFilter);
+        });
+    }
+
+    function onLogsFilterChanged() {
+        loadStructuredLogEvents(true);
+    }
+
+    function scheduleLogsSearch() {
+        if (logsSearchTimer) clearTimeout(logsSearchTimer);
+        logsSearchTimer = setTimeout(() => {
+            loadStructuredLogEvents(true);
+        }, 250);
+    }
+
+    async function loadMoreLogEvents() {
+        await loadStructuredLogEvents(false);
+    }
+
+    async function loadStructuredLogEvents(reset = true) {
+        if (reset) {
+            logsOffset = 0;
+        }
+        const runId = document.getElementById('logsRunFilter')?.value || 'ALL';
+        const actionId = document.getElementById('logsActionFilter')?.value || '';
+        const q = document.getElementById('logsSearchInput')?.value?.trim() || '';
+
+        const params = new URLSearchParams();
+        if (logsCategoryFilter && logsCategoryFilter !== 'ALL') params.set('category', logsCategoryFilter);
+        if (runId && runId !== 'ALL') params.set('runId', runId);
+        if (actionId !== '') params.set('actionId', actionId);
+        if (q) params.set('q', q);
+        params.set('limit', String(LOGS_PAGE_LIMIT));
+        params.set('offset', String(logsOffset));
+
+        try {
+            const res = await fetch('/api/logs/events?' + params.toString());
+            const data = await res.json();
+            if (data.logsDir) logsDirPath = data.logsDir;
+
+            const incoming = Array.isArray(data.events) ? data.events : [];
+            if (reset) {
+                logsLoadedEvents = incoming;
+            } else {
+                logsLoadedEvents = logsLoadedEvents.concat(incoming);
             }
-            if (data && data.messages && Object.keys(data.messages).length > 0) {
-                i18nMessages = data.messages;
-                applyI18nToDom();
+            logsTotalMatching = Number(data.totalMatching || 0);
+            logsTotalEvents = Number(data.totalEvents || 0);
+            logsOffset = logsLoadedEvents.length;
+
+            updateLogsCategoryCounts(data.countsByCategory || {}, logsTotalEvents);
+            updateLogsRunDropdown(Array.isArray(data.runs) ? data.runs : []);
+            renderLogsEventsList();
+        } catch (e) {
+            console.error('Failed to load structured log events:', e);
+            showToast(t('web.logs.load_error_toast'));
+        }
+    }
+
+    function updateLogsCategoryCounts(counts, total) {
+        const setEl = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = String(val || 0);
+        };
+        setEl('logsCatCountALL', total);
+        setEl('logsCatCountERROR', counts.ERROR || 0);
+        setEl('logsCatCountMODIFIED', counts.MODIFIED || 0);
+        setEl('logsCatCountFILE_ACTION', counts.FILE_ACTION || 0);
+        setEl('logsCatCountSKIPPED', counts.SKIPPED || 0);
+        setEl('logsCatCountANALYSIS', counts.ANALYSIS || 0);
+        setEl('logsCatCountOPERATION', counts.OPERATION || 0);
+    }
+
+    function updateLogsRunDropdown(runs) {
+        logsRunsCache = runs;
+        const select = document.getElementById('logsRunFilter');
+        if (!select) return;
+        const prev = select.value || 'ALL';
+        select.innerHTML = '';
+        const allOpt = document.createElement('option');
+        allOpt.value = 'ALL';
+        allOpt.textContent = t('web.logs.run_all');
+        select.appendChild(allOpt);
+
+        runs.forEach(r => {
+            const opt = document.createElement('option');
+            opt.value = r.runId;
+            const actionTitle = r.localizedActionTitle || r.actionFallback || r.runId;
+            const shortTs = String(r.startedAt || '').slice(0, 19);
+            opt.textContent = t('web.logs.run_option_fmt', shortTs, actionTitle, r.eventCount || 0, r.errorCount || 0);
+            select.appendChild(opt);
+        });
+
+        select.value = prev;
+        if (select.value !== prev) {
+            select.value = 'ALL';
+        }
+    }
+
+    function renderLogsEventsList() {
+        const listEl = document.getElementById('logsEventList');
+        const showingEl = document.getElementById('logsShowingLabel');
+        const loadMoreBar = document.getElementById('logsLoadMoreBar');
+        const loadMoreBtn = document.getElementById('btnLogsLoadMore');
+        if (!listEl) return;
+
+        if (showingEl) {
+            showingEl.textContent = t('web.logs.total_showing', logsLoadedEvents.length, logsTotalMatching, logsTotalEvents);
+        }
+
+        listEl.innerHTML = '';
+        if (logsLoadedEvents.length === 0) {
+            listEl.innerHTML = `<div class="logs-detail-empty" style="padding: 36px 14px;"><p>${escapeHtml(t('web.logs.empty_events'))}</p></div>`;
+            renderLogEventDetail(null);
+        } else {
+            let selectedObj = logsLoadedEvents.find(ev => ev.id === logsSelectedEventId) || null;
+            if (!selectedObj) {
+                selectedObj = logsLoadedEvents[0];
+                logsSelectedEventId = selectedObj.id;
+            }
+
+            logsLoadedEvents.forEach(ev => {
+                const card = document.createElement('div');
+                const cat = ev.category || 'OPERATION';
+                card.className = `log-event-card cat-${cat}` + (ev.id === logsSelectedEventId ? ' active' : '');
+                const actionLabel = ev.localizedActionTitle || ev.actionFallback || '';
+                const pathPreview = ev.targetPath || ev.beforePath || ev.afterPath || '';
+                const diffBadge = (Array.isArray(ev.diffLines) && ev.diffLines.length > 0)
+                    ? `<span class="log-action-pill">±${ev.diffLines.length}</span>`
+                    : '';
+
+                card.innerHTML = `
+                    <div class="log-event-card-top">
+                        <div class="log-event-badges">
+                            <span class="log-cat-pill cat-${escapeHtml(cat)}">${escapeHtml(ev.localizedCategory || cat)}</span>
+                            ${actionLabel ? `<span class="log-action-pill" title="${escapeHtml(actionLabel)}">${escapeHtml(actionLabel)}</span>` : ''}
+                            ${diffBadge}
+                        </div>
+                        <span class="log-event-time">${escapeHtml(String(ev.timestamp || '').slice(0, 19))}</span>
+                    </div>
+                    <div class="log-event-card-msg">${escapeHtml(ev.renderedMessage || '')}</div>
+                    ${pathPreview ? `<div class="log-event-card-path" title="${escapeHtml(pathPreview)}">${escapeHtml(pathPreview)}</div>` : ''}
+                `;
+                card.addEventListener('click', () => selectLogEvent(ev.id));
+                listEl.appendChild(card);
+            });
+
+            renderLogEventDetail(selectedObj);
+        }
+
+        const remaining = logsTotalMatching - logsLoadedEvents.length;
+        if (loadMoreBar && loadMoreBtn) {
+            if (remaining > 0) {
+                loadMoreBar.style.display = 'block';
+                loadMoreBtn.textContent = t('web.logs.load_more_btn', remaining);
+            } else {
+                loadMoreBar.style.display = 'none';
+            }
+        }
+    }
+
+    function selectLogEvent(eventId) {
+        logsSelectedEventId = eventId;
+        const selected = logsLoadedEvents.find(e => e.id === eventId) || null;
+        renderLogsEventsList();
+        renderLogEventDetail(selected);
+    }
+
+    function renderLogEventDetail(ev) {
+        const pane = document.getElementById('logsDetailPane');
+        if (!pane) return;
+        if (!ev) {
+            pane.innerHTML = `
+                <div class="logs-detail-empty">
+                    <h3>${escapeHtml(t('web.logs.detail.empty_title'))}</h3>
+                    <p>${escapeHtml(t('web.logs.detail.empty_subtitle'))}</p>
+                </div>
+            `;
+            return;
+        }
+
+        const cat = ev.category || 'OPERATION';
+        const actionTitle = ev.localizedActionTitle || ev.actionFallback || ev.eventType || '-';
+        const openTarget = ev.targetPath || ev.afterPath || ev.beforePath || '';
+
+        let pathsHtml = '';
+        if (ev.targetPath) {
+            pathsHtml += `
+                <div class="logs-detail-path-box">
+                    <div class="logs-detail-path-label">${escapeHtml(t('web.logs.detail.target_path'))}</div>
+                    <div class="logs-detail-path-value">${escapeHtml(ev.targetPath)}</div>
+                </div>
+            `;
+        }
+        if (ev.beforePath) {
+            pathsHtml += `
+                <div class="logs-detail-path-box">
+                    <div class="logs-detail-path-label">${escapeHtml(t('web.logs.detail.before_path'))}</div>
+                    <div class="logs-detail-path-value">${escapeHtml(ev.beforePath)}</div>
+                </div>
+            `;
+        }
+        if (ev.afterPath) {
+            pathsHtml += `
+                <div class="logs-detail-path-box">
+                    <div class="logs-detail-path-label">${escapeHtml(t('web.logs.detail.after_path'))}</div>
+                    <div class="logs-detail-path-value">${escapeHtml(ev.afterPath)}</div>
+                </div>
+            `;
+        }
+
+        let diffHtml = '';
+        if (Array.isArray(ev.diffLines) && ev.diffLines.length > 0) {
+            const rowsHtml = ev.diffLines.map(d => `
+                <div class="logs-diff-row">
+                    <div class="logs-diff-cell">${escapeHtml(t('web.logs.detail.diff_line', d.lineNumber))}</div>
+                    <div class="logs-diff-cell logs-diff-before">${escapeHtml(d.before !== null && d.before !== undefined ? d.before : '—')}</div>
+                    <div class="logs-diff-cell logs-diff-after">${escapeHtml(d.after !== null && d.after !== undefined ? d.after : '—')}</div>
+                </div>
+            `).join('');
+
+            diffHtml = `
+                <div class="logs-diff-section">
+                    <h4>${escapeHtml(t('web.logs.detail.diff_title'))}</h4>
+                    <div class="logs-diff-table">
+                        <div class="logs-diff-row header">
+                            <div class="logs-diff-cell">#</div>
+                            <div class="logs-diff-cell">${escapeHtml(t('web.logs.detail.diff_before'))}</div>
+                            <div class="logs-diff-cell">${escapeHtml(t('web.logs.detail.diff_after'))}</div>
+                        </div>
+                        ${rowsHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        const combinedMeta = Object.assign({}, ev.summaryStats || {}, ev.metadata || {});
+        const metaKeys = Object.keys(combinedMeta);
+        let metaHtml = '';
+        if (metaKeys.length > 0) {
+            const cards = metaKeys.map(k => `
+                <div class="logs-detail-meta-card">
+                    <div class="meta-label">${escapeHtml(k)}</div>
+                    <div class="meta-value">${escapeHtml(String(combinedMeta[k]))}</div>
+                </div>
+            `).join('');
+            metaHtml = `
+                <div class="logs-diff-section">
+                    <h4>${escapeHtml(t('web.logs.detail.metadata_title'))}</h4>
+                    <div class="logs-detail-meta-grid">${cards}</div>
+                </div>
+            `;
+        }
+
+        pane.innerHTML = `
+            <div class="logs-detail-header">
+                <div style="display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0;">
+                    <div class="log-event-badges">
+                        <span class="log-cat-pill cat-${escapeHtml(cat)}">${escapeHtml(ev.localizedCategory || cat)}</span>
+                        <span class="log-action-pill">${escapeHtml(actionTitle)}</span>
+                    </div>
+                    <div class="logs-detail-title">${escapeHtml(ev.renderedMessage || '')}</div>
+                </div>
+                ${openTarget ? `<button class="btn-secondary" id="btnOpenEventTargetLoc" style="padding: 6px 12px; font-size: 0.78rem;" type="button">${escapeHtml(t('web.logs.detail.open_location_btn'))}</button>` : ''}
+            </div>
+
+            <div class="logs-detail-meta-grid">
+                <div class="logs-detail-meta-card">
+                    <div class="meta-label">${escapeHtml(t('web.logs.detail.category_label'))}</div>
+                    <div class="meta-value">${escapeHtml(ev.localizedCategory || cat)}</div>
+                </div>
+                <div class="logs-detail-meta-card">
+                    <div class="meta-label">${escapeHtml(t('web.logs.detail.action_label'))}</div>
+                    <div class="meta-value">${escapeHtml(actionTitle)}</div>
+                </div>
+                <div class="logs-detail-meta-card">
+                    <div class="meta-label">${escapeHtml(t('web.logs.detail.timestamp_label'))}</div>
+                    <div class="meta-value">${escapeHtml(ev.timestamp || '-')}</div>
+                </div>
+                <div class="logs-detail-meta-card">
+                    <div class="meta-label">${escapeHtml(t('web.logs.detail.event_type_label'))}</div>
+                    <div class="meta-value">${escapeHtml(ev.eventType || '-')}</div>
+                </div>
+                <div class="logs-detail-meta-card">
+                    <div class="meta-label">${escapeHtml(t('web.logs.detail.run_id_label'))}</div>
+                    <div class="meta-value">${escapeHtml(ev.runId || '-')}</div>
+                </div>
+            </div>
+
+            ${pathsHtml}
+            ${diffHtml}
+            ${metaHtml}
+        `;
+
+        const btnOpen = document.getElementById('btnOpenEventTargetLoc');
+        if (btnOpen && openTarget) {
+            btnOpen.addEventListener('click', () => openLogTargetLocation(openTarget));
+        }
+    }
+
+    function formatLogFileSize(bytes) {
+        const b = Number(bytes || 0);
+        if (b < 1024) return b + ' B';
+        if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' KB';
+        return (b / (1024 * 1024)).toFixed(2) + ' MB';
+    }
+
+    async function loadRawLogFiles() {
+        try {
+            const res = await fetch('/api/logs/files');
+            const data = await res.json();
+            if (data.logsDir) logsDirPath = data.logsDir;
+            logsRawFilesCache = Array.isArray(data.files) ? data.files : [];
+            renderRawLogFilesList();
+
+            if (logsRawFilesCache.length > 0) {
+                const stillExists = logsRawFilesCache.some(f => f.name === logsSelectedRawFileName);
+                const toOpen = stillExists ? logsSelectedRawFileName : logsRawFilesCache[0].name;
+                await selectRawLogFile(toOpen);
+            } else {
+                logsSelectedRawFileName = '';
+                logsSelectedRawFilePath = '';
+                const box = document.getElementById('logsRawLinesBox');
+                if (box) box.innerHTML = `<div style="color: var(--text-muted);">${escapeHtml(t('web.logs.raw.select_prompt'))}</div>`;
+            }
+        } catch (e) {
+            console.error('Failed to load log files list:', e);
+            showToast(t('web.logs.load_error_toast'));
+        }
+    }
+
+    function renderRawLogFilesList() {
+        const container = document.getElementById('logsRawFilesList');
+        if (!container) return;
+        container.innerHTML = '';
+
+        if (logsRawFilesCache.length === 0) {
+            container.innerHTML = `<div style="padding: 16px; color: var(--text-muted); font-size: 0.82rem;">${escapeHtml(t('web.logs.raw.empty_files'))}</div>`;
+            return;
+        }
+
+        logsRawFilesCache.forEach(file => {
+            const card = document.createElement('div');
+            card.className = 'logs-raw-file-card' + (file.name === logsSelectedRawFileName ? ' active' : '');
+
+            let badgeHtml = '';
+            if (file.isCurrentExecution) {
+                badgeHtml += `<span class="badge badge-info" style="font-size:0.62rem;">${escapeHtml(t('web.logs.raw.badge_current'))}</span>`;
+            }
+            if (file.isAuditLog) {
+                badgeHtml += `<span class="badge badge-success" style="font-size:0.62rem;">${escapeHtml(t('web.logs.raw.badge_audit'))}</span>`;
+            }
+            if (file.isEventsLog) {
+                badgeHtml += `<span class="badge badge-warning" style="font-size:0.62rem;">${escapeHtml(t('web.logs.raw.badge_events'))}</span>`;
+            }
+
+            const dateStr = file.lastModifiedMs ? new Date(file.lastModifiedMs).toLocaleString() : '';
+            card.innerHTML = `
+                <div class="logs-raw-file-name">${escapeHtml(file.name)}</div>
+                <div class="logs-raw-file-meta">
+                    <span>${escapeHtml(formatLogFileSize(file.sizeBytes))} • ${escapeHtml(dateStr)}</span>
+                    <span style="display: inline-flex; gap: 4px;">${badgeHtml}</span>
+                </div>
+            `;
+            card.addEventListener('click', () => selectRawLogFile(file.name));
+            container.appendChild(card);
+        });
+    }
+
+    async function selectRawLogFile(fileName) {
+        logsSelectedRawFileName = fileName;
+        renderRawLogFilesList();
+        await reloadSelectedRawLogFile();
+    }
+
+    function scheduleRawLogSearch() {
+        if (logsRawSearchTimer) clearTimeout(logsRawSearchTimer);
+        logsRawSearchTimer = setTimeout(() => {
+            reloadSelectedRawLogFile();
+        }, 250);
+    }
+
+    async function reloadSelectedRawLogFile() {
+        if (!logsSelectedRawFileName) return;
+        const tail = document.getElementById('logsRawTailSelect')?.value || '400';
+        const q = document.getElementById('logsRawSearchInput')?.value?.trim() || '';
+        const params = new URLSearchParams({name: logsSelectedRawFileName, tail});
+        if (q) params.set('q', q);
+
+        try {
+            const res = await fetch('/api/logs/file?' + params.toString());
+            if (!res.ok) return;
+            const data = await res.json();
+            logsSelectedRawFilePath = data.path || '';
+
+            const titleEl = document.getElementById('logsRawFileTitle');
+            const subEl = document.getElementById('logsRawFileSubtitle');
+            const openBtn = document.getElementById('btnOpenSelectedRawFile');
+            const linesBox = document.getElementById('logsRawLinesBox');
+
+            if (titleEl) titleEl.textContent = data.name || logsSelectedRawFileName;
+            if (subEl) {
+                const sizeNote = formatLogFileSize(data.sizeBytes) + (data.truncated ? (' • ' + t('web.logs.raw.truncated_note')) : '');
+                subEl.textContent = t('web.logs.raw.showing_lines', data.totalLinesShown || 0, sizeNote);
+            }
+            if (openBtn) {
+                openBtn.style.display = logsSelectedRawFilePath ? 'inline-flex' : 'none';
+            }
+            if (linesBox) {
+                const lines = Array.isArray(data.lines) ? data.lines : [];
+                if (lines.length === 0) {
+                    linesBox.innerHTML = `<div style="color: var(--text-muted);">${escapeHtml(t('web.logs.empty_raw_file'))}</div>`;
+                } else {
+                    linesBox.innerHTML = lines.map(line => {
+                        const lower = String(line).toLowerCase();
+                        let cls = 'logs-raw-line';
+                        if (lower.includes('error') || lower.includes('erro') || lower.includes('exception') || lower.includes('❌') || lower.includes('audit:error')) {
+                            cls += ' raw-line-err';
+                        } else if (lower.includes('[audit:') || lower.includes('========')) {
+                            cls += ' raw-line-audit';
+                        } else if (lower.includes('http 200') || lower.includes('success') || lower.includes('✔')) {
+                            cls += ' raw-line-ok';
+                        }
+                        return `<div class="${cls}">${escapeHtml(line)}</div>`;
+                    }).join('');
+                }
+            }
+        } catch (e) {
+            console.error('Failed to read raw log file:', e);
+        }
+    }
+
+    async function openLogTargetLocation(targetPath) {
+        if (!targetPath) return;
+        try {
+            const res = await fetch('/api/open-location?path=' + encodeURIComponent(targetPath));
+            const json = await res.json();
+            if (json.success) {
+                showToast(t('web.player.open_folder_success_toast'));
+            } else {
+                showToast(t('web.player.open_folder_failed_toast'));
             }
         } catch (_e) {
+            showToast(t('web.player.open_folder_error_toast'));
+        }
+    }
+
+    async function openLogsDirectory() {
+        if (!logsRawFilesCache || logsRawFilesCache.length === 0) {
+            try {
+                const res = await fetch('/api/logs/files');
+                const data = await res.json();
+                if (data.logsDir) logsDirPath = data.logsDir;
+                logsRawFilesCache = Array.isArray(data.files) ? data.files : [];
+            } catch (_e) {
+            }
+        }
+        const target = (logsRawFilesCache && logsRawFilesCache.length > 0 && logsRawFilesCache[0].path)
+            ? logsRawFilesCache[0].path
+            : logsDirPath;
+        await openLogTargetLocation(target);
+    }
+
+    function openSelectedRawLogLocation() {
+        if (logsSelectedRawFilePath) {
+            openLogTargetLocation(logsSelectedRawFilePath);
         }
     }
 

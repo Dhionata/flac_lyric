@@ -36,11 +36,25 @@ class MusicLyricsService(
     private val auditLogService: AuditLogService = AuditLogServiceImpl(),
 ) {
 
+    private fun wrapFileException(file: File, e: Exception): Exception {
+        val raw = e.message?.takeIf { it.isNotBlank() } ?: e.javaClass.simpleName
+        val formatted = if (raw.contains(file.name) && raw.contains(file.absolutePath)) {
+            raw
+        } else if (raw.contains(file.name)) {
+            "$raw [${file.absolutePath}]"
+        } else {
+            "${file.name}: $raw [${file.absolutePath}]"
+        }
+        return RuntimeException(formatted, e)
+    }
+
     private fun getValidatedMusicDirectory(message: String): File {
         val musicDirectory = directoryService.getDirectory(message)
         if (!musicDirectory.canRead()) {
-            userInterface.showError(Messages.get("error.read_permission", musicDirectory))
-            throw RuntimeException(Messages.get("error.read_permission", musicDirectory))
+            val errMsg = Messages.get("error.read_permission", musicDirectory)
+            auditLogService.logError("Directory Validation", musicDirectory, RuntimeException(errMsg))
+            userInterface.showError(errMsg)
+            throw RuntimeException(errMsg)
         }
         return musicDirectory
     }
@@ -60,6 +74,7 @@ class MusicLyricsService(
             val txtFileName = reportFile.path
             reportFile.writeText(
                 incorrectlyNamedFiles.joinToString("\n") { it.name })
+            auditLogService.logReportGenerated("Option 5 - Nomenclature Report", reportFile, incorrectlyNamedFiles.size)
 
             val shouldMove = userInterface.askToMoveIncorrectFiles(incorrectlyNamedFiles.size, txtFileName)
 
@@ -74,10 +89,14 @@ class MusicLyricsService(
                         if (fileService.moveFile(file, outDirectory)) {
                             movedNames.add(file.name)
                         } else {
-                            errors.add(RuntimeException(Messages.get("error.move_simple_failed", file.name)))
+                            val ex = RuntimeException(Messages.get("error.move_simple_failed", file.name))
+                            auditLogService.logError("Option 5 - Move Incorrect File", file, ex)
+                            errors.add(wrapFileException(file, ex))
                         }
                     } catch (e: Exception) {
-                        errors.add(e)
+                        val wrapped = wrapFileException(file, e)
+                        auditLogService.logError("Option 5 - Move Incorrect File", file, wrapped)
+                        errors.add(wrapped)
                     }
                 }
                 userInterface.closeProgress()
@@ -97,14 +116,18 @@ class MusicLyricsService(
         val musicDirectory = directoryService.getDirectory(Messages.get("prompt.select.music_dir"))
 
         if (!musicDirectory.canWrite()) {
-            userInterface.showError(Messages.get("error.write_permission", musicDirectory))
+            val errMsg = Messages.get("error.write_permission", musicDirectory)
+            auditLogService.logError("Option 0 - Organize Music and Lyrics", musicDirectory, RuntimeException(errMsg))
+            userInterface.showError(errMsg)
             return
         }
 
         val lyricsDirectory = directoryService.getDirectory(Messages.get("prompt.select.lyrics_dir"))
 
         if (!lyricsDirectory.canWrite()) {
-            userInterface.showError(Messages.get("error.write_permission", lyricsDirectory))
+            val errMsg = Messages.get("error.write_permission", lyricsDirectory)
+            auditLogService.logError("Option 0 - Organize Music and Lyrics", lyricsDirectory, RuntimeException(errMsg))
+            userInterface.showError(errMsg)
             return
         }
 
@@ -114,11 +137,25 @@ class MusicLyricsService(
         logService.info("log.organize.started", audioFiles.size, lyricFiles.size)
 
         val filePairs = matchService.matchFiles(lyricFiles, audioFiles)
+        auditLogService.logAnalysis(
+            operation = "Option 0 - Match Audio & Lyrics",
+            targetDir = musicDirectory,
+            messageKey = "audit.analysis.organize_matched",
+            messageArgs = listOf(audioFiles.size, lyricFiles.size, filePairs.size),
+            metadata = mapOf(
+                "audioCount" to audioFiles.size,
+                "lyricCount" to lyricFiles.size,
+                "matchedPairs" to filePairs.size
+            )
+        )
 
         var result = matchService.handleFilePairs(filePairs)
 
         val unmatchedResult = fileService.handleUnmatchedFiles(musicDirectory, lyricsDirectory, userInterface)
         result += unmatchedResult
+        result.errorSet.forEach { err ->
+            auditLogService.logError("Option 0 - Organize Music and Lyrics", null, err)
+        }
 
         userInterface.showResult(result.changedSet, result.errorSet)
     }
@@ -139,9 +176,23 @@ class MusicLyricsService(
 
             if (!hasLyric) {
                 musicFilesWithoutLyrics.add(audioFile)
+                auditLogService.logFileAnalyzed(
+                    operation = "Option 1 - Missing Lyrics Check",
+                    targetFile = audioFile,
+                    messageKey = "audit.file.missing_lyric",
+                    messageArgs = listOf(audioFile.name)
+                )
             }
         }
         userInterface.closeProgress()
+
+        auditLogService.logAnalysis(
+            operation = "Option 1 - Missing Lyrics Check",
+            targetDir = musicDirectory,
+            messageKey = "audit.analysis.missing_lyrics",
+            messageArgs = listOf(audioFiles.size, musicFilesWithoutLyrics.size),
+            metadata = mapOf("totalAudio" to audioFiles.size, "missingCount" to musicFilesWithoutLyrics.size)
+        )
 
         val changes = mutableSetOf<String>()
         if (musicFilesWithoutLyrics.isNotEmpty()) {
@@ -151,6 +202,7 @@ class MusicLyricsService(
             val txtFileName = reportFile.path
             reportFile.writeText(
                 musicFilesWithoutLyrics.joinToString("\n") { it.name })
+            auditLogService.logReportGenerated("Option 1 - Missing Lyrics Report", reportFile, musicFilesWithoutLyrics.size)
             changes.add(Messages.get("result.found_no_lyrics", musicFilesWithoutLyrics.size, txtFileName))
         } else {
             changes.add(Messages.get("result.no_lyrics_unpaired", audioFiles.size))
@@ -166,16 +218,41 @@ class MusicLyricsService(
         val outDirectory = directoryService.getDirectory(Messages.get("prompt.select.out_dir"))
         val lyricFiles = lyricFileHandler.getLyricFiles(lyricsDirectory)
 
+        val scanErrors = mutableSetOf<Exception>()
         userInterface.showProgress(Messages.get("progress.check_sync"), lyricFiles.size)
         val lyricsFilesWithoutSync = lyricFiles.filterIndexed { index, lyricFile ->
             userInterface.updateProgress(index + 1, lyricFile.name)
             try {
-                !LyricSyntaxPatterns.TIMESTAMP_REGEX.containsMatchIn(lyricFile.readText())
-            } catch (_: Exception) {
+                val unsynced = !LyricSyntaxPatterns.TIMESTAMP_REGEX.containsMatchIn(lyricFile.readText())
+                if (unsynced) {
+                    auditLogService.logFileAnalyzed(
+                        operation = "Option 2 - Unsynced Check",
+                        targetFile = lyricFile,
+                        messageKey = "audit.file.unsynced_lyric",
+                        messageArgs = listOf(lyricFile.name)
+                    )
+                }
+                unsynced
+            } catch (e: Exception) {
+                val wrapped = wrapFileException(lyricFile, e)
+                scanErrors.add(wrapped)
+                auditLogService.logError("Option 2 - Read Lyric File", lyricFile, wrapped)
                 false
             }
         }
         userInterface.closeProgress()
+
+        auditLogService.logAnalysis(
+            operation = "Option 2 - Unsynced Check",
+            targetDir = lyricsDirectory,
+            messageKey = "audit.analysis.unsynced_lyrics",
+            messageArgs = listOf(lyricFiles.size, lyricsFilesWithoutSync.size, scanErrors.size),
+            metadata = mapOf(
+                "scannedLyrics" to lyricFiles.size,
+                "unsyncedCount" to lyricsFilesWithoutSync.size,
+                "readErrors" to scanErrors.size
+            )
+        )
 
         if (lyricsFilesWithoutSync.isNotEmpty()) {
             val reportFile = AppOutputDirectories.createReportFile(
@@ -183,17 +260,22 @@ class MusicLyricsService(
             )
             reportFile.writeText(
                 lyricsFilesWithoutSync.joinToString("\n") { it.name })
+            auditLogService.logReportGenerated("Option 2 - Unsynced Lyrics Report", reportFile, lyricsFilesWithoutSync.size)
         }
 
         val changes = mutableSetOf<String>()
-        val errors = mutableSetOf<Exception>()
+        val errors = scanErrors.toMutableSet()
 
         userInterface.showProgress(Messages.get("progress.move_unsynced"), lyricsFilesWithoutSync.size)
         lyricsFilesWithoutSync.forEachIndexed { index, lyric ->
             userInterface.updateProgress(index + 1, lyric.name)
             val [_, moveResult] = fileService.moveLyricFile(lyric, outDirectory)
             changes.addAll(moveResult.changedSet)
-            errors.addAll(moveResult.errorSet)
+            moveResult.errorSet.forEach { err ->
+                val wrapped = wrapFileException(lyric, err)
+                auditLogService.logError("Option 2 - Move Unsynced Lyric", lyric, wrapped)
+                errors.add(wrapped)
+            }
         }
         userInterface.closeProgress()
 
@@ -208,85 +290,194 @@ class MusicLyricsService(
      * out-of-order/duplicated multi-timestamps, UTF-8 BOM, and optional unsynced lines in synced files),
      * recording a complete before/after audit log for every modified file.
      */
-    fun findLyricsWithV1Text(options: LyricCleanOptions = LyricCleanOptions()): List<File> {
+    fun findLyricsWithV1Text(
+        options: LyricCleanOptions = LyricCleanOptions(),
+        removeEmbeddedSyncedLyricsFromAudio: Boolean = true,
+    ): List<File> {
         val lyricsDirectory = directoryService.getDirectory(Messages.get("prompt.select.lyrics_dir"))
-        auditLogService.logOperationStart(
-            actionName = "Option 3 - Clean and Normalize .lrc Files",
-            options = mapOf(
-                "lyricsDirectory" to lyricsDirectory.absolutePath,
-                "removeSpeakerAndBgTags" to options.removeSpeakerAndBgTags,
-                "removeInlineWordTimestamps" to options.removeInlineWordTimestamps,
-                "removeCreditsAndWatermarks" to options.removeCreditsAndWatermarks,
-                "sortAndDeduplicateMultiTimestamps" to options.sortAndDeduplicateMultiTimestamps,
-                "removeUnsyncedLinesInSyncedFile" to options.removeUnsyncedLinesInSyncedFile,
-                "stripBom" to options.stripBom
-            )
-        )
-
-        val lyricFiles = lyricFileHandler.getLyricFiles(lyricsDirectory)
-
-        val cleanedMatches = mutableListOf<Pair<File, models.LyricCleanResult>>()
-
-        userInterface.showProgress(Messages.get("progress.find_v1"), lyricFiles.size)
-        lyricFiles.forEachIndexed { index, lyricFile ->
-            userInterface.updateProgress(index + 1, lyricFile.name)
-            try {
-                val originalText = lyricFile.readText()
-                val cleanResult = lyricContentCleaner.clean(originalText, options)
-                if (cleanResult.modified) {
-                    cleanedMatches.add(lyricFile to cleanResult)
-                }
-            } catch (_: Exception) {
-                // Skip unreadable files during scan
+        val ownAuditRun = AuditRunContext.current() == null
+        val runBlock: () -> List<File> = {
+            if (ownAuditRun) {
+                auditLogService.logOperationStart(
+                    actionName = "Option 3 - Clean and Normalize .lrc Files",
+                    options = mapOf(
+                        "lyricsDirectory" to lyricsDirectory.absolutePath,
+                        "removeSpeakerAndBgTags" to options.removeSpeakerAndBgTags,
+                        "removeInlineWordTimestamps" to options.removeInlineWordTimestamps,
+                        "removeCreditsAndWatermarks" to options.removeCreditsAndWatermarks,
+                        "sortAndDeduplicateMultiTimestamps" to options.sortAndDeduplicateMultiTimestamps,
+                        "removeUnsyncedLinesInSyncedFile" to options.removeUnsyncedLinesInSyncedFile,
+                        "stripBom" to options.stripBom,
+                        "normalizeTimestampsToCentiseconds" to options.normalizeTimestampsToCentiseconds,
+                        "removeTrailingEmptyTimestampLines" to options.removeTrailingEmptyTimestampLines,
+                        "removeEmbeddedSyncedLyricsFromAudio" to removeEmbeddedSyncedLyricsFromAudio
+                    )
+                )
             }
-        }
-        userInterface.closeProgress()
 
-        val changes = mutableSetOf<String>()
-        val errors = mutableSetOf<Exception>()
-        val modifiedFiles = cleanedMatches.map { it.first }
+            val lyricFiles = lyricFileHandler.getLyricFiles(lyricsDirectory)
 
-        if (cleanedMatches.isNotEmpty()) {
-            val reportFile = AppOutputDirectories.createReportFile(
-                AppOutputDirectories.SUBDIR_V1_LYRICS, "LyricsWithV1_${modifiedFiles.hashCode()}.txt"
-            )
-            reportFile.writeText(
-                cleanedMatches.joinToString("\n") { [file, res] ->
-                    "${file.name} [${res.appliedFixes.joinToString(", ")}]"
-                }
-            )
+            val cleanedMatches = mutableListOf<Pair<File, models.LyricCleanResult>>()
+            val errors = mutableSetOf<Exception>()
 
-            userInterface.showProgress(Messages.get("progress.remove_v1"), cleanedMatches.size)
-            cleanedMatches.forEachIndexed { index, [lyricFile, cleanResult] ->
+            userInterface.showProgress(Messages.get("progress.find_v1"), lyricFiles.size)
+            lyricFiles.forEachIndexed { index, lyricFile ->
                 userInterface.updateProgress(index + 1, lyricFile.name)
                 try {
-                    lyricFile.writeText(cleanResult.cleanedContent)
-                    auditLogService.logContentModification(
-                        operation = "Option 3 - Clean and Normalize .lrc",
-                        targetFile = lyricFile,
-                        beforeContent = cleanResult.originalContent,
-                        afterContent = cleanResult.cleanedContent,
-                        metadata = mapOf("appliedFixes" to cleanResult.appliedFixes.joinToString(", "))
-                    )
-                    changes.add("${lyricFile.name} (${cleanResult.appliedFixes.joinToString(", ")})")
+                    val originalText = lyricFile.readText()
+                    val cleanResult = lyricContentCleaner.clean(originalText, options)
+                    if (cleanResult.modified) {
+                        cleanedMatches.add(lyricFile to cleanResult)
+                    }
                 } catch (e: Exception) {
-                    errors.add(e)
+                    val wrapped = wrapFileException(lyricFile, e)
+                    errors.add(wrapped)
+                    auditLogService.logError("Option 3 - Read .lrc File", lyricFile, wrapped)
                 }
             }
             userInterface.closeProgress()
+
+            val changes = mutableSetOf<String>()
+            val modifiedFiles = cleanedMatches.map { it.first }.toMutableList()
+            val reportLines = mutableListOf<String>()
+
+            if (cleanedMatches.isNotEmpty()) {
+                userInterface.showProgress(Messages.get("progress.remove_v1"), cleanedMatches.size)
+                cleanedMatches.forEachIndexed { index, [lyricFile, cleanResult] ->
+                    userInterface.updateProgress(index + 1, lyricFile.name)
+                    try {
+                        lyricFile.writeText(cleanResult.cleanedContent)
+                        auditLogService.logContentModification(
+                            operation = "Option 3 - Clean and Normalize .lrc",
+                            targetFile = lyricFile,
+                            beforeContent = cleanResult.originalContent,
+                            afterContent = cleanResult.cleanedContent,
+                            metadata = mapOf("appliedFixes" to cleanResult.appliedFixes.joinToString(", "))
+                        )
+                        val summary = "${lyricFile.name} [${cleanResult.appliedFixes.joinToString(", ")}]"
+                        reportLines.add(summary)
+                        changes.add("${lyricFile.name} (${cleanResult.appliedFixes.joinToString(", ")})")
+                    } catch (e: Exception) {
+                        val wrapped = wrapFileException(lyricFile, e)
+                        errors.add(wrapped)
+                        auditLogService.logError("Option 3 - Write Cleaned .lrc", lyricFile, wrapped)
+                    }
+                }
+                userInterface.closeProgress()
+            }
+
+            var audioCheckedCount = 0
+            var audioRemovedCount = 0
+            var audioSkippedUnsupportedCount = 0
+
+            if (removeEmbeddedSyncedLyricsFromAudio) {
+                val lrcKeys = lyricFiles.map {
+                    (it.parentFile?.canonicalPath ?: "") to it.nameWithoutExtension.lowercase()
+                }.toSet()
+                val audioWithLrc = audioFileHandler.getAudioFiles(lyricsDirectory).filter { audio ->
+                    val key = (audio.parentFile?.canonicalPath ?: "") to audio.nameWithoutExtension.lowercase()
+                    key in lrcKeys
+                }
+                audioCheckedCount = audioWithLrc.size
+
+                if (audioWithLrc.isNotEmpty()) {
+                    userInterface.showProgress(Messages.get("progress.clean_embedded_lyrics"), audioWithLrc.size)
+                    audioWithLrc.forEachIndexed { index, audioFile ->
+                        userInterface.updateProgress(index + 1, audioFile.name)
+                        try {
+                            when (val outcome = EmbeddedLyricsHelper.removeEmbeddedSyncedLyricsWithOutcome(audioFile)) {
+                                is EmbeddedCleanupOutcome.Removed -> {
+                                    audioRemovedCount++
+                                    val tagsDesc = outcome.info.tagKeys.joinToString(", ")
+                                    auditLogService.logContentModification(
+                                        operation = "Option 3 - Remove Embedded Synced Lyrics",
+                                        targetFile = audioFile,
+                                        beforeContent = outcome.info.content,
+                                        afterContent = "(removed embedded tags: $tagsDesc)",
+                                        metadata = mapOf("removedTags" to tagsDesc)
+                                    )
+                                    modifiedFiles.add(audioFile)
+                                    reportLines.add("${audioFile.name} [embedded: $tagsDesc]")
+                                    changes.add("${audioFile.name} (embedded $tagsDesc removed)")
+                                }
+                                is EmbeddedCleanupOutcome.SkippedUnsupported -> {
+                                    audioSkippedUnsupportedCount++
+                                    auditLogService.logSkipped(
+                                        operation = "Option 3 - Embedded Lyrics Cleanup",
+                                        targetFile = audioFile,
+                                        reasonKey = outcome.reasonKey,
+                                        reasonArgs = outcome.reasonArgs,
+                                        metadata = mapOf("extension" to outcome.extension)
+                                    )
+                                }
+                                EmbeddedCleanupOutcome.Clean -> Unit
+                            }
+                        } catch (e: Exception) {
+                            val wrapped = wrapFileException(audioFile, e)
+                            errors.add(wrapped)
+                            auditLogService.logError("Option 3 - Clean Embedded Audio Lyrics", audioFile, wrapped)
+                        }
+                    }
+                    userInterface.closeProgress()
+                }
+            }
+
+            auditLogService.logAnalysis(
+                operation = "Option 3 - Clean & Normalize Summary",
+                targetDir = lyricsDirectory,
+                messageKey = "audit.analysis.option3_summary",
+                messageArgs = listOf(
+                    lyricFiles.size,
+                    cleanedMatches.size,
+                    audioCheckedCount,
+                    audioRemovedCount,
+                    audioSkippedUnsupportedCount,
+                    errors.size
+                ),
+                metadata = mapOf(
+                    "lrcScanned" to lyricFiles.size,
+                    "lrcCleaned" to cleanedMatches.size,
+                    "audioChecked" to audioCheckedCount,
+                    "embeddedRemoved" to audioRemovedCount,
+                    "skippedUnsupported" to audioSkippedUnsupportedCount,
+                    "errors" to errors.size
+                )
+            )
+
+            if (reportLines.isNotEmpty()) {
+                val reportFile = AppOutputDirectories.createReportFile(
+                    AppOutputDirectories.SUBDIR_V1_LYRICS, "LyricsWithV1_${modifiedFiles.hashCode()}.txt"
+                )
+                reportFile.writeText(reportLines.joinToString("\n"))
+                auditLogService.logReportGenerated("Option 3 - Cleaned Files Report", reportFile, reportLines.size)
+            }
+
+            if (ownAuditRun) {
+                auditLogService.logOperationEnd(
+                    actionName = "Option 3 - Clean and Normalize .lrc Files",
+                    success = errors.isEmpty(),
+                    processedCount = changes.size,
+                    errorCount = errors.size,
+                    details = changes.toList()
+                )
+            }
+
+            userInterface.showResult(changes, errors)
+
+            modifiedFiles
         }
 
-        auditLogService.logOperationEnd(
-            actionName = "Option 3 - Clean and Normalize .lrc Files",
-            success = errors.isEmpty(),
-            processedCount = changes.size,
-            errorCount = errors.size,
-            details = changes.toList()
-        )
-
-        userInterface.showResult(changes, errors)
-
-        return modifiedFiles
+        return if (ownAuditRun) {
+            AuditRunContext.withRun(
+                actionId = 3,
+                actionKey = "menu.option.3.title",
+                actionFallback = "Option 3 - Clean and Normalize .lrc Files"
+            ) {
+                runBlock()
+            }
+        } else {
+            runBlock()
+        }
     }
 
     /**
@@ -322,6 +513,18 @@ class MusicLyricsService(
             aloneLyrics.addAll(strayTxtFiles)
         }
 
+        auditLogService.logAnalysis(
+            operation = "Option 4 - Find Alone Lyrics",
+            targetDir = mainDirectory,
+            messageKey = "audit.analysis.alone_lyrics",
+            messageArgs = listOf(lyricFiles.size, aloneLyrics.size),
+            metadata = mapOf(
+                "scannedLyrics" to lyricFiles.size,
+                "aloneFound" to aloneLyrics.size,
+                "includeTxtFiles" to includeTxtFiles
+            )
+        )
+
         val movedLyricsNames = mutableListOf<String>()
         val changes = mutableSetOf<String>()
         val errors = mutableSetOf<Exception>()
@@ -333,18 +536,28 @@ class MusicLyricsService(
             if (lyric.extension.equals("lrc", ignoreCase = true)) {
                 val [_, moveResult] = fileService.moveLyricFile(lyric, outDirectory)
                 changes.addAll(moveResult.changedSet)
-                errors.addAll(moveResult.errorSet)
-                movedLyricsNames.add(lyric.name)
+                moveResult.errorSet.forEach { err ->
+                    val wrapped = wrapFileException(lyric, err)
+                    auditLogService.logError("Option 4 - Move Alone Lyric", lyric, wrapped)
+                    errors.add(wrapped)
+                }
+                if (moveResult.errorSet.isEmpty()) {
+                    movedLyricsNames.add(lyric.name)
+                }
             } else {
                 try {
                     if (fileService.moveFile(lyric, outDirectory)) {
                         movedLyricsNames.add(lyric.name)
                         changes.add(Messages.get("result.lyric_moved", lyric.name, parentFolder?.absolutePath ?: "", outDirectory.absolutePath))
                     } else {
-                        errors.add(RuntimeException(Messages.get("error.move_simple_failed", lyric.name)))
+                        val ex = RuntimeException(Messages.get("error.move_simple_failed", lyric.name))
+                        auditLogService.logError("Option 4 - Move File", lyric, ex)
+                        errors.add(wrapFileException(lyric, ex))
                     }
                 } catch (e: Exception) {
-                    errors.add(e)
+                    val wrapped = wrapFileException(lyric, e)
+                    auditLogService.logError("Option 4 - Move File", lyric, wrapped)
+                    errors.add(wrapped)
                 }
             }
 
@@ -364,6 +577,7 @@ class MusicLyricsService(
             reportFile.writeText(
                 movedLyricsNames.joinToString("\n")
             )
+            auditLogService.logReportGenerated("Option 4 - Alone Lyrics Moved Report", reportFile, movedLyricsNames.size)
         }
 
         userInterface.showResult(changes, errors)
@@ -381,11 +595,24 @@ class MusicLyricsService(
             userInterface.updateProgress(index + 1, audioFile.name)
             if (!nomenclatureValidator.isValid(audioFile, musicDirectory)) {
                 incorrectlyNamedFiles.add(audioFile)
+                auditLogService.logFileAnalyzed(
+                    operation = "Option 5 - Nomenclature Check",
+                    targetFile = audioFile,
+                    messageKey = "audit.file.invalid_nomenclature",
+                    messageArgs = listOf(audioFile.name)
+                )
             }
         }
         userInterface.closeProgress()
 
         logService.info("log.nomenclature.checked", audioFiles.size, incorrectlyNamedFiles.size)
+        auditLogService.logAnalysis(
+            operation = "Option 5 - Nomenclature Check",
+            targetDir = musicDirectory,
+            messageKey = "audit.analysis.nomenclature",
+            messageArgs = listOf(audioFiles.size, incorrectlyNamedFiles.size),
+            metadata = mapOf("totalAudio" to audioFiles.size, "invalidCount" to incorrectlyNamedFiles.size)
+        )
 
         val (changedSet, errorSet) = processIncorrectlyNamedFiles(
             incorrectlyNamedFiles, "AdvancedIncorrectNomenclatureMoved", "result.moved_incorrect", "result.all_correct"
@@ -416,15 +643,35 @@ class MusicLyricsService(
         userInterface.showProgress(Messages.get("progress.analyze_spectrum"), audioFiles.size)
         audioFiles.forEachIndexed { index, file ->
             userInterface.updateProgress(index + 1, file.name)
-            val (isFake, _, message) = audioAnalysisService.analyzeCutoff(file, isFullAnalysis)
-            if (isFake) {
-                fakeFiles.add(file)
-                analysisResults.add("${file.name} -> $message")
+            try {
+                val (isFake, _, message) = audioAnalysisService.analyzeCutoff(file, isFullAnalysis)
+                if (isFake) {
+                    fakeFiles.add(file)
+                    analysisResults.add("${file.name} -> $message")
+                    auditLogService.logFileAnalyzed(
+                        operation = "Option 6 - Fake FLAC Spectrum Check",
+                        targetFile = file,
+                        messageKey = "audit.file.fake_flac",
+                        messageArgs = listOf(file.name, message),
+                        metadata = mapOf("fullAnalysis" to isFullAnalysis, "detail" to message)
+                    )
+                }
+            } catch (e: Exception) {
+                val wrapped = wrapFileException(file, e)
+                errors.add(wrapped)
+                auditLogService.logError("Option 6 - Analyze FLAC Spectrum", file, wrapped)
             }
         }
         userInterface.closeProgress()
 
         logService.info("log.spectrum.checked", audioFiles.size, fakeFiles.size)
+        auditLogService.logAnalysis(
+            operation = "Option 6 - Fake FLAC Spectrum Check",
+            targetDir = musicDirectory,
+            messageKey = "audit.analysis.spectrum",
+            messageArgs = listOf(audioFiles.size, fakeFiles.size),
+            metadata = mapOf("flacCount" to audioFiles.size, "fakeDetected" to fakeFiles.size, "fullAnalysis" to isFullAnalysis)
+        )
 
         if (fakeFiles.isNotEmpty()) {
             val reportFile = AppOutputDirectories.createReportFile(
@@ -432,6 +679,7 @@ class MusicLyricsService(
             )
             val txtFileName = reportFile.path
             reportFile.writeText(analysisResults.joinToString("\n"))
+            auditLogService.logReportGenerated("Option 6 - Fake FLAC Report", reportFile, fakeFiles.size)
 
             val shouldMove = userInterface.askToMoveFakeLossless(fakeFiles.size, txtFileName)
 
@@ -444,10 +692,14 @@ class MusicLyricsService(
                         if (fileService.moveFile(file, outDirectory)) {
                             movedNames.add(file.name)
                         } else {
-                            errors.add(RuntimeException(Messages.get("error.move_simple_failed", file.name)))
+                            val ex = RuntimeException(Messages.get("error.move_simple_failed", file.name))
+                            auditLogService.logError("Option 6 - Move Fake FLAC", file, ex)
+                            errors.add(wrapFileException(file, ex))
                         }
                     } catch (e: Exception) {
-                        errors.add(e)
+                        val wrapped = wrapFileException(file, e)
+                        auditLogService.logError("Option 6 - Move Fake FLAC", file, wrapped)
+                        errors.add(wrapped)
                     }
                 }
 
@@ -504,7 +756,9 @@ class MusicLyricsService(
                 val issues = lyricSyncValidator.validate(lyricFile, sameFolderAudio)
                 allIssues.addAll(issues)
             } catch (e: Exception) {
-                errors.add(e)
+                val wrapped = wrapFileException(lyricFile, e)
+                errors.add(wrapped)
+                auditLogService.logError("Option 7 - Validate Lyric Sync", lyricFile, wrapped)
             }
         }
 
@@ -527,14 +781,29 @@ class MusicLyricsService(
                         )
                     }
                 } catch (e: Exception) {
-                    errors.add(e)
+                    val wrapped = wrapFileException(audioFile, e)
+                    errors.add(wrapped)
+                    auditLogService.logError("Option 7 - Check Missing Lyric", audioFile, wrapped)
                 }
             }
         }
         userInterface.closeProgress()
 
+        val distinctProblematicFiles = allIssues.map { it.lyricFile }.distinct()
+        auditLogService.logAnalysis(
+            operation = "Option 7 - Verify Lyrics Integrity & Sync",
+            targetDir = musicDirectory,
+            messageKey = "audit.analysis.sync_check",
+            messageArgs = listOf(lyricFiles.size, audioFiles.size, distinctProblematicFiles.size, allIssues.size),
+            metadata = mapOf(
+                "lyricsScanned" to lyricFiles.size,
+                "audioScanned" to audioFiles.size,
+                "problematicFiles" to distinctProblematicFiles.size,
+                "totalIssues" to allIssues.size
+            )
+        )
+
         if (allIssues.isNotEmpty()) {
-            val distinctProblematicFiles = allIssues.map { it.lyricFile }.distinct()
             val existingProblematicFiles = distinctProblematicFiles.filter { it.exists() }
             val reportFile = AppOutputDirectories.createReportFile(
                 AppOutputDirectories.SUBDIR_SYNC_REPORTS, "LyricsSyncIssues_${allIssues.hashCode()}.txt"
@@ -566,6 +835,7 @@ class MusicLyricsService(
             }
 
             reportFile.writeText(reportContent)
+            auditLogService.logReportGenerated("Option 7 - Sync Issues Report", reportFile, allIssues.size)
 
             val shouldMove = existingProblematicFiles.isNotEmpty() && userInterface.askToMoveProblematicLyrics(existingProblematicFiles.size, txtFileName)
 
@@ -579,10 +849,18 @@ class MusicLyricsService(
                     try {
                         val [_, moveResult] = fileService.moveLyricFile(file, outDirectory)
                         changes.addAll(moveResult.changedSet)
-                        errors.addAll(moveResult.errorSet)
-                        movedFiles.add(file.name)
+                        moveResult.errorSet.forEach { err ->
+                            val wrapped = wrapFileException(file, err)
+                            auditLogService.logError("Option 7 - Move Problematic Lyric", file, wrapped)
+                            errors.add(wrapped)
+                        }
+                        if (moveResult.errorSet.isEmpty()) {
+                            movedFiles.add(file.name)
+                        }
                     } catch (e: Exception) {
-                        errors.add(e)
+                        val wrapped = wrapFileException(file, e)
+                        auditLogService.logError("Option 7 - Move Problematic Lyric", file, wrapped)
+                        errors.add(wrapped)
                     }
                 }
                 userInterface.closeProgress()

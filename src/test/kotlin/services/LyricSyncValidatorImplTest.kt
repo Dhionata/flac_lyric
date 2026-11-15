@@ -244,4 +244,54 @@ class LyricSyncValidatorImplTest {
         assertTrue(issues.any { it.issueType == "ERRO_CODIFICACAO" })
         assertTrue(issues.any { it.issueType == "TAGS_SUJAS" })
     }
+
+    @Test
+    fun testLyricWithoutCentisecondsIsFlaggedAsDirtyTags() {
+        Messages.setLocale(Locale.forLanguageTag("pt-BR"))
+        val lrc = File(tempDir, "Babado Novo - Bola De Sabao.lrc").apply {
+            writeText(
+                """
+                [00:13] Baby baby
+                [00:18] Vem cá
+                [03:46] By RarF.
+                [03:48]
+                """.trimIndent()
+            )
+        }
+
+        val issues = validator.validate(lrc, null)
+        val dirtyIssue = issues.firstOrNull { it.issueType == "TAGS_SUJAS" }
+        assertTrue(dirtyIssue != null, "Expected TAGS_SUJAS issue, got: $issues")
+        assertTrue(dirtyIssue!!.description.contains("[mm:ss] sem .xx"))
+        assertTrue(dirtyIssue.description.contains("timestamp final vazio"))
+    }
+
+    @Test
+    fun testFlacWithEmbeddedTimestampedLyricsIsFlaggedInPtAndEn() {
+        val flac = EmbeddedLyricsHelperTest.createMinimalFlac(File(tempDir, "Roberto Carlos - Detalhes.flac"))
+        val audioObj = org.jaudiotagger.audio.AudioFileIO.read(flac)
+        audioObj.tagOrCreateAndSetDefault.apply {
+            setField(org.jaudiotagger.tag.FieldKey.ARTIST, "Roberto Carlos")
+            setField(org.jaudiotagger.tag.FieldKey.TITLE, "Detalhes")
+            setField(org.jaudiotagger.tag.FieldKey.LYRICS, "[00:12.72] Não adianta nem tentar\n[00:17.61] Me esquecer")
+        }
+        audioObj.commit()
+
+        val lrc = File(tempDir, "Roberto Carlos - Detalhes.lrc").apply {
+            writeText("[00:12.41] Não adianta nem tentar\n[00:17.50] Me esquecer")
+        }
+
+        Messages.setLocale(Locale.forLanguageTag("pt-BR"))
+        val ptIssues = validator.validate(lrc, flac)
+        assertTrue(ptIssues.any { it.issueType == "LETRA_EMBUTIDA" && it.description.contains("LYRICS") })
+
+        Messages.setLocale(Locale.ENGLISH)
+        val enIssues = validator.validate(lrc, flac)
+        assertTrue(enIssues.any { it.issueType == "EMBEDDED_LYRICS" && it.description.contains("LYRICS") })
+
+        // After cleaning embedded synced lyrics, validation passes without LETRA_EMBUTIDA / EMBEDDED_LYRICS
+        EmbeddedLyricsHelper.removeEmbeddedSyncedLyrics(flac)
+        val afterClean = validator.validate(lrc, flac)
+        assertTrue(afterClean.none { it.issueType == "EMBEDDED_LYRICS" || it.issueType == "LETRA_EMBUTIDA" })
+    }
 }

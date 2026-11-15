@@ -10,6 +10,8 @@ package models
  * @property sortAndDeduplicateMultiTimestamps Sorts out-of-order multi-timestamps on the same line and deduplicates identical tags.
  * @property removeUnsyncedLinesInSyncedFile Removes loose unsynchronized text lines when mixed inside an already synchronized `.lrc` file.
  * @property stripBom Removes leading UTF-8 Byte Order Mark (`\uFEFF`) characters.
+ * @property normalizeTimestampsToCentiseconds Normalizes `[mm:ss]` timestamps without decimals into `[mm:ss.00]` for player compatibility (e.g. Samsung Music).
+ * @property removeTrailingEmptyTimestampLines Removes empty timestamp-only lines at the end of the file (e.g. `[03:48]`).
  */
 data class LyricCleanOptions(
     val removeSpeakerAndBgTags: Boolean = true,
@@ -18,4 +20,6 @@ data class LyricCleanOptions(
     val sortAndDeduplicateMultiTimestamps: Boolean = true,
     val removeUnsyncedLinesInSyncedFile: Boolean = false,
     val stripBom: Boolean = true,
+    val normalizeTimestampsToCentiseconds: Boolean = true,
+    val removeTrailingEmptyTimestampLines: Boolean = true,
 )

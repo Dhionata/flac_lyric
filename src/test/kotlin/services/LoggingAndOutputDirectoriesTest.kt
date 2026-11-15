@@ -112,4 +112,76 @@ class LoggingAndOutputDirectoriesTest {
         assertEquals("Fast Song", results.first().trackName)
         assertEquals("FAST_API", results.first().source)
     }
+
+    @Test
+    fun `LoggingInitializer should list log files, support reverse tailing on large logs, and block path traversal`(@TempDir tempDir: File) {
+        val smallLog = File(tempDir, "flac_lyric_audit.log")
+        smallLog.writeText((1..50).joinToString("\n") { "Audit line $it" }, Charsets.UTF_8)
+
+        val ignoredLock = File(tempDir, "flac_lyric.log.lck")
+        ignoredLock.writeText("lock", Charsets.UTF_8)
+
+        // Create > 600KB file to trigger the reverse RandomAccessFile tailing code path
+        val hugeLog = File(tempDir, "huge_execution.log")
+        val lineTemplate = "2026-11-15 10:00:00 [INFO] Padding payload for reverse chunk reader verification number="
+        hugeLog.bufferedWriter(Charsets.UTF_8).use { writer ->
+            for (i in 1..7000) {
+                writer.write("$lineTemplate$i\n")
+            }
+        }
+        assertTrue(hugeLog.length() > 512 * 1024, "Expected hugeLog > 512KB, was ${hugeLog.length()}")
+
+        val listed = LoggingInitializer.listLogFiles(tempDir)
+        assertEquals(2, listed.size)
+        assertTrue(listed.none { it.name.endsWith(".lck") })
+        assertTrue(listed.any { it.isAuditLog && it.name == "flac_lyric_audit.log" })
+
+        val tailedHuge = LoggingInitializer.readLogFileTail(
+            fileName = "huge_execution.log",
+            tailLines = 15,
+            logDir = tempDir
+        )
+        assertTrue(tailedHuge != null)
+        assertEquals(15, tailedHuge!!.totalLinesShown)
+        assertTrue(tailedHuge.truncated)
+        assertTrue(tailedHuge.lines.last().endsWith("number=7000"))
+        assertTrue(tailedHuge.lines.first().endsWith("number=6986"))
+
+        val searched = LoggingInitializer.readLogFileTail(
+            fileName = "huge_execution.log",
+            tailLines = 20,
+            search = "number=6999",
+            logDir = tempDir
+        )
+        assertEquals(listOf("${lineTemplate}6999"), searched?.lines)
+
+        // Attempt path traversal
+        val outside = File(tempDir.parentFile, "outside_secret.log").apply {
+            writeText("secret", Charsets.UTF_8)
+        }
+        try {
+            val traversal = LoggingInitializer.readLogFileTail(
+                fileName = "../${outside.name}",
+                logDir = tempDir
+            )
+            // Note: File("../outside_secret.log").name strips directory and looks in tempDir where it doesn't exist
+            assertEquals(null, traversal)
+        } finally {
+            outside.delete()
+        }
+    }
+
+    @Test
+    fun `Messages getAvailableLocales discovers built-in locales and external i18n bundles`(@TempDir tempDir: File) {
+        val frBundle = File(tempDir, "messages_fr.properties")
+        frBundle.writeText("web.menu.hero_title=Tableau des opérations\n", Charsets.UTF_8)
+
+        val options = Messages.getAvailableLocales(externalDir = tempDir)
+        val tags = options.map { it.tag }
+
+        assertTrue(tags.contains("en"))
+        assertTrue(tags.contains("pt-BR"))
+        assertTrue(tags.contains("es"))
+        assertTrue(tags.contains("fr"), "Expected dynamically discovered 'fr' bundle in $tags")
+    }
 }

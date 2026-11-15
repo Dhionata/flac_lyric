@@ -69,4 +69,60 @@ interface AuditLogService {
         afterFile: File? = null,
         details: String? = null,
     )
+
+    /**
+     * Records an analysis summary event (e.g., files scanned, issues or candidates found).
+     */
+    fun logAnalysis(
+        operation: String,
+        targetDir: File? = null,
+        messageKey: String,
+        messageArgs: List<Any> = emptyList(),
+        metadata: Map<String, Any?> = emptyMap(),
+    ) {}
+
+    /**
+     * Records an individual analyzed file result (e.g., fake FLAC detected or file inspected).
+     */
+    fun logFileAnalyzed(
+        operation: String,
+        targetFile: File,
+        messageKey: String,
+        messageArgs: List<Any> = emptyList(),
+        metadata: Map<String, Any?> = emptyMap(),
+    ) {}
+
+    /**
+     * Records a file skipped intentionally (e.g., unsupported tag format like `.opus` during embedded lyrics cleanup).
+     */
+    fun logSkipped(
+        operation: String,
+        targetFile: File,
+        reasonKey: String,
+        reasonArgs: List<Any> = emptyList(),
+        metadata: Map<String, Any?> = emptyMap(),
+    ) {}
+
+    /**
+     * Records a file-attributed error event with exact target path and exception details.
+     */
+    fun logError(
+        operation: String,
+        targetFile: File? = null,
+        error: Throwable? = null,
+        messageKey: String? = null,
+        messageArgs: List<Any> = emptyList(),
+        metadata: Map<String, Any?> = emptyMap(),
+    ) {}
+
+    /**
+     * Records generation of a text report file.
+     */
+    fun logReportGenerated(
+        operation: String,
+        reportFile: File,
+        itemCount: Int,
+        metadata: Map<String, Any?> = emptyMap(),
+    ) {}
 }
+

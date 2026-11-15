@@ -309,6 +309,18 @@ class LyricSyncValidatorImpl(
                     )
                 }
             }
+            // C. Check embedded timestamped lyrics inside audio tags (e.g. FLAC LYRICS tag overriding or printing raw [mm:ss] in Samsung Music)
+            val embeddedSynced = audioMeta.embeddedSyncedLyrics
+            if (embeddedSynced != null) {
+                issues.add(
+                    LyricValidationIssue(
+                        lyricFile,
+                        audioFile,
+                        Messages.get("lyric.issue.type.embedded_lyrics"),
+                        Messages.get("lyric.issue.embedded_lyrics", embeddedSynced.tagKeys.joinToString(", "))
+                    )
+                )
+            }
         }
 
         return issues
@@ -318,12 +330,14 @@ class LyricSyncValidatorImpl(
         val duration: Double?,
         val artist: String?,
         val title: String?,
+        val embeddedSyncedLyrics: EmbeddedSyncedLyricsInfo? = null,
     )
 
     private fun extractAudioMetadata(audioFile: File): AudioMeta {
         var duration: Double? = null
         var artist: String? = null
         var title: String? = null
+        var embeddedSyncedLyrics: EmbeddedSyncedLyricsInfo? = null
 
         try {
             val audioFileObj = AudioFileIO.read(audioFile)
@@ -341,6 +355,7 @@ class LyricSyncValidatorImpl(
             if (tag != null) {
                 artist = tag.getFirst(FieldKey.ARTIST).takeIf { it.isNotBlank() }
                 title = tag.getFirst(FieldKey.TITLE).takeIf { it.isNotBlank() }
+                embeddedSyncedLyrics = EmbeddedLyricsHelper.inspectEmbeddedSyncedLyrics(tag)
             }
         } catch (_: Exception) {
             // AudioFileIO may fail on certain codecs like opus; fallback to ffprobe
@@ -350,7 +365,7 @@ class LyricSyncValidatorImpl(
             duration = extractDurationWithFfprobe(audioFile)
         }
 
-        return AudioMeta(duration, artist, title)
+        return AudioMeta(duration, artist, title, embeddedSyncedLyrics)
     }
 
     private fun extractDurationWithFfprobe(file: File): Double? {

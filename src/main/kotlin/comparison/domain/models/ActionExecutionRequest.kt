@@ -18,5 +18,8 @@ data class ActionExecutionRequest(
     val removeCreditsAndWatermarks: Boolean = true,
     val sortAndDeduplicateMultiTimestamps: Boolean = true,
     val removeUnsyncedLinesInSyncedFile: Boolean = false,
+    val normalizeTimestampsToCentiseconds: Boolean = true,
+    val removeTrailingEmptyTimestampLines: Boolean = true,
+    val removeEmbeddedSyncedLyricsFromAudio: Boolean = true,
     val includeTxtFiles: Boolean = false,
 )

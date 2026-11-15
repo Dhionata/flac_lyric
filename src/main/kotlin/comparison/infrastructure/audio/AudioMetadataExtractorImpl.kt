@@ -5,6 +5,7 @@ import comparison.domain.ports.AudioMetadataExtractor
 import java.io.File
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.tag.FieldKey
+import services.EmbeddedLyricsHelper
 
 /**
  * Extracts metadata and embedded cover art from audio files using Jaudiotagger.
@@ -27,15 +28,29 @@ class AudioMetadataExtractorImpl : AudioMetadataExtractor {
             val albumFromTag = tag?.getFirst(FieldKey.ALBUM)?.trim().orEmpty()
             val durationSeconds = header?.trackLength ?: 0
             val hasArtwork = tag?.firstArtwork != null
+            val embeddedInfo = EmbeddedLyricsHelper.inspectEmbeddedSyncedLyrics(tag)
+            val hasEmbeddedSyncedLyrics = embeddedInfo != null
+            val embeddedLyricTags = embeddedInfo?.tagKeys ?: emptyList()
 
             val fallback = fallbackMetadata(audioFile)
             if (titleFromTag.isNotBlank()) {
                 TrackAudioMetadata(
-                    titleFromTag, artistFromTag.ifBlank { fallback.artist }, albumFromTag, durationSeconds, hasArtwork
+                    title = titleFromTag,
+                    artist = artistFromTag.ifBlank { fallback.artist },
+                    album = albumFromTag,
+                    durationSeconds = durationSeconds,
+                    hasArtwork = hasArtwork,
+                    hasEmbeddedSyncedLyrics = hasEmbeddedSyncedLyrics,
+                    embeddedLyricTags = embeddedLyricTags,
                 )
             } else {
                 fallback.copy(
-                    title = artistFromTag.ifBlank { fallback.artist }, artist = albumFromTag, durationSeconds = durationSeconds, hasArtwork = hasArtwork
+                    title = artistFromTag.ifBlank { fallback.artist },
+                    artist = albumFromTag,
+                    durationSeconds = durationSeconds,
+                    hasArtwork = hasArtwork,
+                    hasEmbeddedSyncedLyrics = hasEmbeddedSyncedLyrics,
+                    embeddedLyricTags = embeddedLyricTags,
                 )
             }
         } catch (_: Exception) {

@@ -40,6 +40,8 @@ object ReportIssueLocalizer {
         "LENGTH_MISMATCH" to "lyric.issue.type.length_mismatch",
         "TERMINO_PREMATURO" to "lyric.issue.type.premature_end",
         "PREMATURE_END" to "lyric.issue.type.premature_end",
+        "LETRA_EMBUTIDA" to "lyric.issue.type.embedded_lyrics",
+        "EMBEDDED_LYRICS" to "lyric.issue.type.embedded_lyrics",
     )
 
     private val encodingPtRegex = Regex(
@@ -131,6 +133,15 @@ object ReportIssueLocalizer {
     )
     private val prematureEnRegex = Regex(
         """^Lyrics end prematurely at line (\S+) for an audio track of ([^).]+)\)?\.?$""",
+        RegexOption.IGNORE_CASE
+    )
+
+    private val embeddedLyricsPtRegex = Regex(
+        """^O arquivo de áudio contém letra embutida com timestamps \(tag:\s*([^)]+)\), causando exibição incorreta no Samsung Music\.?$""",
+        RegexOption.IGNORE_CASE
+    )
+    private val embeddedLyricsEnRegex = Regex(
+        """^Audio file contains embedded lyrics with timestamps \(tag:\s*([^)]+)\), which causes display issues on Samsung Music\.?$""",
         RegexOption.IGNORE_CASE
     )
 
@@ -274,6 +285,11 @@ object ReportIssueLocalizer {
             val lastTs = m.groupValues[1]
             val audioDur = m.groupValues[2].trim()
             return "lyric.issue.type.premature_end" to Messages.get("lyric.issue.premature_end", lastTs, audioDur)
+        }
+
+        (embeddedLyricsPtRegex.find(desc) ?: embeddedLyricsEnRegex.find(desc))?.let { m ->
+            val tagKeys = m.groupValues[1].trim()
+            return "lyric.issue.type.embedded_lyrics" to Messages.get("lyric.issue.embedded_lyrics", tagKeys)
         }
 
         return null to desc

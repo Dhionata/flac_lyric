@@ -88,4 +88,107 @@ class LyricContentCleanerImplTest {
         assertTrue(detected.contains("<mm:ss>"))
         assertTrue(detected.contains("créditos"))
     }
+
+    @Test
+    fun `test normalizes timestamps without centiseconds to mm ss 00`() {
+        val raw = """
+            [ar: Babado Novo]
+            [ti: Bola De Sabão]
+            [length: 03:59]
+            [00:13] Baby baby
+            [00:18][01:45] Chorus line
+            [01:55]NoSpace
+            [02:10.5] Already decimal
+        """.trimIndent()
+
+        val dirty = cleaner.inspectDirtyPatterns(raw)
+        assertTrue(dirty.contains("[mm:ss] sem .xx"))
+
+        val result = cleaner.clean(raw)
+        assertTrue(result.modified)
+        assertTrue(result.appliedFixes.contains("[mm:ss] -> [mm:ss.00]"))
+        assertEquals(
+            """
+            [ar: Babado Novo]
+            [ti: Bola De Sabão]
+            [length: 03:59]
+            [00:13.00] Baby baby
+            [00:18.00][01:45.00] Chorus line
+            [01:55.00]NoSpace
+            [02:10.5] Already decimal
+            """.trimIndent(),
+            result.cleanedContent
+        )
+
+        val disabledResult = cleaner.clean(
+            "[00:13] Baby baby",
+            LyricCleanOptions(normalizeTimestampsToCentiseconds = false)
+        )
+        assertFalse(disabledResult.modified)
+    }
+
+    @Test
+    fun `test removes contextual author signatures without false positives on real verses`() {
+        val raw = """
+            [00:01.00]by tOnHaUm ® 05/02/2010
+            [00:05.00]SINCRONIZADO POR MARCELO JR.
+            [00:10.00]By: Walter
+            [00:15.00]By the time you get home
+            [00:20.00]By my side forever
+            [00:25.00]By the rivers of Babylon
+            [00:30.00]By the way, I miss you
+            [00:35.00]By now I should know
+            [03:46.00]By RarF.
+        """.trimIndent()
+
+        val dirty = cleaner.inspectDirtyPatterns(raw)
+        assertTrue(dirty.contains("créditos"))
+
+        val result = cleaner.clean(raw)
+        assertTrue(result.modified)
+        assertTrue(result.appliedFixes.contains("créditos"))
+        assertEquals(
+            """
+            [00:15.00]By the time you get home
+            [00:20.00]By my side forever
+            [00:25.00]By the rivers of Babylon
+            [00:30.00]By the way, I miss you
+            [00:35.00]By now I should know
+            """.trimIndent(),
+            result.cleanedContent
+        )
+    }
+
+    @Test
+    fun `test removes only trailing empty timestamp lines while preserving middle instrumental breaks`() {
+        val raw = """
+            [00:12.72] Não adianta nem tentar
+            [00:17.61] 
+            [00:17.61] Me esquecer
+            [03:46] By RarF.
+            [03:48]
+            [03:50.00]   
+        """.trimIndent()
+
+        val dirty = cleaner.inspectDirtyPatterns(raw)
+        assertTrue(dirty.contains("timestamp final vazio"))
+
+        val result = cleaner.clean(raw)
+        assertTrue(result.modified)
+        assertTrue(result.appliedFixes.contains("timestamp final vazio"))
+        assertEquals(
+            """
+            [00:12.72] Não adianta nem tentar
+            [00:17.61]
+            [00:17.61] Me esquecer
+            """.trimIndent(),
+            result.cleanedContent
+        )
+
+        val keepTrailing = cleaner.clean(
+            "[00:12.72]Verse\n[03:48.00]",
+            LyricCleanOptions(removeTrailingEmptyTimestampLines = false)
+        )
+        assertFalse(keepTrailing.modified)
+    }
 }

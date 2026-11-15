@@ -19,6 +19,7 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+    systemProperty("flac.lyric.log.dir", layout.buildDirectory.dir("test-runs/logs").get().asFile.absolutePath)
 }
 
 tasks.jar {

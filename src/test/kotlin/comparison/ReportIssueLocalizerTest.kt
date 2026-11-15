@@ -103,4 +103,18 @@ class ReportIssueLocalizerTest {
         val roundTripPt = ReportIssueLocalizer.localizeIssues(enLocalized)
         assertEquals(ptIssues, roundTripPt)
     }
+
+    @Test
+    fun `test localizes embedded lyrics tag and description between Portuguese and English`() {
+        val ptIssue = "[LETRA_EMBUTIDA] O arquivo de áudio contém letra embutida com timestamps (tag: LYRICS), causando exibição incorreta no Samsung Music."
+
+        Messages.setLocale(Locale.ENGLISH)
+        val enLocalized = ReportIssueLocalizer.localizeIssue(ptIssue)
+        assertTrue(enLocalized.startsWith("[EMBEDDED_LYRICS] "))
+        assertTrue(enLocalized.contains("(tag: LYRICS)"))
+
+        Messages.setLocale(Locale.forLanguageTag("pt-BR"))
+        val ptRoundTrip = ReportIssueLocalizer.localizeIssue(enLocalized)
+        assertEquals(ptIssue, ptRoundTrip)
+    }
 }

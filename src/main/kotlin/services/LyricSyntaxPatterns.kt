@@ -13,6 +13,9 @@ object LyricSyntaxPatterns {
     /** Standard and extended LRC line timestamp pattern: `[mm:ss]`, `[mm:ss.xx]`, `[mm:ss,xxx]`, `[mm:ss:xx]`, `[mm:ss.xx-1]`. */
     val TIMESTAMP_REGEX: Regex = Regex("""\[(\d{1,2}):(\d{2})(?:[.,:](\d{1,3}))?(?:-\d+)?\]""")
 
+    /** LRC line timestamp missing centiseconds/milliseconds (e.g. `[00:13]`, `[0:13]`, `[00:13-1]`), which fails in players like Samsung Music. */
+    val TIMESTAMP_WITHOUT_FRACTION_REGEX: Regex = Regex("""\[(\d{1,2}):(\d{2})(-\d+)?\]""")
+
     /** Inline word-by-word (Enhanced LRC / karaoke) timestamp pattern: `<mm:ss.xx>` or `<mm:ss.xxx>`. */
     val INLINE_WORD_TAG_REGEX: Regex = Regex("""<\d{1,2}:\d{2}(?:[.,:]\d{1,3})?>""")
 
@@ -44,10 +47,26 @@ object LyricSyntaxPatterns {
         RegexOption.IGNORE_CASE
     )
 
-    /** Credit-only verse text pattern (Chinese/English composition/production credits or redundant Artist/Title/Album header lines at 00:00). */
+    /** Credit-only verse text pattern (Chinese/English/Portuguese composition/sync credits and `By:` signatures). */
     val CREDIT_ONLY_TEXT_REGEX: Regex = Regex(
-        """^(?:作词|作曲|编曲|制作人|混音|母带|录音|吉他|贝斯|鼓|和声|词|曲|Lyrics\s*by|Composed\s*by|Arranged\s*by|Produced\s*by|Synced\s*by|Edited\s*by|Transcribed\s*by)\s*[:：].*$""",
+        """^(?:(?:作词|作曲|编曲|制作人|混音|母带|录音|吉他|贝斯|鼓|和声|词|曲)\s*[:：].*|(?:Lyrics\s*by|Composed\s*by|Arranged\s*by|Produced\s*by|Synced\s*by|Edited\s*by|Transcribed\s*by|LRC\s*by|Sincronizado\s*por|Editado\s*por|Legendado\s*por|Traduzido\s*por|Tradução\s*por)\s*[:：]?\s+\S.*|By\s*[:：]\s*\S.*)$""",
         RegexOption.IGNORE_CASE
+    )
+
+    private val BY_SIGNATURE_PREFIX_REGEX: Regex = Regex("""^by\s+(.+)$""", RegexOption.IGNORE_CASE)
+    private val SIGNATURE_MARKER_REGEX: Regex = Regex("""@|®|©|™|\d{2}/\d{2}/\d{2,4}""")
+    private val BY_SIGNATURE_STOP_WORDS: Set<String> = setOf(
+        "the", "a", "an", "my", "your", "his", "her", "its", "our", "their",
+        "this", "that", "these", "those", "all", "me", "you", "him", "us", "them",
+        "myself", "yourself", "himself", "herself", "itself", "ourselves", "themselves",
+        "far", "now", "then", "here", "there", "chance", "heart", "design", "surprise",
+        "force", "hand", "hands", "night", "day", "dawn", "dusk", "noon", "midnight",
+        "grace", "faith", "love", "god", "way", "time", "side", "one", "two", "three",
+        "four", "five", "six", "seven", "eight", "nine", "ten", "no", "not", "any",
+        "some", "each", "every", "both", "either", "neither", "o", "os", "as",
+        "um", "uma", "uns", "umas", "meu", "minha", "meus", "minhas", "seu", "sua",
+        "seus", "suas", "teu", "tua", "nosso", "nossa", "mim", "ti", "ele", "ela",
+        "eles", "elas", "nós", "você", "vocês"
     )
 
     /** Metadata stub repeated as a synced line at 00:00 (e.g. `Artist: Carl Douglas`, `Title: ...`, `Album: ...`). */
@@ -70,6 +89,51 @@ object LyricSyntaxPatterns {
      * Strips leading UTF-8 BOM (`\uFEFF`) and surrounding whitespace from a line.
      */
     fun String.trimAndStripBom(): String = this.trim().trimStart(UTF8_BOM).trim()
+
+    /**
+     * Detects author signatures without a colon (such as `By RarF.`, `by rhesa elian`, `by tOnHaUm ® 05/02/2010`)
+     * positioned at the start/end of a lyric file while avoiding false positives on real verses like `By the time` or `By my side`.
+     */
+    fun isContextualAuthorSignature(
+        verseText: String,
+        lineIndex: Int,
+        firstNonEmptyIndex: Int,
+        lastNonEmptyIndex: Int,
+        timestampMs: Long?,
+    ): Boolean {
+        val match = BY_SIGNATURE_PREFIX_REGEX.matchEntire(verseText.trim()) ?: return false
+        val rest = match.groupValues[1].trim()
+        if (rest.isEmpty()) return false
+        if (SIGNATURE_MARKER_REGEX.containsMatchIn(rest)) return true
+
+        val words = rest.trimEnd('.').split(Regex("""\s+""")).filter { it.isNotBlank() }
+        val firstWord = words.firstOrNull()?.lowercase().orEmpty()
+        val nearEdge = (firstNonEmptyIndex >= 0 && lineIndex <= firstNonEmptyIndex + 2) ||
+            (lastNonEmptyIndex >= 0 && lineIndex >= lastNonEmptyIndex - 4) ||
+            (timestampMs != null && timestampMs <= 25_000L)
+
+        return nearEdge &&
+            words.size in 1..4 &&
+            firstWord.isNotEmpty() &&
+            firstWord !in BY_SIGNATURE_STOP_WORDS &&
+            firstWord.none { it.isDigit() } &&
+            !rest.contains(',') &&
+            !rest.contains('\'') &&
+            !firstWord.endsWith("ing")
+    }
+
+    /**
+     * Normalizes a `[mm:ss]` timestamp match without fractional seconds into `[mm:ss.00]`
+     * (preserving any `-N` repeat suffix and padding single-digit minutes).
+     */
+    fun normalizeTimestampToCentiseconds(match: MatchResult): String {
+        val millisRaw = match.groupValues.getOrNull(3).orEmpty()
+        if (millisRaw.isNotEmpty()) return match.value
+        val minutes = match.groupValues[1].padStart(2, '0')
+        val seconds = match.groupValues[2].padStart(2, '0')
+        val suffix = if (match.value.contains('-')) "-${match.value.substringAfter('-').removeSuffix("]")}" else ""
+        return "[$minutes:$seconds.00$suffix]"
+    }
 
     /**
      * Parses a regex match from [TIMESTAMP_REGEX] into total milliseconds.
